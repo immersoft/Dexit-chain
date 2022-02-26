@@ -1,1 +1,145 @@
 
+import { useState, useEffect } from "react";
+import { Grid, Row, Col } from "antd";
+
+import Loading1 from "../../Loading/loading1/Loading1";
+
+const PriceCell = ({ cellNumber, title, description, price }) => {
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
+
+  return (
+    <div className="h-full text-[#292929] dark:text-[#FFFFFF]">
+      <div
+        className={`h-full flex items-center px-4 py-6${
+          cellNumber === 1 || cellNumber === 3
+            ? screens.xs
+              ? cellNumber === 3
+                ? " border-b border-b-[#1AECD7]"
+                : ""
+              : " border-r border-r-[#1AECD7]"
+            : ""
+        }${
+          cellNumber === 1 || cellNumber === 2
+            ? " border-b border-b-[#1AECD7]"
+            : ""
+        }`}
+      >
+        <div>
+          <p className="mb-3 font-semibold">{title}</p>
+          <p className="mb-3 text-sm">{description}</p>
+          <div className="text-[#B177FF] text-2xl font-semibold">{price}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function PriceTable() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPrice, setCurrentPrice] = useState();
+  const [high24, setHigh24] = useState();
+  const [low24, setLow24] = useState();
+  const [priceChangePercentage30Days, setPriceChangePercentage30Days] =
+    useState();
+
+  async function fetchDXTDetails() {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/coins/dexit-finance"
+    );
+    if (response.status === 200) {
+      const res = await response.json();
+      setIsLoading(false);
+      setCurrentPrice(res.market_data.current_price.usd);
+      setHigh24(res.market_data.high_24h.usd);
+      setLow24(res.market_data.low_24h.usd);
+      setPriceChangePercentage30Days(
+        res.market_data.price_change_percentage_30d
+      );
+    }
+  }
+
+  useEffect(() => {
+    fetchDXTDetails();
+  }, []);
+
+  return (
+    <div className="h-full border border-[#1AECD7] rounded-md">
+      <Row className="h-full">
+        <Col xs={24} sm={12}>
+          <PriceCell
+            cellNumber={1}
+            title="DXT CURRENT PRICE (USD)"
+            description="The latest price for 1 DXT."
+            price={
+              isLoading ? (
+                <Loading1
+                  width={25}
+                  lightBackground="#23C26E"
+                  darkBackground="#57f3a1"
+                />
+              ) : (
+                `$${currentPrice}`
+              )
+            }
+          />
+        </Col>
+        <Col xs={24} sm={12}>
+          <PriceCell
+            cellNumber={2}
+            title="24 HOURS HIGH (USD)"
+            description="DXT highest price for last 24 hours."
+            price={
+              isLoading ? (
+                <Loading1
+                  width={25}
+                  lightBackground="#23C26E"
+                  darkBackground="#57f3a1"
+                />
+              ) : (
+                `$${high24}`
+              )
+            }
+          />
+        </Col>
+        <Col xs={24} sm={12}>
+          <PriceCell
+            cellNumber={3}
+            title="24 HOURS LOW (USD)"
+            description="DXT lowest price for last 24 hours."
+            price={
+              isLoading ? (
+                <Loading1
+                  width={25}
+                  lightBackground="#23C26E"
+                  darkBackground="#57f3a1"
+                />
+              ) : (
+                `$${low24}`
+              )
+            }
+          />
+        </Col>
+        <Col xs={24} sm={12}>
+          <PriceCell
+            cellNumber={4}
+            title="PRICE CHANGE PERCENTAGE 30 DAYS"
+            description="DXT price change percentage for last 30 days."
+            price={
+              isLoading ? (
+                <Loading1
+                  width={25}
+                  lightBackground="#23C26E"
+                  darkBackground="#57f3a1"
+                />
+              ) : (
+                `${priceChangePercentage30Days}`
+              )
+            }
+          />
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
