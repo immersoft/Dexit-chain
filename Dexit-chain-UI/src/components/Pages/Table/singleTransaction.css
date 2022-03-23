@@ -1,0 +1,33 @@
+#btn{
+    text-transform: lowercase !important;
+    border: none !important;
+    background: #EAF4FB;
+}
+
+.extra_data_card{
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* .table_column{
+    width: 400px;
+} */
+
+#extra_hex{
+    min-width: 30%;
+}
+
+#block_number{
+    display: flex;
+    align-items: center;
+}
+
+#success{
+    background: #E5F9F6;
+    color: #4AC9AE;
+}
+
+#unsucess{
+    background: rgb(253, 226, 226);
+    color: rgb(247, 140, 140);
+}

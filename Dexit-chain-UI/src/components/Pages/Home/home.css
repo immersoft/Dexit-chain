@@ -1,0 +1,10 @@
+.home_container{
+    background:"black";
+    height:"40vh"
+}
+
+@media only screen and (max-width: 490px) {
+    .home_container{
+        height: 20vh !important;
+    }
+  }

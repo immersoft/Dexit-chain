@@ -1,0 +1,25 @@
+.parent_div{
+    /* border-radius: 19px;
+    background: #EAF4FB; */
+}
+
+/* .input_div > div{
+    border: 1px solid white;
+    background: white;
+    min-width: 55% !important
+}
+.input_div{
+    padding: 5% 6%;
+} */
+
+#btn_search{
+    margin-top: -0.1rem;
+    height: 7.7vh;
+}
+
+
+/* @media only screen and (max-width: 490px) {
+    .parent_div{
+        height: 25vh !important;
+    }
+  } */

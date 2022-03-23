@@ -1,0 +1,29 @@
+.card_container{
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    /* align-items: center; */
+}
+
+.btn_container{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.text_input{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+
+.btn_postdetails{
+    display: flex;
+    justify-content: center;
+    justify-content: space-evenly;
+}
+
+.btn_postdetails > button{
+    width: 30%;
+}
