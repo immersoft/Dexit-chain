@@ -84,7 +84,7 @@ const TransactionTable = () => {
   const handleValidatorListDetails= async(list)=>{
     try {
       let contract=await Connection.getContractBalance()
-      console.log(contract.toString(),"contract")
+      // console.log(contract.toString(),"contract")
      if(list){
       for(let i=0;i<list.length;i++){
         // console.log(list[i],"list[i]")
@@ -192,7 +192,7 @@ const handleClaim=async()=>{
                 <TableBody>
                   {/* {console.log(dd, "jhjhjhj")} */}
                   {
-                    dd.length>0?
+                    dd.length>0 ?
                      dd.slice(0).sort(function(a,b){
                        return b.amount -a .amount;
                      })
@@ -247,56 +247,27 @@ const handleClaim=async()=>{
 
                           </TableRow>
                         :
-                        ""
+                          ""
                         }
                           </>
                         )
                       }):
-                      <Box sx={{ display: 'flex',justifyContent:"center" }}>
-                        <CircularProgress size={30} />
-                      </Box>   
-                  }
-                  {/* {dd.length!=0 ? dd.map(async(val, key) => {
-                    return (
                       <>
-                        <TableRow
-                          key={key}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {key}
-                          </TableCell>
-                          <TableCell component="th" scope="row">
-                            {val[0]}
-                          </TableCell>
-                          <TableCell>{await getAmount(val[0])}</TableCell>
-                        </TableRow>
+                      { 
+                        dd.length===0 ? "Not Found":
+                        <>
+                        <Box sx={{ display: 'flex',justifyContent:"center" }}>
+                          <CircularProgress size={30} />
+                        </Box> 
+                       </>
+                      }
+                     
                       </>
-                    );
-                  })
-                  :"null"
-                  } */}
+                      // <Box sx={{ display: 'flex',justifyContent:"center" }}>
+                      //   <CircularProgress size={30} />
+                      // </Box>   
+                  }
                  
-                  {/* {dd.map((val, key) => {
-
-                            return (
-                                <>
-                                    {val.slice(0).reverse().map((row, i) => (
-                                        <TableRow
-                                            key={i}
-                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                        >
-                                            <TableCell component="th" scope="row">{i}</TableCell>
-                                            <TableCell component="th" scope="row">
-                                                {row[0]}
-                                            </TableCell>
-                                            <TableCell >{row[1].toString()}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </>)
-                        })} */}
                 </TableBody>
               </Table>
             </TableContainer>

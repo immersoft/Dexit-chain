@@ -509,8 +509,6 @@ const UnStaking = () => {
                     aria-label="basic tabs example"
                   >
                     <Tab label="Stake Amount" {...a11yProps(0)} />
-                    {/* <Tab label="Delegate" {...a11yProps(1)} /> */}
-                    {/* <Tab label="Item Three" {...a11yProps(2)} /> */}
                   </Tabs>
                 </Box>
 
@@ -556,7 +554,6 @@ const UnStaking = () => {
                                                   { border: 0 },
                                               }}
                                             >
-                                             
                                               <TableCell
                                                 component="th"
                                                 scope="row"
@@ -580,12 +577,6 @@ const UnStaking = () => {
                                               <TableCell>
                                                 {item ? item.totalAmount : "-"}
                                               </TableCell>
-
-                                              {/* <TableCell>
-                            {moment
-                            .unix(item.endTime).add(3, 'days').calendar()
-                            }
-                        </TableCell> */}
 
                                               {item.validatorAddress ? (
                                                 <>
@@ -638,7 +629,6 @@ const UnStaking = () => {
                                                   </TableCell>
 
                                                   <TableCell>
-                                                   
                                                     <Button
                                                       variant="outlined"
                                                       success
@@ -694,11 +684,9 @@ const UnStaking = () => {
                                               </>
                                               )
                                             }
-                                            
-
                                             </TableRow>
                                           ) : (
-                                            ""
+                                            "Not Found"
                                           )}
                                         </>
                                       ) : (
@@ -716,61 +704,20 @@ const UnStaking = () => {
                                     </>
                                   );
                                 })
-                              : <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                mt: 4,
-                                ml: 15,
-                              }}
-                            >
-                              <CircularProgress />
-                            </Box>
-                            // <Box sx={{ display: 'flex',justifyContent:"center",mt:4,ml:15 }}>
-                            //       <CircularProgress />
-                            // </Box>
-                          }
-                          {/* {dd.length!=0 ? dd.map(async(val, key) => {
-                    return (
-                      <>
-                        <TableRow
-                          key={key}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {key}
-                          </TableCell>
-                          <TableCell component="th" scope="row">
-                            {val[0]}
-                          </TableCell>
-                          <TableCell>{await getAmount(val[0])}</TableCell>
-                        </TableRow>
-                      </>
-                    );
-                  })
-                  :"null"
-                  } */}
-
-                          {/* {dd.map((val, key) => {
-
-                            return (
-                                <>
-                                    {val.slice(0).reverse().map((row, i) => (
-                                        <TableRow
-                                            key={i}
-                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                              : <>
+                                    <Box
+                                          sx={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            mt: 4,
+                                            ml: 15,
+                                          }}
                                         >
-                                            <TableCell component="th" scope="row">{i}</TableCell>
-                                            <TableCell component="th" scope="row">
-                                                {row[0]}
-                                            </TableCell>
-                                            <TableCell >{row[1].toString()}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </>)
-                        })} */}
+                                          <CircularProgress />
+                                        </Box>
+                              </>
+                          }
+
                         </TableBody>
                       </Table>
                     </TableContainer>

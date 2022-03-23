@@ -22,6 +22,8 @@ const DetailsBox = () => {
   web3.setProvider("https://testnet.dexit.network");
   // web3.setProvider("http://datafeed.dexit.network");
 
+console.log(Connection)
+
   const getLatestBlockNumber = async () => {
     try {
       let contract = await Contract.getContractBalance();

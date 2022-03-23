@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 
 if (window.ethereum) {
-  // const contractAddress= "0x0000000000000000000000000000000000001000";
-  const contractAddress= "0xc006248d63d258Ae4E47d11aCF242C1e5E958c4f";
+  const contractAddress= "0x0000000000000000000000000000000000001000";
+  // const contractAddress= "0xc006248d63d258Ae4E47d11aCF242C1e5E958c4f";
   
 
   const contractAbi =[
