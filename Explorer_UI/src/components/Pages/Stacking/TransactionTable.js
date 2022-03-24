@@ -87,12 +87,9 @@ const TransactionTable = () => {
   const handleValidatorListDetails= async(list)=>{
     try {
       let contract=await Connection.getContractBalance()
-      // console.log(contract.toString(),"contract")
      if(list){
       for(let i=0;i<list.length;i++){
-        // console.log(list[i],"list[i]")
         let dataget=await Connection.getValidatorInfo(list[i])
-        // console.log(dataget,"dataget")
         let totalVotingPower=((dataget[3].toString()/1000000000000000000)/(contract.toString()/1000000000000000000))*100
         let customObject={
           address:list[i],
@@ -254,7 +251,7 @@ const handleClaim=async()=>{
                             </TableCell>
 
                             <TableCell>
-                              {item.status===2 ? <Button variant={(index<3) ? "contained":"outlined"} color={(index<3)?"success":"warning"} size='small'>{(index<3) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:""}
+                              {item.status===2 ? <Button variant={(index<3) ? "contained":"outlined"} color={(index<3)?"success":"warning"} size='small'>{(index<3) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
                               
                             </TableCell>
 
@@ -288,7 +285,7 @@ const handleClaim=async()=>{
                       }):
                       <>
                       { 
-                        dd.length===0 ? "Not Found":
+                        !dd ? "Not Found":
                         <>
                         <Box sx={{ display: 'flex',justifyContent:"center" }}>
                           <CircularProgress size={30} />

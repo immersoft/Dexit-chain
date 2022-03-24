@@ -123,7 +123,6 @@ const UnStaking = () => {
   async function getBalanceData() {
     try {
       let list = await Connection.getCurrentValidators();
-      console.log(list, "jjjjj");
       handleValidatorListDetails(list);
     } catch (error) {
       console.log(error);
@@ -160,7 +159,6 @@ const UnStaking = () => {
   };
 
   const handleValidatorListDetails = async (list) => {
-    console.log("called handle");
     try {
       let contract = await Connection.totalDXTStake();
       // console.log(contract,"contract")
@@ -173,7 +171,7 @@ const UnStaking = () => {
             //  console.log(dataget,"dsdsfffff")
             //  console.log(dataget[2],"infoDetailsssss")
             for (let j = 0; j < dataget[6].length; j++) {
-              console.log(dataget[6][j], "dsdsfffff");
+              // console.log(dataget[6][j], "dsdsfffff");
               // let address=await dataget[6][j].toString()
               // let amount=await getAmount(address)
               if (dataget[6][j].toLowerCase() === account) {
@@ -187,7 +185,7 @@ const UnStaking = () => {
                   dataget[6][j],
                   dataget[0]
                 );
-                console.log(infoDetails,"kkkkkkinfoDetails")
+                // console.log(infoDetails,"kkkkkkinfoDetails")
                 let data = {
                   address: dataget[6][j],
                   validatorAddress: dataget[0],
@@ -221,14 +219,13 @@ const UnStaking = () => {
                   (item) => item.address.toLowerCase() === account
                 );
                 if (check == undefined) {
-                  console.log(data, "datainside");
                   customList.push(data);
                 }
                 // customList.push(data)
               }
             }
           } else if (dataget[6].length === 0) {
-             console.log(dataget,"no delei")
+            //  console.log(dataget,"no delei")
             if (dataget[0].toLowerCase() === account) {
               //  console.log(dataget,"infoDetailsssssdddd")
 
@@ -393,7 +390,6 @@ const UnStaking = () => {
     }
   };
 
-  console.log(Connection,"top functions")
 
   const handleClaim=async()=>{
     try {
