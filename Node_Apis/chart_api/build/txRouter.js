@@ -14,43 +14,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
-const index1_1 = __importDefault(require("./index1"));
+// import searchTransactionByBlock from "./index1";
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
 const { Client } = require('pg');
 const router = express_1.default.Router();
-router.get("/transactions", function (req, res) {
+router.get("/validatorInfo/:address", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const txRepo = (0, typeorm_1.getRepository)(txHistoryCount_entity_1.TransactionEntity);
-        const transactions = yield txRepo.find();
-        let ID = transactions.map((tx) => tx.id);
+        const transactions = yield txRepo.findOne({ Address: req.params.address });
         res.json({ data: transactions });
-        console.log(ID.length);
-        let t = 0;
-        t = t + 5;
-        if (ID.length >= 15) {
-            const we = txRepo.createQueryBuilder().delete()
-                .from(txHistoryCount_entity_1.TransactionEntity)
-                .where("id <= :id", { id: ID[14] })
-                .execute();
-        }
     });
 });
-const count = (0, index1_1.default)();
-console.log(count,'final count wait for 3 hours')
-setInterval(function () {
-    (0, index1_1.default)();
-}, 60000 * 60 * 3);
-
-router.post("/tx", function (req, res) {
+router.post("/validatorInfo", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(count, "inside post");
-        let we = 2;
         const txRepo = (0, typeorm_1.getRepository)(txHistoryCount_entity_1.TransactionEntity);
         const tx = yield txRepo.create(req.body);
-        const { tcount } = req.body;
         // await txRepo.insert({totalcount:count});
-        // const results = await txRepo.save(tx);
-        // return res.send(results);
+        const results = yield txRepo.save(tx);
+        return res.send(results);
     });
 });
 // router.put("/update:id", async function (req: Request, res: Response) {

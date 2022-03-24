@@ -19,13 +19,21 @@ __decorate([
 ], TransactionEntity.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
-], TransactionEntity.prototype, "totalcount", void 0);
+    __metadata("design:type", String)
+], TransactionEntity.prototype, "Name", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", Date)
-], TransactionEntity.prototype, "created_at", void 0);
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], TransactionEntity.prototype, "Website", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], TransactionEntity.prototype, "Description", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], TransactionEntity.prototype, "Address", void 0);
 TransactionEntity = __decorate([
-    (0, typeorm_1.Entity)('times')
+    (0, typeorm_1.Entity)('validatorsInfo')
 ], TransactionEntity);
 exports.TransactionEntity = TransactionEntity;

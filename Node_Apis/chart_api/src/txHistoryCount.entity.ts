@@ -1,16 +1,23 @@
 import { Column, Entity, PrimaryGeneratedColumn,CreateDateColumn,UpdateDateColumn } from "typeorm";
 
-@Entity('times')
+@Entity('validatorsInfo')
 export class TransactionEntity {
   @PrimaryGeneratedColumn()
   id!:number;
   
   @Column()
-  totalcount!: number;
+  Name!: String;
+
+  @Column()
+  Website!: String;
+
+  @Column()
+  Description!: String;
+
+  @Column()
+  Address!: String;
 
 
-  @CreateDateColumn()
-created_at:Date;
     
 
 }
