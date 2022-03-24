@@ -12,6 +12,9 @@ import { Box } from "@mui/system";
 import Connection from "../../../Contract";
 import { useNavigate } from "react-router-dom";
 import './TransactionTable.css';
+import loader from "../../../Image/graphics-07.gif";
+import { toast, ToastContainer } from "react-toastify";
+
 
 const columns = [
   { id: "address", label: "Address", minWidth: 50 },
@@ -36,7 +39,7 @@ const TransactionTable = () => {
     const [listData,setListData]=useState(false)
     let customList = []
     let [account, setAccount] = useState("");
-
+    const[claimLoader,setClaimLoader]=useState(false)
     // console.log(Connection,"connections")
 
     const getAccounts = async () => {
@@ -151,12 +154,43 @@ const numberOfDelegators=(validatorAddress)=>{
 
 const handleClaim=async()=>{
   console.log(account,"called")
-  const claimButton=await Connection.claimValidtorReward()
-  console.log(claimButton,"claimButton")
+  try {
+    setClaimLoader(true)
+    const claimButton=await Connection.claimValidatorReward()
+    let abc = await claimButton.wait();
+    if (abc) {
+      setClaimLoader(false);
+      toast.success("Claim successfull")
+    }
+    console.log(claimButton,"claimButton")
+  } catch (error) {
+    setClaimLoader(false);
+    toast.error(error.data.message);
+    console.log(error)
+  }
 }
 
   return (
     <>
+      <ToastContainer  />
+
+    {claimLoader? <Box sx={{ display: "flex", justifyContent: "center", padding: "10%" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "center",
+            }}
+          >
+            <img src={loader} width={250} height={120} />
+            <span
+              style={{ fontSize: "1.2rem", lineHeight: "0", color: "grey" }}
+            >
+              Please Wait...
+            </span>
+          </div>
+        </Box>
+        :
       <div className="validator_container">
         <Card
           sx={{
@@ -274,6 +308,7 @@ const handleClaim=async()=>{
           </Box>
         </Card>
       </div>
+}
     </>
   );
 };

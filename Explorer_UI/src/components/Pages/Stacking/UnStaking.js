@@ -114,9 +114,7 @@ const UnStaking = () => {
   const [deWithdraw, setDeWithdraw] = useState(false);
   const [deWithdrawError, setDeWithdrawError] = useState();
   const [loading, setLoading] = useState(false);
-
-  const [unStakeSuccess, setUnstakeSuccess] = useState(false);
-  const [withDrawSuccess, setWithDrawSuccess] = useState(false);
+  const[claimLoader,setClaimLoader]=useState(false)
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -399,18 +397,33 @@ const UnStaking = () => {
 
   const handleClaim=async()=>{
     try {
-      const claimButton=await Connection.claimValidtorReward()
-      console.log(claimButton,"claimButton")
+      setLoading(true)
+      const claimButton=await Connection.claimValidatorReward()
+      let abc = await claimButton.wait();
+      if (abc) {
+        setLoading(false);
+        toast.success("Claim successfull")
+      }
     } 
     catch (error) {
+      setLoading(false);
+      toast.error(error.data.message);
       console.log(error)
     } 
   }
 
   const delegateClaim=async(account)=>{
     try {
+      setLoading(true)
       const delegateClaim=await Connection.claimDelegatorReward(account)
+      let abc = await delegateClaim.wait();
+      if (abc) {
+        setLoading(false);
+        toast.success("Claim successfull")
+      }
     } catch (error) {
+      setLoading(false);
+      toast.error(error.data.message);
       console.log(error)
     }
   }
