@@ -39,18 +39,21 @@ let t=0;
 });
 
   
-
-
  
 router.post("/validatorInfo", async function (req: Request, res: Response) {
   const txRepo = getRepository(TransactionEntity);
+  const get = await txRepo.findOne({Address:req.body.Address})
+  if(get){
+    res.json({ data: "Already Exist" });
+  }
+  else{
+    const tx = await txRepo.create(req.body);
+    const results = await txRepo.save(tx);
+    return res.send(results);
+  }
+  
 
-  const tx = await txRepo.create(req.body);
-
-  // await txRepo.insert({totalcount:count});
-
-  const results = await txRepo.save(tx);
-  return res.send(results);
+ 
   
 });
  export default router;
