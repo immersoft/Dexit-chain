@@ -17,6 +17,7 @@ const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
 const txRouter_1 = __importDefault(require("./txRouter"));
+const txTable_1 = require("./txTable");
 const cors = require('cors');
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -28,7 +29,7 @@ exports.connection = (0, typeorm_1.createConnection)({
     username: "mrabouuj",
     password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
     database: "mrabouuj",
-    entities: [txHistoryCount_entity_1.TransactionEntity],
+    entities: [txHistoryCount_entity_1.TransactionEntity, txTable_1.TransactionTable],
     synchronize: true,
     logging: false,
 })

@@ -16,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
 // import searchTransactionByBlock from "./index1";
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
+const txTable_1 = require("./txTable");
 const { Client } = require('pg');
 const router = express_1.default.Router();
 router.get("/validatorInfo/:address", function (req, res) {
@@ -23,6 +24,23 @@ router.get("/validatorInfo/:address", function (req, res) {
         const txRepo = (0, typeorm_1.getRepository)(txHistoryCount_entity_1.TransactionEntity);
         const transactions = yield txRepo.findOne({ Address: req.params.address });
         res.json({ data: transactions });
+    });
+});
+router.get("/transactions", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const txRepo = (0, typeorm_1.getRepository)(txTable_1.TransactionTable);
+        const transactions = yield txRepo.find();
+        let ID = transactions.map((tx) => tx.id);
+        res.json({ data: transactions });
+        console.log(ID.length);
+        let t = 0;
+        t = t + 5;
+        if (ID.length >= 15) {
+            const we = txRepo.createQueryBuilder().delete()
+                .from(txHistoryCount_entity_1.TransactionEntity)
+                .where("id <= :id", { id: ID[14] })
+                .execute();
+        }
     });
 });
 router.post("/validatorInfo", function (req, res) {
@@ -34,11 +52,4 @@ router.post("/validatorInfo", function (req, res) {
         return res.send(results);
     });
 });
-// router.put("/update:id", async function (req: Request, res: Response) {
-//   const txRepo = getRepository(TransactionEntity);
-//   const tx = await txRepo.create(req.body);
-//   const { count , start } = req.body;
-//    const results = await txRepo.update({id: 1}, {count:count,start:start});
-//   return res.send(results);
-// });
 exports.default = router;

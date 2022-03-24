@@ -4,6 +4,7 @@ import { Connection, getRepository, Transaction,createQueryBuilder, TransactionR
 import { idText } from "typescript";
 // import searchTransactionByBlock from "./index1";
 import { TransactionEntity } from "./txHistoryCount.entity";
+import { TransactionTable } from "./txTable";
 const { Client } = require('pg');
 const router = express.Router();
 
@@ -16,7 +17,28 @@ router.get("/validatorInfo/:address", async function (req: Request, res: Respons
 });
 
   
+router.get("/transactions", async function (req: Request, res: Response) {
+  const txRepo = getRepository(TransactionTable);
+  const transactions = await txRepo.find()
+  let ID = transactions.map((tx) => tx.id)
+  res.json({ data: transactions });
+  console.log(ID.length);
+  
+  
+let t=0;
+ t=t+5;
+  if(ID.length>=15){
+    const we=txRepo.createQueryBuilder().delete()
+    .from(TransactionEntity)
+    .where("id <= :id", { id: ID[14] })
+    .execute()
 
+  
+  }
+ 
+});
+
+  
 
 
  
@@ -26,18 +48,9 @@ router.post("/validatorInfo", async function (req: Request, res: Response) {
   const tx = await txRepo.create(req.body);
 
   // await txRepo.insert({totalcount:count});
- 
+
   const results = await txRepo.save(tx);
   return res.send(results);
   
 });
-// router.put("/update:id", async function (req: Request, res: Response) {
-//   const txRepo = getRepository(TransactionEntity);
-//   const tx = await txRepo.create(req.body);
-
-//   const { count , start } = req.body;
-//    const results = await txRepo.update({id: 1}, {count:count,start:start});
-//   return res.send(results);
-// });
-
-export default router;
+ export default router;

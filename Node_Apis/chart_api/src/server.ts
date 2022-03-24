@@ -4,6 +4,7 @@ import { transactionHistoryCount } from "./txHistory";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import Router from "./txRouter";
 import Web3 from "web3";
+import { TransactionTable } from "./txTable";
 const cors=require('cors')
 const app = express();
 app.use(express.json());
@@ -16,7 +17,7 @@ export const connection = createConnection({
   username: "mrabouuj",
   password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
   database: "mrabouuj",
-  entities: [TransactionEntity],
+  entities: [TransactionEntity,TransactionTable],
   synchronize: true,
   logging: false,
 })
