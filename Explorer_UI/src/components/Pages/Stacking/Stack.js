@@ -138,6 +138,7 @@ const Stack = () => {
         console.log(result, "results");
         let abc = await result.wait();
         if (abc) {
+          console.log(abc, "abc");
           setLoading(false);
           setOpenStack(false);
           postValidatorDetails()

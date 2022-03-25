@@ -715,15 +715,15 @@ const UnStaking = () => {
                                 })
                               : <>
                                     <Box
-                                          sx={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            mt: 4,
-                                            ml: 15,
-                                          }}
+                                        sx={{
+                                          display: "flex",
+                                          justifyContent: "center",
+                                          mt: 4,
+                                          ml: 15,
+                                        }}
                                         >
-                                          <CircularProgress />
-                                        </Box>
+                                        <CircularProgress />
+                                    </Box>
                               </>
                           }
 

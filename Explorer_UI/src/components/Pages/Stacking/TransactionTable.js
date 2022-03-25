@@ -86,7 +86,7 @@ const TransactionTable = () => {
 
   const handleValidatorListDetails= async(list)=>{
     try {
-      let contract=await Connection.totalDXTStake()
+      let contract=await Connection.getContractBalance()
      if(list){
       for(let i=0;i<list.length;i++){
         let dataget=await Connection.getValidatorInfo(list[i])

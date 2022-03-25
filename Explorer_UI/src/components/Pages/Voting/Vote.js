@@ -114,9 +114,9 @@ const Vote = (props) => {
   const submitProposal = async () => {
     setShowLoader(true);
     setshowWarning("");
-    console.log("proposal id",proposalId)
-    console.log("proposal icon color",submitProposalIconColor )
-    console.log("text  votwe",submitProposalIconColor ===null ,!proposalId)
+    // console.log("proposal id",proposalId)
+    // console.log("proposal icon color",submitProposalIconColor )
+    // console.log("text  votwe",submitProposalIconColor ===null ,!proposalId)
     if (submitProposalIconColor===null || !proposalId) {
       setShowLoader(false);
 
