@@ -26,7 +26,7 @@ console.log(Connection)
 
   const getLatestBlockNumber = async () => {
     try {
-      let contract = await Contract.getContractBalance();
+      let contract = await Contract.totalDXTStake();
       console.log(contract.toString(),"kklklklklkl")
       setVotingPower(contract.toString());
       let currentBlock = await web3.eth.getBlockNumber();
