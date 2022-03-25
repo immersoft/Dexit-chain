@@ -22,7 +22,7 @@ const DetailsBox = () => {
   web3.setProvider("https://testnet.dexit.network");
   // web3.setProvider("http://datafeed.dexit.network");
 
-console.log(Connection)
+// console.log(Connection)
 
   const getLatestBlockNumber = async () => {
     try {
@@ -57,7 +57,7 @@ console.log(Connection)
   };
 
   const postTransactionCounts = (blocknum, totalCount) => {
-    console.log("called");
+    // console.log("called");
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -97,7 +97,7 @@ console.log(Connection)
   async function getBalanceData() {
     try {
       let list = await Connection.getHighestValidators();
-      console.log(list,"listssss")
+      // console.log(list,"listssss")
       setHighestCount(list.length)
     } catch (error) {
       console.log(error);
