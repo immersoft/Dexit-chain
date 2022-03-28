@@ -251,7 +251,6 @@ const Voting = () => {
     <>
       
       <div>
-      {/* <Button onClick={handleOpen}>Open modal</Button> */}
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -335,7 +334,6 @@ const Voting = () => {
                         <Grid item>
                           {proposalData[11] === true ? "True" : "False"}
                         </Grid>
-                        {/* {console.log(proposalData[11].toString(),"kkkkkk")} */}
                         <Divider />
                       </Grid>
                     </Card>
@@ -347,6 +345,12 @@ const Voting = () => {
                     </Typography>{" "}
                   </>
                 )}
+              </Grid>
+
+              <Grid container sx={{p:2}}>
+                <Grid item md={12} sm={12} xs={12}>
+                  <Vote data={senIdToVoteComp} />
+                </Grid>
               </Grid>
           </Box>
         </Fade>
@@ -365,7 +369,7 @@ const Voting = () => {
                 All proposal list
               </Typography>
               <Divider />
-              <div style={{ maxHeight: "250px", overflow: "scroll" }}>
+              <div >
                 {proposalList.length > 0 ? (
                   proposalList.map((val, key) => {
                     return (
@@ -521,11 +525,11 @@ const Voting = () => {
           </Card>
         </Grid>
       </Grid>
-      <Grid container sx={{p:2}}>
+      {/* <Grid container sx={{p:2}}>
         <Grid item md={12} sm={12} xs={12}>
           <Vote data={senIdToVoteComp} />
         </Grid>
-      </Grid>
+      </Grid> */}
     </>
   );
 };
