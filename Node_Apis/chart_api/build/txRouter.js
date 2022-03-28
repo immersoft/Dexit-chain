@@ -46,15 +46,12 @@ router.get("/transactions", function (req, res) {
 router.post("/validatorInfo", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const txRepo = (0, typeorm_1.getRepository)(txHistoryCount_entity_1.TransactionEntity);
-        console.log("Body", req.body);
         const get = yield txRepo.findOne({ Address: req.body.Address });
-        console.log("gett--", get);
         if (get) {
             res.json({ data: "Already Exist" });
         }
         else {
             const tx = yield txRepo.create(req.body);
-            // await txRepo.insert({totalcount:count});
             const results = yield txRepo.save(tx);
             return res.send(results);
         }
