@@ -8,17 +8,12 @@ import "./interface/ISlashIndicator.sol";
 import "./interface/ITokenHub.sol";
 import "./interface/IParamSubscriber.sol";
 import "./interface/IBSCValidatorSet.sol";
-// import "./lib/RLPDecode.sol";
 import "./lib/SafeMath.sol";
 import "./lib/CmnPkg.sol";
-// import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
-contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
-
+contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber {
   using SafeMath for uint256;
-//   using RLPDecode for *;
-
-
 
   // will not transfer value less than 0.1 BNB for validators
   uint256 constant public DUSTY_INCOMING = 1e17;
@@ -114,7 +109,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
     valInfo.amount = 10000 ether; 
     valInfo.coins = 10000 ether; 
     valInfo.status = Status.Staked;
-    proposalLastingPeriod = 7 days;
+    //proposalLastingPeriod = 7 days;
   }
 
   /*********************** Cross Chain App Implement **************************/
@@ -136,30 +131,10 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
        
         uint256 remainingDelegatorRewardAmount = value.sub(rewardAmount); // Remaining delgators reward amount;
         uint256 totalCoinsByDelegators = valInfo.coins.sub(valInfo.amount); 
-        //console.log("Now Setting The Remaining Reward to Delegators %s",remainingDelegatorRewardAmount);
-        // distributeRewardToDelegators(remainingDelegatorRewardAmount,valAddr,totalCoinsByDelegators);
         distributeRewardToDelegators(remainingDelegatorRewardAmount,valAddr,totalCoinsByDelegators);
  
   }
 
-//   function jailValidator(ValidatorBSC memory v) internal returns (uint32) {
-//     uint256 index = currentValidatorSetMapBSC[v.consensusAddress];
-//     if (index==0 || currentValidatorSetBSC[index-1].jailed) {
-//       emit validatorEmptyJailed(v.consensusAddress);
-//       return CODE_OK;
-//     }
-//     uint n = currentValidatorSetBSC.length;
-//     bool shouldKeep = (numOfJailed >= n-1);
-//     // will not jail if it is the last valid validator
-//     if (shouldKeep) {
-//       emit validatorEmptyJailed(v.consensusAddress);
-//       return CODE_OK;
-//     }
-//     numOfJailed ++;
-//     currentValidatorSetBSC[index-1].jailed = true;
-//     emit validatorJailed(v.consensusAddress);
-//     return CODE_OK;
-//   }
 
   function updateValidatorSet(ValidatorBSC[] memory validatorSet) internal returns (uint32) {
     // do verify.
@@ -278,66 +253,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
   }
 
   /*********************** For slash **************************/
-  function misdemeanor(address validator)external onlySlash override{
-    uint256 index = currentValidatorSetMapBSC[validator];
-    if (index <= 0) {
-      return;
-    }
-    // the actually index
-    index = index - 1;
-    uint256 income = currentValidatorSetBSC[index].incoming;
-    currentValidatorSetBSC[index].incoming = 0;
-    uint256 rest = currentValidatorSetBSC.length - 1;
-    emit validatorMisdemeanor(validator,income);
-    if (rest==0) {
-      // should not happen, but still protect
-      return;
-    }
-    uint256 averageDistribute = income/rest;
-    if (averageDistribute!=0) {
-      for (uint i=0;i<index;i++) {
-        currentValidatorSetBSC[i].incoming = currentValidatorSetBSC[i].incoming + averageDistribute;
-      }
-      uint n = currentValidatorSetBSC.length;
-      for (uint i=index+1;i<n;i++) {
-        currentValidatorSetBSC[i].incoming = currentValidatorSetBSC[i].incoming + averageDistribute;
-      }
-    }
-    // averageDistribute*rest may less than income, but it is ok, the dust income will go to system reward eventually.
-  }
 
-  function felony(address validator)external onlySlash override{
-    uint256 index = currentValidatorSetMapBSC[validator];
-    if (index <= 0) {
-      return;
-    }
-    // the actually index
-    index = index - 1;
-    uint256 income = currentValidatorSetBSC[index].incoming;
-    uint256 rest = currentValidatorSetBSC.length - 1;
-    if (rest==0) {
-      // will not remove the validator if it is the only one validator.
-      currentValidatorSetBSC[index].incoming = 0;
-      return;
-    }
-    emit validatorFelony(validator,income);
-    delete currentValidatorSetMapBSC[validator];
-    // It is ok that the validatorSet is not in order.
-    if (index != currentValidatorSetBSC.length-1) {
-      currentValidatorSetBSC[index] = currentValidatorSetBSC[currentValidatorSetBSC.length-1];
-      currentValidatorSetMapBSC[currentValidatorSetBSC[index].consensusAddress] = index + 1;
-    }
-    currentValidatorSetBSC.pop();
-    uint256 averageDistribute = income/rest;
-    if (averageDistribute!=0) {
-      uint n = currentValidatorSetBSC.length;
-      for (uint i=0;i<n;i++) {
-        currentValidatorSetBSC[i].incoming = currentValidatorSetBSC[i].incoming + averageDistribute;
-      }
-    }
-    // averageDistribute*rest may less than income, but it is ok, the dust income will go to system reward eventually.
-  }
-
+  
   /*********************** Param update ********************************/
   function updateParam(string calldata key, bytes calldata value) override external onlyInit onlyGov{
     if (Memory.compareStrings(key, "expireTimeSecondGap")) {
@@ -417,58 +334,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
     return v1.consensusAddress == v2.consensusAddress && v1.feeAddress == v2.feeAddress && v1.BBCFeeAddress == v2.BBCFeeAddress && v1.votingPower == v2.votingPower;
   }
 
-  //rlp encode & decode function
-//   function decodeValidatorSetSynPackage(bytes memory msgBytes) internal pure returns (IbcValidatorSetPackage memory, bool) {
-//     IbcValidatorSetPackage memory validatorSetPkg;
-
-//     RLPDecode.Iterator memory iter = msgBytes.toRLPItem().iterator();
-//     bool success = false;
-//     uint256 idx=0;
-//     while (iter.hasNext()) {
-//       if (idx == 0) {
-//         validatorSetPkg.packageType = uint8(iter.next().toUint());
-//       } else if (idx == 1) {
-//         RLPDecode.RLPItem[] memory items = iter.next().toList();
-//         validatorSetPkg.validatorSet =new ValidatorBSC[](items.length);
-//         for (uint j = 0;j<items.length;j++) {
-//           (ValidatorBSC memory val, bool ok) = decodeValidator(items[j]);
-//           if (!ok) {
-//             return (validatorSetPkg, false);
-//           }
-//           validatorSetPkg.validatorSet[j] = val;
-//         }
-//         success = true;
-//       } else {
-//         break;
-//       }
-//       idx++;
-//     }
-//     return (validatorSetPkg, success);
-//   }
-
-//   function decodeValidator(RLPDecode.RLPItem memory itemValidator) internal pure returns(ValidatorBSC memory, bool) {
-//     ValidatorBSC memory validator;
-//     RLPDecode.Iterator memory iter = itemValidator.iterator();
-//     bool success = false;
-//     uint256 idx=0;
-//     while (iter.hasNext()) {
-//       if (idx == 0) {
-//         validator.consensusAddress = iter.next().toAddress();
-//       } else if (idx == 1) {
-//         validator.feeAddress = address(uint160(iter.next().toAddress()));
-//       } else if (idx == 2) {
-//         validator.BBCFeeAddress = iter.next().toAddress();
-//       } else if (idx == 3) {
-//         validator.votingPower = uint64(iter.next().toUint());
-//         success = true;
-//       } else {
-//         break;
-//       }
-//       idx++;
-//     }
-//     return (validator, success);
-//   }
-
 
   /********Staking*****************/
 
@@ -521,12 +386,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
 
     /**********Punish Params**********/
 
-    uint256 public removeThreshold = 48;
-    uint256 public punishThreshold = 24;
+    uint256 public removeThreshold = 8;
+    uint256 public punishThreshold = 4;
 
     struct PunishRecord {
         uint256 missedBlockCounter;
         uint256 index;
+        uint256 jailedTime;
         bool isPunished;
     }
 
@@ -534,11 +400,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
     //Mapping for Block Number Tracking
     // mapping(uint256 => bool) punished;
     // mapping(uint256 => bool) decreased;
+    address[] public punishValidator;
 
     /**********Constant**********/
     uint256 public constant minimum_Stake_Amount = 10 ether; // Minimum Stake DXT
     uint256 public constant Max_Validators = 3; // Total Max Validator
     uint64 public constant StakingLockPeriod = 5 seconds; // Stake Locking Period
+    uint64 public constant unjailingPeriod = 1 minutes;
 
         /***************state of the contract******************/
     uint256 public minimumStakeAmount;
@@ -597,6 +465,14 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         address indexed validator,
         uint256 amount,
         uint256 time
+    );
+    event PunishValidator(
+      address indexed validator,
+       uint256 time
+    );
+    event RemoveFromPunishValidator(
+      address indexed validator,
+      uint256 time
     );
 
     /**********Modifiers**********/
@@ -659,8 +535,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         if (!isActiveValidator(staker)) {
             currentValidators.push(staker);
         }
-
-        totalDXTStake = totalDXTStake.add(stakeamount);
       
         //  testIncome(staker);
          
@@ -670,12 +544,11 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
 
         (highCoin,highIdx,addValAddress)= highestCoinsInCurrentValidatorsNotInTopValidator();
 
-        //console.log("validator to be add", addValAddress);
-
         if(highestValidators.length < MaxValidators && addValAddress!=address(0)){
             highestValidators.push(addValAddress);
         }
         emit StakeValidator(staker, stakeamount, block.timestamp);
+       totalDXTStake = totalDXTStake.add(stakeamount);
         return true;
     }
 
@@ -692,21 +565,18 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         Delegator storage stakeInfo = stakingInfo[staker][validator];
         require(Status.Jailed != valInfo.status, "Validator Jailed");
         require(isActiveValidator(validator),"Validator Not Exist");
+        require(valInfo.status != Status.NotExist, "This Validator Not Exist");
        
-         if (valInfo.status == Status.Staked) {
-            // Update Validator Coins
-            valInfo.coins = valInfo.coins.add(stakeamount); // update in Validator Amount (Self)
-            stakeInfo.amount = stakeInfo.amount.add(stakeamount); // update in Validator Coins(Total)
-
+         if (valInfo.status == Status.Staked && stakeInfo.amount == 0 ) {
+            
             stakeInfo.delegatorAddress = staker; // update in Delegator Staking Struct 
             stakeInfo.index = valInfo.delegators.length; // update the index of delegator struct for  delegators array in validator
-            if(valInfo.delegators.length == 0){
-                valInfo.delegators.push(staker);
-            } else if(!isDelegatorsExist(staker,valInfo.delegators)){
-                valInfo.delegators.push(staker);
-             }
+            valInfo.delegators.push(staker);
             
         }
+        
+             valInfo.coins = valInfo.coins.add(stakeamount);
+             stakeInfo.amount = stakeInfo.amount.add(stakeamount); // update in Validator Coins(Total)
 
         if (highestValidators.length < MaxValidators && !isTopValidator(validator)){
             highestValidators.push(validator); // push into highestValidator if there is space
@@ -728,13 +598,12 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
             }
         }
 
-        // Change the Status to Staked
         if (valInfo.status != Status.Staked) {
             valInfo.status = Status.Staked;
         }
-        totalDXTStake = totalDXTStake.add(stakeamount);
 
         emit StakeDelegator(staker, validator, stakeamount, block.timestamp);
+        totalDXTStake = totalDXTStake.add(stakeamount);
         return true;
     }
 
@@ -747,12 +616,12 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         uint256 unstakeamount = valInfo.amount; // self amount validator
 
         // Check for the unstakeBlock status
+        require(valInfo.status != Status.Jailed,"Validator is Jailed");
         require(stakingInfo[staker][staker].unstakeblock == 0,"Already in Unstaking Status");
         require(unstakeamount > 0, "Don't have any stake");
         require(highestValidators.length != 1 && isActiveValidator(staker),
             "Can't Unstake, Validator List Empty "
         );
-
 
         // Set Block No When Validator Unstake
         stakeInfo.unstakeblock = block.number;
@@ -767,8 +636,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
 
         (highCoin,highIdx,addValAddress)= highestCoinsInCurrentValidatorsNotInTopValidator();
 
-        //console.log("validator to be add", addValAddress);
-
         if(highestValidators.length < MaxValidators && addValAddress!=address(0)){
             highestValidators.push(addValAddress);
         }
@@ -781,10 +648,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         address delegator = msg.sender; //get Delegator Address
         // Struct Delegator
         Delegator storage stakeInfo = stakingInfo[delegator][validator];
-        Validator storage valInfo = validatorInfo[validator]; // Struct Validator
 
         require(stakeInfo.unstakeblock == 0, "Already in unstaking status");
-        require(Status.Jailed != valInfo.status, "Validator Jailed");
+        //require(Status.Jailed != valInfo.status, "Validator Jailed");
         uint256 unstakeamount = stakeInfo.amount; // get the staking info
         require(unstakeamount > 0, "don't have any stake");
         require(
@@ -794,10 +660,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
 
         // Update The Unstake Block for Validator
         stakeInfo.unstakeblock = block.number; //update the ustakeblock status
-        // valInfo.coins = valInfo.coins.sub(unstakeamount); // sub from validator coins
-        // totalDXTStake = totalDXTStake.sub(unstakeamount); // sub from total
-
-        // Find Lowest Coins in Highest Validator List
         
         emit UnstakeDelegator(
             validator,
@@ -813,17 +675,16 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         address payable staker = msg.sender; // validator address
 
         Validator storage valInfo = validatorInfo[staker];
+        Delegator storage stakeInfo = stakingInfo[staker][staker];
 
         uint256 unstakeamount = valInfo.amount; // get the stake self amount
 
-        Delegator storage stakeInfo = stakingInfo[staker][staker];
         require(stakeInfo.unstakeblock != 0, "you have to unstake first");
         require(stakeInfo.unstakeblock + StakingLockPeriod <= block.number,"Staking haven't unlocked yet");
 
         uint256 staking = valInfo.amount;
         valInfo.amount = 0;
         valInfo.coins = valInfo.coins.sub(unstakeamount);
-        totalDXTStake = totalDXTStake.sub(unstakeamount);
 
         // Get the staking amount
         stakeInfo.unstakeblock = 0;
@@ -835,24 +696,20 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         }
         valInfo.status = Status.NotExist;
         staker.transfer(staking);
+        
         emit WithdrawValidatorStaking(staker, staking, block.timestamp);
+        totalDXTStake = totalDXTStake.sub(unstakeamount);
         return true;
     }
 
-    function withdrawDelegatorStaking(address validator)
-        external
-        zeroAddress
-        returns (bool)
+    function withdrawDelegatorStaking(address validator)  external zeroAddress returns (bool)  
     {
         address payable staker = msg.sender; //Delegator Address
 
         Delegator storage stakeInfo = stakingInfo[staker][validator]; // Delegator Staking Info
         Validator storage valInfo = validatorInfo[validator]; // Validator 
         require(stakeInfo.unstakeblock != 0, "you have to unstake first");
-        require(
-            stakeInfo.unstakeblock + StakingLockPeriod <= block.number,
-            "Staking haven't unlocked yet"
-        );
+        require(stakeInfo.unstakeblock + StakingLockPeriod <= block.number,"Staking haven't unlocked yet");
 
         //Get The Staking Coins of Delegators
         uint256 staking = stakeInfo.amount;
@@ -898,12 +755,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
 
         staker.transfer(staking);
 
-        emit WithdrawDelegatorStaking(
-            staker,
-            validator,
-            staking,
-            block.timestamp
-        );
+        emit WithdrawDelegatorStaking(staker, validator, staking, block.timestamp);
+        totalDXTStake = totalDXTStake.sub(staking);
+        return true;
     }
 
     function claimValidatorReward() external zeroAddress returns(bool) {
@@ -935,9 +789,155 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
 
         delegator.transfer(staking); // transfer the income to delegators
         stakeInfo.income = 0; 
-    
         emit DelegatorClaimReward(delegator,validator,staking,block.timestamp);
         return true;
+    }
+
+    /**********************Slashing**********************/
+
+    // function slash(address validator) public {
+    //   punish(validator);
+    // }
+    function punish(address validator) external override  {
+        //Zero Address
+        require(validator != address(0), "Zero Address");
+        //Get The Validator Info to Change Status
+        Validator storage valInfo = validatorInfo[validator];
+        // Get Punish Record of the Validator
+        PunishRecord storage punishInfo = punishRecord[validator];
+
+        uint256 income = valInfo.income;
+
+        if (!punishInfo.isPunished) {
+            punishInfo.isPunished = true;
+            punishInfo.index = punishValidator.length;
+            punishValidator.push(validator);
+            // console.log("Punished Validators", validator);
+        }
+
+        // Increment the Block Counter
+        punishInfo.missedBlockCounter = punishInfo.missedBlockCounter.add(1);
+
+        // If Cross Punish Threshold Change Status To Jail  // distributeIncomeToValidator();
+          if(punishInfo.missedBlockCounter % removeThreshold == 0) {
+            //Change the Status to Jailed
+          valInfo.status = Status.Jailed;
+          distributeRewardIncomeExcept(validator, income);
+          
+          
+          valInfo.income = 0;
+          punishInfo.missedBlockCounter = 0;
+          punishInfo.jailedTime = block.timestamp;
+
+          removeFromHighestValidatorList(validator);
+         
+        uint256 highCoin;
+        uint256 highIdx;
+        address addValAddress;
+
+        (highCoin,highIdx,addValAddress)= highestCoinsInCurrentValidatorsNotInTopValidator();
+
+        // console.log("validator to be add", addValAddress);
+
+        if(highestValidators.length < MaxValidators && addValAddress!=address(0) && validatorInfo[addValAddress].status != Status.Jailed ){
+        //   console.log("Highest vali from current", addValAddress);
+            highestValidators.push(addValAddress);
+
+           }
+        } else if (punishInfo.missedBlockCounter % punishThreshold == 0 && Status.Jailed != valInfo.status) {
+            // Logic to Distribute Income to Better Validators
+            distributeRewardIncomeExcept(validator, income);
+            // Reset the Validator Missed Block Counter 
+            valInfo.income = 0;
+
+        }
+       
+        emit PunishValidator(validator, block.timestamp);
+    }
+
+    function unJailed() payable external returns(bool){
+        address requester = msg.sender; // validator address
+        Validator storage valInfo = validatorInfo[requester];
+        PunishRecord storage punishInfo = punishRecord[requester]; // Get The Punish Record
+        uint256 endTime = punishInfo.jailedTime + unjailingPeriod; // Get The End Time
+        require(block.timestamp >= endTime,"Time not Expired Yet To Unjailed");
+        // Need to Submit Only 1 DXT To Unjailed
+        require(msg.value == 1 ether,"1 DXT Needed to UnJailed");
+
+        // Change Status To Staked
+        valInfo.status = Status.Staked;
+
+
+        if(highestValidators.length < MaxValidators && requester != address(0)){
+            highestValidators.push(requester);
+        }else{
+
+
+            // Get The Highest from Current
+            uint256 highCoin;
+            uint256 highIdx;
+            address addValAddress;
+            (highCoin,highIdx,addValAddress)= highestCoinsInCurrentValidatorsNotInTopValidator();
+
+            // Get The Lowest from Highest
+            uint256 lowCoin;
+            uint256 lowIdx;
+            address lowAddress;
+
+            (lowCoin, lowIdx, lowAddress) = lowestCoinsInHighestValidator();
+
+
+            if(highCoin > lowCoin){
+                highestValidators[lowIdx] = addValAddress;
+            }
+
+            // Reset Punish Record 
+            punishInfo.jailedTime = 0;
+            punishInfo.index = 0;
+            punishInfo.isPunished = false;
+
+            // Remove From Punish Record
+            removeFromPunishValidator(requester);
+
+        }
+        
+    }
+
+     function distributeRewardIncomeExcept(address validator, uint256 income)
+        private
+    {
+        uint256 index;
+        
+        uint256 rest = currentValidators.length - 1;
+        for (uint256 i = 0; i < currentValidators.length; i++) {
+            if (currentValidators[i] == validator) {
+                index = i;
+                // console.log("Address of punished val", currentValidators[i]);
+                // console.log("index of validator", i);
+                break;
+            }
+        }
+        uint256 averageDistribute = income.div(rest);
+        // console.log("Average Distribute", averageDistribute);
+        if (averageDistribute != 0) {
+            for (uint256 i = 0; i < index; i++) {
+                validatorInfo[currentValidators[i]].income = validatorInfo[
+                    currentValidators[i]
+                ].income.add(averageDistribute);
+                // console.log("index of start validator", i);
+                // console.log("address to get income", currentValidators[i]);
+                // console.log("starting validators", validatorInfo[currentValidators[i]].income);
+            }
+            for (uint256 i = index + 1; i < currentValidators.length; i++) {
+                validatorInfo[currentValidators[i]].income = validatorInfo[
+                    currentValidators[i]
+                ].income.add(averageDistribute);
+                //   console.log("Ending validators", validatorInfo[currentValidators[i]].income);
+                //   console.log("address to get income", currentValidators[i]);
+                // console.log("index of End validator", i);
+
+            }
+        }
     }
 
 
@@ -1017,6 +1017,20 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         }
     }
 
+    function removeFromPunishValidator(address val) private {
+      uint256 n = punishValidator.length;
+      for(uint256 j = 0; j < n; j++) {
+        if(val == punishValidator[j]) {
+          if(j != n-1) {
+            punishValidator[j] = punishValidator[n - 1];
+          }
+          punishValidator.pop();
+          emit RemoveFromPunishValidator(val, block.timestamp);
+          break;
+        }
+      }
+    }
+
     function getStakingInfo(address staker, address val)
         public
         view
@@ -1054,7 +1068,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
 
             return(lowestCoin,lowIndex,lowValidator);
     }
-
     function highestCoinsInCurrentValidatorsNotInTopValidator() private view returns(uint256,uint256,address){
 
         uint256 highCoins;
@@ -1069,8 +1082,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         }
         return(highCoins,highIndex,highestValidatorAddress);
     }
-
-
     function distributeRewardToDelegators(uint256 rewardAmount, address validator,uint256 totalCoins) private{
 
         Validator storage valInfo = validatorInfo[validator];
@@ -1104,6 +1115,14 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
         return currentValidators;
     }
 
+  //   function getPunishValidators() public view returns(address[] memory) {
+  //    return punishValidator;
+  //  }
+  //  function getPunishInfo(address validator) public view returns(uint256, uint256,uint256, bool) {
+  //    PunishRecord memory p = punishRecord[validator];
+  //    return (p.missedBlockCounter, p.index, p.jailedTime, p.isPunished);
+  //  }
+
     function getBlockNumber() public view returns(uint256) {
         return block.number;
     }
@@ -1117,7 +1136,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, IParamSubscriber{
     }
    /*'''''''''''''Voting''''''''''*/
    
-    uint256 public proposalLastingPeriod;
+       uint256 public proposalLastingPeriod;
     
     // record
     mapping(address => bool) public pass;
