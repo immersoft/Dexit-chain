@@ -278,7 +278,7 @@ const handleClaim=async()=>{
 
                           </TableRow>
                         :
-                          ""
+                          "Not Found"
                         }
                           </>
                         )

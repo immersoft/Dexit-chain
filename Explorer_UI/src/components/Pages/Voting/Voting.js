@@ -12,6 +12,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Modal,
+  Fade,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useTheme } from "@mui/material/styles";
@@ -24,6 +26,8 @@ import { styled } from "@mui/material/styles";
 import Vote from "./Vote";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { ToastContainer, toast } from "react-toastify";
+import Backdrop from '@mui/material/Backdrop';
+
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -32,6 +36,19 @@ const Item = styled(Paper)(({ theme }) => ({
   textAlign: "center",
   color: theme.palette.text.secondary,
 }));
+
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 600,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 const Voting = () => {
   const [stakerAmount, setStakerAmount] = useState("");
@@ -45,8 +62,10 @@ const Voting = () => {
   const [openAlert, setOpenAlert] = React.useState(false);
   const [senIdToVoteComp, setsenIdToVoteComp] = useState("");
   const [showLoader, setShowLoader] = useState(false);
-  const [currentValueOfselectedVar, setcurrentValueOfselectedVar] =
-    useState("");
+  const [currentValueOfselectedVar, setcurrentValueOfselectedVar] = useState("");
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   useEffect(() => {
     minimumStakeValue();
@@ -153,7 +172,7 @@ const Voting = () => {
       for (let j = 0; j < checkPropsal.length; j++) {
         let proposalsss = await Proposal.proposals(checkPropsal[j]);
         // console.log("getetetetetet", proposalsss[0]);
-        getProposalDetails(proposalList[0]);
+        // getProposalDetails(proposalList[0]);
 
         // console.log(proposalsss, "proposalsss");
         ab.push(proposalsss);
@@ -166,6 +185,7 @@ const Voting = () => {
 
   const getProposalDetails = async (id) => {
     try {
+      handleOpen()
       setsenIdToVoteComp(id);
       let proposalsss = await Proposal.proposals(id);
       // console.log(proposalsss, "proposalsss");
@@ -230,85 +250,23 @@ const Voting = () => {
   return (
     <>
       
-      <ToastContainer />
-      <Typography variant='h4' style={{ textAlign: "center" }}>Voting</Typography>
-      <Grid container>
-        <Grid xs={12} sm={12} md={12}>
-          <Card sx={{ mt: 3, backgroundColor: "#F8FAFD", boxShadow: 1 }} item>
-            <Box sx={{ flexFlow: 1, p: 2 }}>
-              <Typography variant="h5" pb={2} sx={{ textAlign: "center" }}>
-                All proposal list
-              </Typography>
-              <Divider />
-              <div style={{ maxHeight: "195px", overflow: "scroll" }}>
-                {proposalList.length > 0 ? (
-                  proposalList.map((val, key) => {
-                    return (
-                      <>
-                        <Grid container sx={{ display: "flex" }}>
-                          <Grid item xs={8}>
-                            <Typography
-                              sx={{
-                                textOverflow: "ellipsis",
-                                overflow: "hidden",
-                              }}
-                              pt={1}
-                            >
-                              {val}{" "}
-                            </Typography>
-                          </Grid>
-                          <Grid xs={1} pt={1}>
-                            <span>
-                              <ContentCopyIcon
-                                style={{
-                                  marginLeft: "0.5rem",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() => copyHash(val)}
-                              />
-                            </span>
-                          </Grid>
-                          {openAlert ? (
-                            <Snackbar
-                              open={openAlert}
-                              autoHideDuration={2000}
-                              onClose={() => setOpenAlert(false)}
-                            >
-                              <Alert
-                                onClose={() => setOpenAlert(false)}
-                                severity="info"
-                              >
-                                Hash Copied
-                              </Alert>
-                            </Snackbar>
-                          ) : null}
-                          <Grid
-                            item
-                            xs={3}
-                            sx={{ display: "flex", justifyContent: "end" }}
-                          >
-                            <Button
-                              variant="outlined"
-                              onClick={() => getProposalDetails(val)}
-                            >
-                              Info
-                            </Button>
-                          </Grid>
-                        </Grid>
-                        <Divider />
-                      </>
-                    );
-                  })
-                ) : (
-                  <>
-                    <Typography sx={{ textAlign: "center", m: 2 }}>
-                      No data found
-                    </Typography>{" "}
-                  </>
-                )}
-              </div>
-              <Grid>
-                <Typography variant="h5" pt={3} pb={2} textAlign={"center"}>
+      <div>
+      {/* <Button onClick={handleOpen}>Open modal</Button> */}
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={open}>
+          <Box sx={style}>
+            <Grid >
+                <Typography variant="h5" pb={2} textAlign={"center"}>
                   Proposal details
                 </Typography>
                 {proposalData ? (
@@ -390,11 +348,180 @@ const Voting = () => {
                   </>
                 )}
               </Grid>
+          </Box>
+        </Fade>
+      </Modal>
+    </div>
+
+
+
+      <ToastContainer />
+      <Typography variant='h4' style={{ textAlign: "center" }}>Voting</Typography>
+      <Grid container sx={{pl:7,pr:7}}>
+        <Grid xs={12} sm={12} md={12}>
+          <Card sx={{ mt: 3, backgroundColor: "#F8FAFD", boxShadow: 1 }} item>
+            <Box sx={{ flexFlow: 1, p: 2 }}>
+              <Typography variant="h5" pb={2} sx={{ textAlign: "center" }}>
+                All proposal list
+              </Typography>
+              <Divider />
+              <div style={{ maxHeight: "250px", overflow: "scroll" }}>
+                {proposalList.length > 0 ? (
+                  proposalList.map((val, key) => {
+                    return (
+                      <>
+                        <Grid container sx={{ display: "flex" }}>
+                          <Grid item xs={8}>
+                            <div style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
+                            <Typography
+                              sx={{
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                              }}
+                              pt={1}
+                            >
+                              {val}{" "}
+                            </Typography>
+                            </div>
+                          </Grid>
+                          <Grid xs={1} pt={1}>
+                            <span>
+                              <ContentCopyIcon
+                                style={{
+                                  marginLeft: "0.5rem",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => copyHash(val)}
+                              />
+                            </span>
+                          </Grid>
+                          {openAlert ? (
+                            <Snackbar
+                              open={openAlert}
+                              autoHideDuration={2000}
+                              onClose={() => setOpenAlert(false)}
+                            >
+                              <Alert
+                                onClose={() => setOpenAlert(false)}
+                                severity="info"
+                              >
+                                Hash Copied
+                              </Alert>
+                            </Snackbar>
+                          ) : null}
+                          <Grid
+                            item
+                            xs={3}
+                            sx={{ display: "flex", justifyContent: "center" }}
+                          >
+                            <Button
+                              variant="outlined"
+                              onClick={() => getProposalDetails(val)}
+                            >
+                              Info
+                            </Button>
+                          </Grid>
+                        </Grid>
+                        <Divider />
+                      </>
+                    );
+                  })
+                ) : (
+                  <>
+                    <Typography sx={{ textAlign: "center", m: 2 }}>
+                      No data found
+                    </Typography>{" "}
+                  </>
+                )}
+              </div>
+
+              {/* <Grid sx={{mt:2}}>
+                <Typography variant="h5" pt={3} pb={2} textAlign={"center"}>
+                  Proposal details
+                </Typography>
+                {proposalData ? (
+                  <>
+                    <Card
+                      sx={{
+                        paddingLeft: "1rem",
+                        paddingRight: "1rem",
+                        boxShadow: 0,
+                        backgroundColor: "#F8FAFD",
+                      }}
+                    >
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Proposer address</Grid>
+                        <Grid item>{proposalData.proposer}</Grid>
+                        <Divider />
+                      </Grid>
+
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Value </Grid>
+                        <Grid item>
+                          {console.log(
+                            "cheehhskhskhs",
+                            proposalData.variable_value.toString()
+                          )}
+                          {proposalData.variable_name === "MaxValidators"
+                            ? proposalData.variable_value.toString()
+                            : proposalData.variable_value.toString() /
+                              1000000000000000000}
+                        </Grid>
+                        <Divider />
+                      </Grid>
+
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Name </Grid>
+                        <Grid item>{proposalData.variable_name}</Grid>
+                        <Divider />
+                      </Grid>
+
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Status </Grid>
+                        <Grid item>
+                          {proposalData[11] === true ? "True" : "False"}
+                        </Grid>
+                        <Divider />
+                      </Grid>
+                    </Card>
+                  </>
+                ) : (
+                  <>
+                    <Typography sx={{ textAlign: "center", mt: 5 }}>
+                      No data found
+                    </Typography>{" "}
+                  </>
+                )}
+              </Grid> */}
             </Box>
           </Card>
         </Grid>
       </Grid>
-      <Grid container sx={{ backgroundColor: "#F8FAFD" }}>
+      <Grid container sx={{p:2}}>
         <Grid item md={12} sm={12} xs={12}>
           <Vote data={senIdToVoteComp} />
         </Grid>
