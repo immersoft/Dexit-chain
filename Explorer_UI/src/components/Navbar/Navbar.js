@@ -173,6 +173,19 @@ export default function Navbar() {
             </span>
           </IconButton>
         </MenuItem>
+
+        <MenuItem>
+          <IconButton
+            size="small"
+            aria-label="show 4 new mails"
+            color="inherit"
+            onClick={() => handleSwap()}
+          >
+            <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
+              Token Swap
+            </span>
+          </IconButton>
+        </MenuItem>
   
         <MenuItem>
           <IconButton
@@ -256,6 +269,11 @@ export default function Navbar() {
       navigate("/unstaking")
     }
 
+    
+    const handleSwap = () =>{
+      navigate("/swapping")
+    }
+
     const navigatRoute=()=>{
       navigate('/')
     }
@@ -323,6 +341,17 @@ export default function Navbar() {
             </span>
           </Button>
 
+          <Button
+              id="demo-customized-button"
+              disableElevation
+              sx={{ border: "none", color: "#7A93B4" }}
+              onClick={handleSwap}
+            >
+              <span style={{ fontSize: "14px" ,textTransform: "none"}}>
+                Token Swap
+              </span>
+
+            </Button>
             <Button
               id="demo-customized-button"
               onClick={() => handleBlock()}

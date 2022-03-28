@@ -181,6 +181,19 @@ const Header3 = () => {
           size="small"
           aria-label="show 4 new mails"
           color="inherit"
+          onClick={() => handleSwap()}
+        >
+          <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
+            Token Swap
+          </span>
+        </IconButton>
+      </MenuItem>
+
+      <MenuItem>
+        <IconButton
+          size="small"
+          aria-label="show 4 new mails"
+          color="inherit"
           onClick={() => handleBlock()}
         >
           <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
@@ -248,6 +261,9 @@ const Header3 = () => {
     navigate("/unstaking")
   }
 
+  const handleSwap = () =>{
+    navigate("/swapping")
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -290,6 +306,17 @@ const Header3 = () => {
           >
             <span style={{ fontSize: "14px", textTransform: "none" }}>
               Un-Stake
+            </span>
+          </Button>
+
+          <Button
+            id="demo-customized-button"
+            disableElevation
+            sx={{ border: "none", color: "#7A93B4" }}
+            onClick={handleSwap}
+          >
+            <span style={{ fontSize: "14px", textTransform: "none" }}>
+              Token Swap
             </span>
           </Button>
 

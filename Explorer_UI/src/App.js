@@ -26,6 +26,7 @@ import Voting from "./components/Pages/Voting/Voting";
 import DepositeTable from "./components/Pages/Deposite/DepositeTable";
 import CreateProposall from "./components/Pages/Voting/CreateProposall";
 import MyProposal from "./components/Pages/Voting/MyProposal";
+import Tokenswap from "./components/Pages/Tokenswap/Tokenswap";
 
 function App() {
   return (
@@ -69,7 +70,15 @@ function App() {
               </>
             }
           />
-
+          
+          <Route
+            path="/swapping"
+            element={
+              <>
+                <Tokenswap />
+              </>
+            }
+          />
           <Route
             path="/transactionDetails"
             element={
