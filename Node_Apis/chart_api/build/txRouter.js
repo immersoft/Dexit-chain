@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17,8 +36,11 @@ const typeorm_1 = require("typeorm");
 // import searchTransactionByBlock from "./index1";
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
 const txTable_1 = require("./txTable");
+const Swap = __importStar(require("./swap/swap"));
+const bigInt = require("big-integer");
 const { Client } = require('pg');
 const router = express_1.default.Router();
+console.log(Swap);
 router.get("/validatorInfo/:address", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const txRepo = (0, typeorm_1.getRepository)(txHistoryCount_entity_1.TransactionEntity);
@@ -46,18 +68,22 @@ router.get("/transactions", function (req, res) {
 router.post("/validatorInfo", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const txRepo = (0, typeorm_1.getRepository)(txHistoryCount_entity_1.TransactionEntity);
-        console.log("Body", req.body);
         const get = yield txRepo.findOne({ Address: req.body.Address });
-        console.log("gett--", get);
         if (get) {
             res.json({ data: "Already Exist" });
         }
         else {
             const tx = yield txRepo.create(req.body);
-            // await txRepo.insert({totalcount:count});
             const results = yield txRepo.save(tx);
             return res.send(results);
         }
     });
+});
+/*********************Swap Router*************************/
+router.post("/withdraw", function (req, res) {
+    var key1 = req.body.myadd;
+    var key2 = bigInt(req.body.amount);
+    Swap.withdraw(key1, key2.value);
+    res.send("API running!");
 });
 exports.default = router;

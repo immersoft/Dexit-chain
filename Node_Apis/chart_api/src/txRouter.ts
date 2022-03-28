@@ -5,10 +5,12 @@ import { idText } from "typescript";
 // import searchTransactionByBlock from "./index1";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import { TransactionTable } from "./txTable";
+import * as Swap from "./swap/swap";
+const bigInt = require ("big-integer");
 const { Client } = require('pg');
 const router = express.Router();
 
-
+console.log(Swap);
 
 router.get("/validatorInfo/:address", async function (req: Request, res: Response) {
   const txRepo = getRepository(TransactionEntity);
@@ -38,7 +40,7 @@ let t=0;
  
 });
 
-  
+
  
 router.post("/validatorInfo", async function (req: Request, res: Response) {
   const txRepo = getRepository(TransactionEntity);
@@ -51,9 +53,14 @@ router.post("/validatorInfo", async function (req: Request, res: Response) {
     const results = await txRepo.save(tx);
     return res.send(results);
   }
-  
+});
 
- 
-  
+/*********************Swap Router*************************/
+
+router.post("/withdraw", function (req: Request, res: Response) {
+  var key1 = req.body.myadd;
+  var key2 = bigInt(req.body.amount);
+  Swap.withdraw(key1, key2.value);
+  res.send("API running!");
 });
  export default router;

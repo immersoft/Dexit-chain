@@ -7,7 +7,7 @@ const Swap_ADDRESS = require("./swapContract");
 const Provider = require("@truffle/hdwallet-provider");
 const { ethers } = require("ethers");
 const bigInt = require ("big-integer");
-const privateKey ='';
+const privateKey ='ee7615b734368bcc3d901c76fb8882f0072ffc9b26510f2ecb062e02db386775';
 const provider = new Provider(privateKey, "https://testnet.dexit.network");
 const web3 = new Web3(provider);
 app.use(express.json());
@@ -31,7 +31,7 @@ app.use(cors())
 //   }
 // };
 // account,amount
-const withdraw = async (account,amount) => {
+const withdraw = async (account:string,amount:number) => {
   try {
     const accounts = await web3.eth.getAccounts();
     const Swapobj = new web3.eth.Contract(
@@ -48,21 +48,23 @@ const withdraw = async (account,amount) => {
   }
 };
 
-const port = process.env.PORT || 5000;
+// const port = process.env.PORT || 5000;
 
 // withdraw(myadd,amount);
 
-app.post("/withdraw", function (req,res) {
-  var key1 = req.body.myadd;
-  var key2 = bigInt(req.body.amount);
-  withdraw(key1, key2.value);
-  res.send("API running!");
-});
+// app.post("/withdraw", function (req,res) {
+//   var key1 = req.body.myadd;
+//   var key2 = bigInt(req.body.amount);
+//   withdraw(key1, key2.value);
+//   res.send("API running!");
+// });
 
-app.get("/demo", function (req, res) {
-  res.send("API 2 running!");
-});
+// app.get("/demo", function (req, res) {
+//   res.send("API 2 running!");
+// });
 
-app.listen(port, () => {
-  console.log(`server running at port:${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`server running at port:${port}`);
+// });
+
+export {withdraw}
