@@ -37,9 +37,11 @@ const TransactionTable = () => {
     // console.log("TXTABLE",dd);
     const navigate = useNavigate();
     const [listData,setListData]=useState(false)
+    const [noList,setnoList]=useState(false);
     let customList = []
     let [account, setAccount] = useState("");
     const[claimLoader,setClaimLoader]=useState(false)
+    const[checkList,setCheckList]=useState(false)
     // console.log(Connection,"connections")
 
     const getAccounts = async () => {
@@ -50,6 +52,7 @@ const TransactionTable = () => {
         console.log(error)
       }
   };
+  
   try {
     window.ethereum.on("accountsChanged", function () {
       getAccounts();
@@ -64,16 +67,14 @@ const TransactionTable = () => {
     
     async function getBalanceData(){
       try {
-        // console.log("function called")
         let list= await Connection.getCurrentValidators() 
-        // console.log(list,"list")
         handleValidatorListDetails(list)
       } catch (error) {
         console.log(error)
+        setnoList(true)
       }
     }
   
-
   const getAmount= async(address)=>{
     try {
       let result= await Connection.stakeValidatorBalance(address)
@@ -104,12 +105,13 @@ const TransactionTable = () => {
         if(check==undefined){
           customList.push(customObject)
         }
-      
         }
      }
+    // console.log(customList,"listttedd")
     
     setDD(customList)
-    setListData(!listData)// console.log(dd,"listttedd")
+    setListData(true)
+    setListData(!listData)
     } catch (error) {
       console.log(error)
     }  
@@ -166,7 +168,7 @@ const handleClaim=async()=>{
     console.log(error)
   }
 }
-
+// console.log(dd.length,"jjjj")
   return (
     <>
       <ToastContainer  />
@@ -203,104 +205,102 @@ const handleClaim=async()=>{
           </Typography>
           <Box sx={{ flexGrow: 1, mt: 2 }}>
             <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
-                <TableHead>
-                  <TableRow
-                    className="heading_table"
-                    sx={{ background: "#F8FAFD" }}
-                  >
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ top: 57, minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {/* {console.log(dd, "jhjhjhj")} */}
-                  {
-                    dd.length>0 ?
-                     dd.slice(0).sort(function(a,b){
-                       return b.amount -a .amount;
-                     })
-                     .map((item,index)=>{
-                        return(
-                          <>
-                        { item.amount/1000000000000000000!==0 ?
-
-                          <TableRow 
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                          // onClick={()=>validatorDetailsData(item)}
+              
+                    <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
+                   {/* {console.log("ddddd-19-93-1932",dd,dd.length)} */}
+                    { dd.length>0 ?
+                    <>
+                        <TableHead>
+                          <TableRow
+                              className="heading_table"
+                              sx={{ background: "#F8FAFD" }}
                           >
-                          <TableCell component="th" scope="row">
-                            {item.address}
-                          </TableCell>
-                            
-                            <TableCell>
-                              {item.amount/1000000000000000000}
-                            </TableCell>
-
-                            <TableCell>
-                            {item.amount/1000000000000000000}/{item.votingpower.toFixed(2)}%
-                            </TableCell>
-
-                            <TableCell>
-                              {item.status===2 ? <Button variant={(index<3) ? "contained":"outlined"} color={(index<3)?"success":"warning"} size='small'>{(index<3) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
-                              
-                            </TableCell>
-
-                            <TableCell>
-                              <Button id="btn" variant="outlined" size='small' onClick={()=>numberOfDelegators(item.address)}>{item.numberOfDelegators}</Button>
-                            </TableCell>
-
-                            <TableCell>
-                             {item.address.toLowerCase() != account ?  <Button variant="outlined" onClick={()=>validatorDetailsData(item)}>Delegate</Button> : <Button variant="contained" disabled>Delegate</Button>}
-                            </TableCell>
-                          
-                            <TableCell>
-                              {item.incomingCoins/1000000000000000000}
-                            </TableCell>
-
-                            <TableCell>
-                              {item.incomingTotalCoins/1000000000000000000}
-                            </TableCell>
-
-                            <TableCell>
-                             {item.address.toLowerCase() === account ?  <Button variant="outlined" onClick={()=>handleClaim()}>Claim</Button> : <Button variant="contained" disabled>Claim</Button>}
-                            </TableCell>
-
-
+                              {columns.map((column) => (
+                              <TableCell
+                                  key={column.id}
+                                  align={column.align}
+                                  style={{ top: 57, minWidth: column.minWidth }}
+                              >
+                                  {column.label}
+                              </TableCell>
+                              ))}
                           </TableRow>
-                        :
-                          "Not Found"
-                        }
-                          </>
-                        )
-                      }):
-                      <>
-                      { 
-                        !dd ? "Not Found":
-                        <>
-                        <Box sx={{ display: 'flex',justifyContent:"center" }}>
-                          <CircularProgress size={30} />
-                        </Box> 
-                       </>
+                        </TableHead>
+                        {
+                        dd.slice(0).sort(function(a,b){
+                            return b.amount-a.amount
+                        }).map((item,index)=>{
+                            return(
+                                <>
+                                  <TableBody>
+                                    <TableRow 
+                                    sx={{
+                                      "&:last-child td, &:last-child th": { border: 0 },
+                                    }}
+                                    >
+                                    <TableCell component="th" scope="row">
+                                      {item.address}
+                                    </TableCell>
+                                      
+                                      <TableCell>
+                                        {item.amount/1000000000000000000}
+                                      </TableCell>
+          
+                                      <TableCell>
+                                      {item.amount/1000000000000000000}/{item.votingpower.toFixed(2)}%
+                                      </TableCell>
+          
+                                      <TableCell>
+                                        {item.status===2 ? <Button variant={(index<3) ? "contained":"outlined"} color={(index<3)?"success":"warning"} size='small'>{(index<3) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
+                                        
+                                      </TableCell>
+          
+                                      <TableCell>
+                                        <Button id="btn" variant="outlined" size='small' onClick={()=>numberOfDelegators(item.address)}>{item.numberOfDelegators}</Button>
+                                      </TableCell>
+          
+                                      <TableCell>
+                                       {item.address.toLowerCase() != account ?  <Button variant="outlined" onClick={()=>validatorDetailsData(item)}>Delegate</Button> : <Button variant="contained" disabled>Delegate</Button>}
+                                      </TableCell>
+                                    
+                                      <TableCell>
+                                        {item.incomingCoins/1000000000000000000}
+                                      </TableCell>
+          
+                                      <TableCell>
+                                        {item.incomingTotalCoins/1000000000000000000}
+                                      </TableCell>
+          
+                                      <TableCell>
+                                       {item.address.toLowerCase() === account ?  <Button variant="outlined" onClick={()=>handleClaim()}>Claim</Button> : <Button variant="contained" disabled>Claim</Button>}
+                                      </TableCell>
+          
+          
+                                    </TableRow>
+                                  </TableBody>
+                                </>
+                            )
+                        })
                       }
-                     
                       </>
-                      // <Box sx={{ display: 'flex',justifyContent:"center" }}>
-                      //   <CircularProgress size={30} />
-                      // </Box>   
-                  }
-                 
-                </TableBody>
-              </Table>
+                        :
+                    <>
+                    {dd.length===0 ? noList==true?
+                    <div style={{textAlign:"center",margin:"15%"}}>
+                      <Typography variant="h5">No Transaction Found</Typography>
+                    </div>
+                    :
+                    <>  
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                      <CircularProgress />
+                    </Box>
+                    </>
+                   : "Error Occured"}
+                      
+                    </>
+                    }
+
+                    </Table> 
             </TableContainer>
           </Box>
         </Card>

@@ -160,55 +160,39 @@ const UnStaking = () => {
 
   const handleValidatorListDetails = async (list) => {
     try {
-      let contract = await Connection.totalDXTStake();
-      // console.log(contract,"contract")
       if (list) {
         for (let i = 0; i < list.length; i++) {
           let dataget = await Connection.getValidatorInfo(list[i]);
-          //  console.log(dataget,"dddddddd")
-          //  console.log(dataget[4],"dsdsffffffffgggg")
           if (dataget[6].length != 0) {
-            //  console.log(dataget,"dsdsfffff")
-            //  console.log(dataget[2],"infoDetailsssss")
+              //Delegator Details
             for (let j = 0; j < dataget[6].length; j++) {
-              // console.log(dataget[6][j], "dsdsfffff");
-              // let address=await dataget[6][j].toString()
-              // let amount=await getAmount(address)
               if (dataget[6][j].toLowerCase() === account) {
-                // console.log(dataget[4][j],"inside id")
-                // console.log(dataget,"insideddd id")
                 let dataget22 = await Connection.getValidatorInfo(
                   dataget[6][j]
                 );
-                // console.log(dataget22, "dataget22");
                 let infoDetails = await Connection.getStakingInfo(
                   dataget[6][j],
                   dataget[0]
                 );
-                // console.log(infoDetails,"kkkkkkinfoDetails")
                 let data = {
                   address: dataget[6][j],
                   validatorAddress: dataget[0],
                   amount: infoDetails[0].toString() / 1000000000000000000,
                   totalAmount: infoDetails[0].toString() / 1000000000000000000,
                   income:infoDetails[3].toString()/1000000000000000000,
-                  // totalIncome:dataget[5].toString()/1000000000000000000,
                   status:dataget[1]
                 };
-
                 customList.push(data);
-              } else if (dataget[6][j].toLowerCase() !== account) {
-                // console.log("inside second ekseif",dataget)
-                // console.log(account,"accounthhh")
+                console.log(data,"first call")
+
+              } 
+              else if (dataget[6][j].toLowerCase() !== account && dataget[0].toLowerCase() === account) {
                 let infoDetails = await Connection.getStakingInfo(
-                  account,
-                  account
+                    dataget[0],
+                    dataget[0]
                 );
-                // console.log(infoDetails,"kkkkkkinfoDetails")
-                // console.log(dataget,"datagetggggghhhh")
                 let data = {
                   address: dataget[0],
-                  // validatorAddress:dataget[0],
                   totalAmount: dataget[3].toString() / 1000000000000000000,
                   amount: dataget[2].toString() / 1000000000000000000,
                   income:dataget[4].toString()/1000000000000000000,
@@ -216,25 +200,25 @@ const UnStaking = () => {
                   status:dataget[1],
                 };
                 let check = customList.find(
-                  (item) => item.address.toLowerCase() === account
+                  (item) => item.address.toLowerCase() !== account
                 );
+                console.log(check,"check")
                 if (check == undefined) {
+                    console.log(data,"ifcheck")
                   customList.push(data);
                 }
-                // customList.push(data)
+                customList.push(data,"listtt")
               }
             }
-          } else if (dataget[6].length === 0) {
-            //  console.log(dataget,"no delei")
-            if (dataget[0].toLowerCase() === account) {
-              //  console.log(dataget,"infoDetailsssssdddd")
+          } 
+          else if (dataget[6].length === 0) {
+            //list Validator Details
 
+            if (dataget[0].toLowerCase() === account) {
               let stakingResult = await Connection.getStakingInfo(
                 dataget[0].toLowerCase(),
                 account
               );
-              // console.log(stakingResult,"stakingResultsecond")
-              // console.log(dataget[3].toString(),"stakingResult")
               let customObject = {
                 address: dataget[0],
                 amount: dataget[2].toString() / 1000000000000000000,
@@ -243,12 +227,12 @@ const UnStaking = () => {
                 income:dataget[4].toString()/1000000000000000000,
                 totalIncome:dataget[5].toString()/1000000000000000
               };
-
               customList.push(customObject);
             }
           }
         }
       }
+    //   console.log(customList,"second call")
 
       setDD(customList);
       setListData(!listData);
@@ -256,6 +240,8 @@ const UnStaking = () => {
       console.log(error);
     }
   };
+
+  console.log(dd,"dddddddddddd")
 
   useEffect(() => {
     getBalanceData();
@@ -424,60 +410,12 @@ const UnStaking = () => {
     }
   }
 
+// console.log(dd,"dd details")
+
   return (
     <>
       <ToastContainer  />
 
-      <div className="unstack_modal">
-        <Modal
-          open={openUnStack}
-          onClose={handleCloseUnStack}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box sx={style}>
-            <Typography variant="h4" sx={{ textAlign: "center" }}>
-              Un-Staking
-            </Typography>
-            <div className="text_input">
-              <FormControl sx={{ m: 1, width: "25ch" }} variant="outlined">
-                <OutlinedInput
-                  id="outlined-adornment-weight"
-                  aria-describedby="outlined-weight-helper-text"
-                  value={unStackPrice}
-                  onChange={(e) => setUnStackPrice(e.target.value)}
-                  inputProps={{
-                    "aria-label": "weight",
-                  }}
-                />
-                <FormHelperText id="outlined-weight-helper-text">
-                  max limit {stackedAmountData ? stackedAmountData.amount : "-"}
-                </FormHelperText>
-              </FormControl>
-            </div>
-
-            <div className="btn_postdetails">
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 1 }}
-                onClick={handleunStake}
-              >
-                Submit
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 1 }}
-                onClick={() => handleCloseUnStack()}
-              >
-                Close
-              </Button>
-            </div>
-          </Box>
-        </Modal>
-      </div>
-    
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", padding: "10%" }}>
           <div
@@ -505,7 +443,7 @@ const UnStaking = () => {
                   display: "flex",
                   p: 2,
                   flexDirection: "column",
-                  boxShadow: "none",
+                  boxShadow: "none !important",
                   background: "#F8FAFD",
                 }}
               >
@@ -524,45 +462,46 @@ const UnStaking = () => {
                 <TabPanel value={value} index={0}>
                   <Box sx={{ flexGrow: 1, mt: 2 }}>
                     <TableContainer component={Paper}>
-                      <Table
-                        sx={{ minWidth: 650, p: 1 }}
-                        aria-label="simple table"
-                      >
-                        <TableHead>
-                          <TableRow
-                            className="heading_table"
-                            sx={{ background: "#F8FAFD" }}
-                          >
-                            {columns.map((column,index) => (
-                              <TableCell
-                                key={index}
-                                align={column.align}
-                                style={{ top: 57, minWidth: column.minWidth }}
-                              >
-                                {column.label}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {
-                            dd.length > 0
-                              ? dd.map((item, index) => {
-                                  return (
-                                    <>
-                                      {item.address ? (
+                        { dd.length>0?
+                            dd.map((item,index)=>{
+                                    return(
                                         <>
-                                          {item.address.toLowerCase() ===
-                                            account &&
-                                          item.amount != 0 &&
-                                          item.totalAmount != undefined ? (
-                                            <TableRow
-                                            key={index}
-                                              sx={{
-                                                "&:last-child td, &:last-child th":
-                                                  { border: 0 },
-                                              }}
-                                            >
+                                       {
+                                           item.address &&
+                                           (
+                                               <>
+                                                <Table
+                                                    sx={{ minWidth: 650, p: 1 }}
+                                                    aria-label="simple table"
+                                                  >
+                                               {
+                                                   item.address.toLowerCase()===account && item.amount!=0 && item.totalAmount !=undefined ?(
+                                                      
+                                                   <>
+                                                    <TableHead>
+                                                      <TableRow
+                                                        className="heading_table"
+                                                        sx={{ background: "#F8FAFD" }}
+                                                      >
+                                                        {columns.map((column,index) => (
+                                                          <TableCell
+                                                            key={index}
+                                                            align={column.align}
+                                                            style={{ top: 57, minWidth: column.minWidth }}
+                                                          >
+                                                            {column.label}
+                                                          </TableCell>
+                                                        ))}
+                                                      </TableRow>
+                                                    </TableHead>
+                                                      <TableBody>
+                                                      <TableRow
+                                                        key={index}
+                                                        sx={{
+                                                            "&:last-child td, &:last-child th":
+                                                            { border: 0 },
+                                                        }}
+                                                        >
                                               <TableCell
                                                 component="th"
                                                 scope="row"
@@ -586,11 +525,11 @@ const UnStaking = () => {
                                               <TableCell>
                                                 {item ? item.totalAmount : "-"}
                                               </TableCell>
+                                              
 
                                               {item.validatorAddress ? (
                                                 <>
-                                                  <TableCell>
-                                                   
+                                                <TableCell>
                                                     <Button
                                                       variant="outlined"
                                                       success
@@ -604,9 +543,9 @@ const UnStaking = () => {
                                                       Delegate Un-Stake
                                                     </Button>
                                                    
-                                                  </TableCell>
+                                                </TableCell>
 
-                                                  <TableCell>
+                                                <TableCell>
                                                     <Button
                                                       variant="outlined"
                                                       success
@@ -619,12 +558,11 @@ const UnStaking = () => {
                                                      Delegate Withdraw
                                                     </Button>
                                                    
-                                                  </TableCell>
+                                                </TableCell>
                                                 </>
                                               ) : (
                                                 <>
                                                   <TableCell>
-                                                    
                                                     <Button
                                                       variant="outlined"
                                                       success
@@ -661,7 +599,7 @@ const UnStaking = () => {
                                             
                                             {
                                               item.validatorAddress ? (
-                                              <>
+                                              // <>
                                                 <TableCell>                            
                                                    <Button
                                                      variant="outlined"
@@ -674,10 +612,8 @@ const UnStaking = () => {
                                                    </Button>
                                                   
                                                  </TableCell>
-                                              </>
                                               ):
                                               (
-                                              <>
                                                 <TableCell>                            
                                                    <Button
                                                      variant="outlined"
@@ -690,52 +626,45 @@ const UnStaking = () => {
                                                    </Button>
                                                   
                                                  </TableCell>
-                                              </>
                                               )
                                             }
                                             </TableRow>
-                                          ) : (
-                                            "Not Found"
-                                          )}
-                                        </>
-                                      ) : (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            mt: 4,
-                                            ml: 15,
-                                          }}
-                                        >
-                                          <CircularProgress />
-                                        </Box>
-                                      )}
-                                    </>
-                                  );
-                                })
-                              : <>
-                                    <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "center",
-                                          mt: 4,
-                                          ml: 15,
-                                        }}
-                                        >
-                                        <CircularProgress />
-                                    </Box>
-                              </>
-                          }
+                                                      </TableBody>
+                                                    </>
+                                                   )
+                                                   :
+                                                   item?.address.toLowerCase()!==account ?
+                                                   <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                                                   <CircularProgress />
+                                                 </Box>:'Found'
+                                               }
+                                            </Table>
 
-                        </TableBody>
-                      </Table>
+                                               </>
+                                           )
+                                       }
+                                        </>
+
+                                    )
+                                })
+                                
+                                : 
+                                dd.length>0 ?
+                                <>  
+                                  <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                                    <CircularProgress />
+                                  </Box>
+                                </>
+                            :
+                                <div style={{textAlign:"center",margin:"15%"}}>
+                                    <Typography variant="h5">No Transaction Found</Typography>
+                                </div>
+                            }
+                       
+                      {/* </Table> */}
                     </TableContainer>
                   </Box>
                 </TabPanel>
-
-                {/* <TabPanel value={value} index={1}>
-              <DelegatorDetails/>
-          </TabPanel> */}
               </Card>
             ) : (
               <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
