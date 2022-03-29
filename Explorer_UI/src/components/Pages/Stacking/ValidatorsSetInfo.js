@@ -29,6 +29,8 @@ const ValidatorSetInfo = () => {
   const [listData, setListData] = useState(true);
   let customList = [];
   let [account, setAccount] = useState("");
+  const [noList,setnoList]=useState(false);
+
 
   const getAccounts = async () => {
     try {
@@ -60,6 +62,8 @@ const ValidatorSetInfo = () => {
       handleValidatorListDetails(list);
     } catch (error) {
       console.log(error);
+      setnoList(true)
+
     }
   }
 
@@ -121,6 +125,9 @@ const ValidatorSetInfo = () => {
           <Box sx={{ flexGrow: 1, mt: 2 }}>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
+                {
+                  dd.length>0 ?
+                <>
                 <TableHead>
                   <TableRow
                     className="heading_table"
@@ -137,17 +144,14 @@ const ValidatorSetInfo = () => {
                     ))}
                   </TableRow>
                 </TableHead>
-                <TableBody>
-                  {/* {console.log(dd, "jhjhjhj")} */}
-                  {dd.length > 0 ? (
-                    
+                {/* <TableBody> */}
+                  { 
                     dd.slice(0).sort(function(a,b){
                       return b.amount -a .amount;
                     }).map((item) => {
                       return (
                         <>
-                        {/* {console.log(item,"item")} */}
-                          {item.amount / 1000000000000000000 !== 0 ? (
+                        <TableBody>
                             <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
@@ -197,59 +201,28 @@ const ValidatorSetInfo = () => {
                                 )}
                               </TableCell>
                             </TableRow>
-                          ) : (
-                            ""
-                          )}
+                        </TableBody>
                         </>
                       );
                     })
-                  ) : (
-                    <Box sx={{ display: "flex", justifyContent: "center" }}>
-                      <CircularProgress size={30} />
+                   }
+                </>
+                :
+                <>
+                    {dd.length===0 ? noList==true?
+                    <div style={{textAlign:"center",margin:"15%"}}>
+                      <Typography variant="h5">No Transaction Found</Typography>
+                    </div>
+                    :
+                    <>  
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                      <CircularProgress />
                     </Box>
-                  )}
-                  {/* {dd.length!=0 ? dd.map(async(val, key) => {
-                    return (
-                      <>
-                        <TableRow
-                          key={key}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {key}
-                          </TableCell>
-                          <TableCell component="th" scope="row">
-                            {val[0]}
-                          </TableCell>
-                          <TableCell>{await getAmount(val[0])}</TableCell>
-                        </TableRow>
-                      </>
-                    );
-                  })
-                  :"null"
-                  } */}
-
-                  {/* {dd.map((val, key) => {
-
-                            return (
-                                <>
-                                    {val.slice(0).reverse().map((row, i) => (
-                                        <TableRow
-                                            key={i}
-                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                        >
-                                            <TableCell component="th" scope="row">{i}</TableCell>
-                                            <TableCell component="th" scope="row">
-                                                {row[0]}
-                                            </TableCell>
-                                            <TableCell >{row[1].toString()}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </>)
-                        })} */}
-                </TableBody>
+                    </>
+                   : "Error Occured"}
+                      
+                    </>
+              }
               </Table>
             </TableContainer>
           </Box>
