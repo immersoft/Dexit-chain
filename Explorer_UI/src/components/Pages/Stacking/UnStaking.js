@@ -649,11 +649,13 @@ const UnStaking = () => {
                                 })
                                 
                                 : 
-                                dd.length>0 ?<>  <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                                <CircularProgress />
-                                {console.log("checkkk",dd)}
-
-                            </Box></>:
+                                dd.length>0 ?
+                                <>  
+                                  <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                                    <CircularProgress />
+                                  </Box>
+                                </>
+                            :
                                 <div style={{textAlign:"center",margin:"15%"}}>
                                     <Typography variant="h5">No Transaction Found</Typography>
                                 </div>
