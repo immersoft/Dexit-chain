@@ -58,9 +58,12 @@ router.post("/validatorInfo", async function (req: Request, res: Response) {
 /*********************Swap Router*************************/
 
 router.post("/withdraw", function (req: Request, res: Response) {
-  var key1 = req.body.myadd;
+  var key1 = req.body.account;
   var key2 = bigInt(req.body.amount);
-  Swap.withdraw(key1, key2.value);
-  res.send("API running!");
+  var key3 = req.body.exc_rate;
+  var key4 = req.body.txn_hash;
+  const result = Swap.withdraw(key1, key2.value, key3, key4);
+  res.send(result);
 });
+
  export default router;

@@ -81,9 +81,11 @@ router.post("/validatorInfo", function (req, res) {
 });
 /*********************Swap Router*************************/
 router.post("/withdraw", function (req, res) {
-    var key1 = req.body.myadd;
+    var key1 = req.body.account;
     var key2 = bigInt(req.body.amount);
-    Swap.withdraw(key1, key2.value);
-    res.send("API running!");
+    var key3 = req.body.exc_rate;
+    var key4 = req.body.txn_hash;
+    const result = Swap.withdraw(key1, key2.value, key3, key4);
+    res.send(result);
 });
 exports.default = router;

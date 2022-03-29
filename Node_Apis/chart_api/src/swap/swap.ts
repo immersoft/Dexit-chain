@@ -31,15 +31,18 @@ app.use(cors())
 //   }
 // };
 // account,amount
-const withdraw = async (account:string,amount:number) => {
+  const withdraw = async (account:string,amount:bigint,exc_rate:number,txn_hash:string) => {
   try {
     const accounts = await web3.eth.getAccounts();
     const Swapobj = new web3.eth.Contract(
       Swap.ETHswap_ABI,
       Swap.ETHswap_ADDRESS
     );
+    
     // let owner =await Swapobj.methods._owner().call()
-    let result = await Swapobj.methods.withdraw(account,amount).send({
+    // console.log("I am here 1", typeof account, account,typeof amount, amount, typeof exc_rate, exc_rate, typeof txn_hash, txn_hash);
+    
+    let result = await Swapobj.methods.withdraw(account,amount,exc_rate,txn_hash).send({
         from : accounts[0]
     });
     console.log("result ", result);

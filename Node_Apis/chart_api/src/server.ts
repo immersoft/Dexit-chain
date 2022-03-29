@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import { createConnection, getRepository } from "typeorm";
 import { transactionHistoryCount } from "./txHistory";
 import { TransactionEntity } from "./txHistoryCount.entity";
+import {SwapTable} from "./swap/swapHistory";
 import Router from "./txRouter";
 import Web3 from "web3";
 import { TransactionTable } from "./txTable";
@@ -18,7 +19,7 @@ export const connection = createConnection({
   username: "mrabouuj",
   password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
   database: "mrabouuj",
-  entities: [TransactionEntity,TransactionTable],
+  entities: [TransactionEntity,TransactionTable,SwapTable],
   synchronize: true,
   logging: false,
 })
