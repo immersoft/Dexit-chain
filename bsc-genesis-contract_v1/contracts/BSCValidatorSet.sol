@@ -98,7 +98,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         valInfo.amount = 10000 ether;
         valInfo.coins = 10000 ether;
         valInfo.status = Status.Staked;
-        //proposalLastingPeriod = 7 days;
+        proposalLastingPeriod = 7 days;
     }
 
     /*********************** External Functions **************************/
