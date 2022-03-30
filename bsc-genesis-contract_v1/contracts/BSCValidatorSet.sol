@@ -452,8 +452,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             currentValidators.push(staker);
         }
 
-        //  testIncome(staker);
-
         uint256 highCoin;
         uint256 highIdx;
         address addValAddress;
@@ -632,7 +630,10 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             "Staking haven't unlocked yet"
         );
 
+        // console.log("At Line 636");
         uint256 updateBalance = valInfo.amount.sub(amount); // balance - amount
+        // console.log("Updated Balance %s", updateBalance);
+        valInfo.amount = valInfo.amount.sub(amount); // update the amount
         valInfo.coins = valInfo.coins.sub(amount); // Update Coins
 
         if (updateBalance >= minimum_Stake_Amount) {
@@ -640,8 +641,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         }
 
         if (updateBalance < minimum_Stake_Amount) {
+            // console.log("Update Balance is Less");
             if (updateBalance == 0) {
-                this.claimValidatorReward(); // Claim Validator Rewards If any
+                // For Testing Purpose
+                // console.log("Inside Update Balance 0 Calling now Claim Validator Reward");
+                if (valInfo.income > 0) {
+                    this.claimValidatorReward(); // Claim Validator Rewards If any
+                }
                 valInfo.status = Status.NotExist;
             } else {
                 revert("Please withdraw all at once");
@@ -653,6 +659,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         }
 
         stakeInfo.unstakeblock = 0; // Reset The UnstakeBlock
+        // console.log("Now Transfering The Amount %s", amount);
         staker.transfer(amount); // Transfer the amount to validator
 
         // Find Lowest in Highest Validator
@@ -755,7 +762,10 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         return true;
     }
 
+    function getStatus(address validator) public view returns (uint256) {}
+
     function claimValidatorReward() external zeroAddress returns (bool) {
+        // console.log("Calling Claim Validator Reward.....");
         address payable staker = msg.sender; // validator address
         Validator storage valInfo = validatorInfo[staker];
         require(
