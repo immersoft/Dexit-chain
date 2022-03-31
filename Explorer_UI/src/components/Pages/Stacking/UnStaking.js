@@ -7,6 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import Backdrop from '@mui/material/Backdrop';
 import {
   Button,
   Box,
@@ -18,6 +19,8 @@ import {
   FormHelperText,
   Alert,
   CircularProgress,
+  Fade,
+  TextField,
 } from "@mui/material";
 // import { Box } from "@mui/system";
 import Connection from "../../../Contract";
@@ -37,6 +40,7 @@ const columns = [
   // { id: "start", label: "Start Time", minWidth: 20 },
   { id: "address", label: "Address", minWidth: 50 },
   { id: "vaddress", label: "Validator Address", minWidth: 50 },
+  { id: "status", label: "Status", minWidth: 50 },
   { id: "amount", label: "Amount", minWidth: 50 },
   { id: "totalamount", label: "Total Amount", minWidth: 50 },
   { id: "unstake", label: "Un-Stake", minWidth: 50 },
@@ -96,25 +100,38 @@ const UnStaking = () => {
   let [account, setAccount] = useState("");
   const [stackedAmountData, setStackedAmountData] = useState();
   const [openUnStack, setOpenUnStack] = React.useState(false);
-  const [unStackPrice, setUnStackPrice] = useState(0);
   const [dd, setDD] = useState([]);
   const [listData, setListData] = useState(true);
   const [value, setValue] = React.useState(0);
   const [withdrawl, setWithdrawl] = useState(false);
-  const [errorWithdrawl, setErrorWithDrawl] = useState(false);
-  const [errorUnstake, setErrorUnStaking] = useState();
   const [open, setOpen] = React.useState(true);
   const [withdrawTimeOut, setWithdrawTimeOut] = useState(60);
   const [withdrawTimeOutStatus, setWithdrawTimeOutStatus] = useState(false);
   const [unstakeDelegateError, setUnstakeDelegateError] = useState();
-  const [toggleUnstakeError, setToggleUnstakeError] = useState(false);
 
   const [deUnstake, setDeUnstake] = useState(false);
-  const [deUnstakeError, setDeUnstakeError] = useState();
-  const [deWithdraw, setDeWithdraw] = useState(false);
-  const [deWithdrawError, setDeWithdrawError] = useState();
   const [loading, setLoading] = useState(false);
   const[claimLoader,setClaimLoader]=useState(false)
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const[withdrawModal,setWithdrawModal]=useState(false)
+  const[withdrawAmount,setWithdrawAmount]=useState(0)
+  const[delegateWithdrawModal,setDelegateWithdrawModal]=useState(false)
+  const [ValidatorAddForDel,setValidatorAddForDel]=useState()
+
+  const handleDelegateWithdrawModal=(validatorAddress)=>{
+    setValidatorAddForDel(validatorAddress)
+    setDelegateWithdrawModal(true)
+  }
+
+  const handleDelegateWithdrawModalClose=()=>{
+    setDelegateWithdrawModal(false)
+  }
+
+  const handleWithdrawModal=()=>setWithdrawModal(true)
+  const handleWithdrawModalClose=()=>setWithdrawModal(false)
+
+  const handleModalOpen = () => setModalOpen(true);
+  const handleModalClose = () => setModalOpen(false);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -165,24 +182,37 @@ const UnStaking = () => {
           let dataget = await Connection.getValidatorInfo(list[i]);
           if (dataget[6].length != 0) {
               //Delegator Details
+              console.log(dataget[6],"delegator details")
             for (let j = 0; j < dataget[6].length; j++) {
               if (dataget[6][j].toLowerCase() === account) {
                 let dataget22 = await Connection.getValidatorInfo(
                   dataget[6][j]
                 );
+                console.log(dataget[6][j],"dataget")
                 let infoDetails = await Connection.getStakingInfo(
                   dataget[6][j],
                   dataget[0]
                 );
+                console.log(infoDetails,"infoDetails")
                 let data = {
                   address: dataget[6][j],
                   validatorAddress: dataget[0],
-                  amount: infoDetails[0].toString() / 1000000000000000000,
-                  totalAmount: infoDetails[0].toString() / 1000000000000000000,
-                  income:infoDetails[3].toString()/1000000000000000000,
-                  status:dataget[1]
+                  amount: infoDetails[1].toString(),
+                  totalAmount: infoDetails[1].toString(),
+                  income:infoDetails[4].toString()/1000000000000000000,
+                  totalIncome:infoDetails[5].toString()/1000000000000000000,
+                  // status:dataget[1]
                 };
+
+                let check = customList.find(
+                  (item) => item.address.toLowerCase() !== account
+                );
+
+                if (check == undefined) {
+                  console.log(data,"ifcheck")
                 customList.push(data);
+              }
+                // customList.push(data);
                 console.log(data,"first call")
 
               } 
@@ -191,38 +221,41 @@ const UnStaking = () => {
                     dataget[0],
                     dataget[0]
                 );
+                console.log(dataget,"infoDetails")
                 let data = {
                   address: dataget[0],
-                  totalAmount: dataget[3].toString() / 1000000000000000000,
-                  amount: dataget[2].toString() / 1000000000000000000,
+                  totalAmount: dataget[3].toString(),
+                  amount: dataget[2].toString(),
                   income:dataget[4].toString()/1000000000000000000,
                   totalIncome:dataget[5].toString()/1000000000000000000,
                   status:dataget[1],
                 };
                 let check = customList.find(
-                  (item) => item.address.toLowerCase() !== account
+                  (item) => item.address.toLowerCase() === account
                 );
                 console.log(check,"check")
                 if (check == undefined) {
                     console.log(data,"ifcheck")
                   customList.push(data);
                 }
-                customList.push(data,"listtt")
+                // customList.push(data)
               }
             }
           } 
           else if (dataget[6].length === 0) {
             //list Validator Details
-
             if (dataget[0].toLowerCase() === account) {
-              let stakingResult = await Connection.getStakingInfo(
-                dataget[0].toLowerCase(),
-                account
-              );
+
+              // let stakingResult = await Connection.getStakingInfo(
+              //   account,
+              //   account
+              // );
+            console.log(dataget,"validator")
+
               let customObject = {
                 address: dataget[0],
-                amount: dataget[2].toString() / 1000000000000000000,
-                totalAmount: dataget[3].toString() / 1000000000000000000,
+                amount: dataget[2].toString(),
+                totalAmount: dataget[3].toString() ,
                 status:dataget[1],
                 income:dataget[4].toString()/1000000000000000000,
                 totalIncome:dataget[5].toString()/1000000000000000
@@ -276,6 +309,8 @@ const UnStaking = () => {
         setWithdrawl(true);
         setLoading(false);
         toast.success("Un-Stake successfull");
+        getBalanceData()
+
       }
     } catch (error) {
       setLoading(false);
@@ -289,18 +324,14 @@ const UnStaking = () => {
       }
     }
 
-    // }
-    // }
-    // let stakerAmountData2 = bigInt(stakerAmount2 * 10 ** 18);
-    // let result = await Connection.unStake(1,stakerAmountData2.value);
-    // console.log(result)
-    // setOpenUnStack(false)
   };
 
   const handleWithdraw = async () => {
     try {
+      handleWithdrawModalClose()
       setLoading(true);
-      let result = await Connection.withdrawValidatorStaking();
+      let ethe=bigInt(withdrawAmount*10**18)
+      let result = await Connection.withdrawValidatorStaking(ethe.value);
       let abc = await result.wait();
       if (abc) {
         setLoading(false);
@@ -309,6 +340,8 @@ const UnStaking = () => {
       console.log(result);
     } catch (error) {
       console.log(error);
+      handleWithdrawModalClose()
+
       setLoading(false);
       if (error.code ===4001) {
         toast.error(error.message);
@@ -346,12 +379,14 @@ const UnStaking = () => {
     }
   };
 
-  const delegateWithDraw = async (validAddress) => {
+  const delegateWithDraw = async () => {
     try {
+      handleDelegateWithdrawModalClose()
       setLoading(true);
-
+      let amountWithdraw=bigInt(withdrawAmount * 10 ** 18);
+      console.log(amountWithdraw.value,"amountWithdraw")
       let delegateWithdrwal = await Connection.withdrawDelegatorStaking(
-        validAddress
+        ValidatorAddForDel,amountWithdraw.value
       );
       let abc = await delegateWithdrwal.wait();
       if (abc) {
@@ -361,7 +396,9 @@ const UnStaking = () => {
       }
       console.log(delegateWithdrwal, "delegateWithdrwal");
     } catch (error) {
+      handleDelegateWithdrawModalClose()
       setLoading(false);
+      console.log(error)
       if(error.code ===4001){
         console.log("if")
         toast.error(error.message);
@@ -410,11 +447,115 @@ const UnStaking = () => {
     }
   }
 
-// console.log(dd,"dd details")
+
+const handleJailed=async()=>{
+  try {
+    let unjailing=await Connection.unJailed()
+    console.log(unjailing,"unjailing")
+  } catch (error) {
+    console.log(error)
+  }
+}
 
   return (
     <>
       <ToastContainer  />
+    <div>
+      {/* <Button onClick={handleModalOpen}>Open modal</Button> */}
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={modalOpen}
+        onClose={handleModalClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={modalOpen}>
+          <Box sx={style}>
+            <Typography variant="h4" sx={{textAlign:"center",fontWeight:"700"}}>Unjail</Typography>
+            <div style={{display:"flex",justifyContent:"space-evenly",alignItems:"center",marginTop:"1rem"}}>
+                <TextField
+              id="outlined-read-only-input"
+              label="Amount"
+              defaultValue="1 DXT"
+              InputProps={{
+                readOnly: true,
+              }}
+              size="medium"
+            />
+
+            <Button variant="outlined" onClick={()=>handleJailed()}>Unjail</Button>
+            </div>
+          </Box>
+        </Fade>
+      </Modal>
+    </div>
+
+
+    <div>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={withdrawModal}
+        onClose={handleWithdrawModalClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={withdrawModal}>
+          <Box sx={style}>
+            <Typography variant="h4" sx={{textAlign:"center",fontWeight:"700"}}>Withdraw Amount</Typography>
+            <div style={{display:"flex",justifyContent:"space-evenly",alignItems:"center",marginTop:"1rem"}}>
+              <TextField
+            required
+            id="outlined-required"
+            label="Required"
+            value={withdrawAmount}
+            onChange={(e)=>setWithdrawAmount(e.target.value)}
+          />
+
+            <Button variant="outlined" onClick={()=>handleWithdraw()}>Confirm</Button>
+            </div>
+          </Box>
+        </Fade>
+      </Modal>
+    </div>
+
+    <div>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={delegateWithdrawModal}
+        onClose={handleDelegateWithdrawModalClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={delegateWithdrawModal}>
+          <Box sx={style}>
+            <Typography variant="h4" sx={{textAlign:"center",fontWeight:"700"}}>Withdraw Amount</Typography>
+            <div style={{display:"flex",justifyContent:"space-evenly",alignItems:"center",marginTop:"1rem"}}>
+              <TextField
+            required
+            id="outlined-required"
+            label="Required"
+            value={withdrawAmount}
+            onChange={(e)=>setWithdrawAmount(e.target.value)}
+          />
+
+            <Button variant="outlined" onClick={()=>delegateWithDraw()}>Confirm</Button>
+            </div>
+          </Box>
+        </Fade>
+      </Modal>
+    </div>
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", padding: "10%" }}>
@@ -519,11 +660,15 @@ const UnStaking = () => {
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? item.amount : "-"}
+                                                {item ? item.status==2 ? <span style={{color:"orange",textTransform:"uppercase"}}>Staked</span>:item.status==3?<span style={{color:"orange",textTransform:"uppercase"}}>Un-Staked</span>:item.status==4 ? <Button variant="contained" color="error" onClick={()=>handleModalOpen()}>Jailed</Button>:item.status==1?<span style={{color:"orange",textTransform:"uppercase"}}>Created</span>:item.status==0? <span style={{color:"orange",textTransform:"uppercase"}}>Not Exist</span> :"-" : "-"}
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? item.totalAmount : "-"}
+                                                {item ? item.amount.slice(0, -18) : "-"}
+                                              </TableCell>
+
+                                              <TableCell>
+                                                {item ? item.totalAmount.slice(0, -18) : "-"}
                                               </TableCell>
                                               
 
@@ -550,7 +695,7 @@ const UnStaking = () => {
                                                       variant="outlined"
                                                       success
                                                       onClick={() =>
-                                                        delegateWithDraw(
+                                                        handleDelegateWithdrawModal(
                                                           item.validatorAddress
                                                         )
                                                       }
@@ -580,7 +725,7 @@ const UnStaking = () => {
                                                       variant="outlined"
                                                       success
                                                       onClick={() =>
-                                                        handleWithdraw()
+                                                        handleWithdrawModal()
                                                       }
                                                     >
                                                       Withdraw

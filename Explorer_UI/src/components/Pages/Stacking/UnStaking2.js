@@ -33,7 +33,7 @@ const columns = [
 
 
 
-const TransactionTable = () => {
+const UnStaking2 = () => {
     const [dd,setDD] = useState([])
     // console.log("TXTABLE",dd);
     const navigate = useNavigate();
@@ -44,7 +44,6 @@ const TransactionTable = () => {
     const[claimLoader,setClaimLoader]=useState(false)
     const[checkList,setCheckList]=useState(false)
     const[maximumValidator,setMaximumValidator]=useState(3)
-
     // console.log(Connection,"connections")
 
     const getAccounts = async () => {
@@ -78,6 +77,8 @@ const TransactionTable = () => {
       }
     }
   
+
+
   const getAmount= async(address)=>{
     try {
       let result= await Connection.stakeValidatorBalance(address)
@@ -94,7 +95,7 @@ const TransactionTable = () => {
      if(list){
       for(let i=0;i<list.length;i++){
         let dataget=await Connection.getValidatorInfo(list[i])
-        let totalVotingPower=((dataget[3].toString().slice(0, -18))/(contract.toString().slice(0, -18)))*100
+        let totalVotingPower=((dataget[3].toString()/1000000000000000000)/(contract.toString()/1000000000000000000))*100
         let customObject={
           address:list[i],
           amount:dataget[3].toString(),
@@ -172,6 +173,7 @@ const handleClaim=async()=>{
   }
 }
 // console.log(dd.length,"jjjj")
+
 
 const maxValidator=async()=>{
   let value = await Proposal.currentValue("MaxValidators");
@@ -257,15 +259,15 @@ useEffect(()=>{
                                     </TableCell>
                                       
                                       <TableCell>
-                                        {item.amount.slice(0, -18)}
+                                        {item.amount/1000000000000000000}
                                       </TableCell>
           
                                       <TableCell>
-                                      {item.amount.slice(0, -18)}/{item.votingpower.toFixed(2)}%
+                                      {item.amount/1000000000000000000}/{item.votingpower.toFixed(2)}%
                                       </TableCell>
           
                                       <TableCell>
-                                        {item.status===2 ? <Button variant={(index<maximumValidator) ? "contained":"outlined"} color={(index<maximumValidator)?"success":"warning"} size='small'>{(index<maximumValidator) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
+                                        {item.status===2 ? <Button variant={(index<3) ? "contained":"outlined"} color={(index<3)?"success":"warning"} size='small'>{(index<3) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
                                         
                                       </TableCell>
           
@@ -324,4 +326,4 @@ useEffect(()=>{
   );
 };
 
-export default TransactionTable;
+export default UnStaking2;

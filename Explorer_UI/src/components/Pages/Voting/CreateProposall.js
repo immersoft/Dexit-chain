@@ -117,7 +117,7 @@ export default function CreateProposall() {
                   xs={12}
                   ml={3}
                   mr={3}
-                  sx={{ display: "flex", justifyContent: "space-between" }}
+                  sx={{ display: "flex", justifyContent: "space-between",alignItems:'center' }}
                 >
                   <label
                     htmlFor="validatorAddress"
@@ -134,12 +134,13 @@ export default function CreateProposall() {
                     onChange={(e)=>setProposalDetails(e.target.value)}
                   />
                 </Grid>
+
                 <Grid
                   item
                   xs={12}
                   ml={3}
                   mr={3}
-                  sx={{ display: "flex", justifyContent: "space-between" }}
+                  sx={{ display: "flex", justifyContent: "space-between",alignItems:'center' }}
                 >
                   <label
                     htmlFor="validatorAddress"
@@ -154,7 +155,7 @@ export default function CreateProposall() {
                     sx={{ mt: 1 }}
                     value="minimumStakeAmount"
                   /> */}
-                  <FormControl sx={{ minWidth: 235 }}>
+                  <FormControl sx={{ minWidth: 222 }}>
                     <Select
                       value={variableName}
                       onChange={handleChange}
@@ -175,7 +176,8 @@ export default function CreateProposall() {
                   xs={12}
                   ml={3}
                   mr={3}
-                  sx={{ display: "flex", justifyContent: "space-between" }}
+                  mt={1}
+                  sx={{ display: "flex", justifyContent: "space-between",alignItems:'center' }}
                 >
                   <label
                     htmlFor="validatorAddress"
@@ -198,7 +200,7 @@ export default function CreateProposall() {
                   xs={12}
                   ml={3}
                   mr={3}
-                  sx={{ display: "flex", justifyContent: "space-between" }}
+                  sx={{ display: "flex", justifyContent: "space-between",alignItems:'center' }}
                 >
                   <label
                     htmlFor="selectedVar"
@@ -212,10 +214,11 @@ export default function CreateProposall() {
                       width: 230,
                       mt: 2,
                       color: "#808080",
+                      fontSize: "1.3rem",
                       fontWeight: "bold",
                     }}
                   >
-                    {currentValueOfselectedVar ? currentValueOfselectedVar : ""}
+                    {currentValueOfselectedVar ? currentValueOfselectedVar : "null"}
                   </Typography>
                 </Grid>
               </Grid>

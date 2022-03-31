@@ -186,10 +186,10 @@ fullStr?.substr(fullStr?.length - backChars))
     myHeaders.append("Content-Type", "application/json");
     
     var raw = JSON.stringify({
-      "name": validatorName,
-      "address": account,
-      "description": validatorDescription,
-      "website": website
+      "Name": validatorName,
+      "Address": account,
+      "Description": validatorDescription,
+      "Website": website
     });
     
     var requestOptions = {
@@ -199,7 +199,7 @@ fullStr?.substr(fullStr?.length - backChars))
       redirect: 'follow'
     };
     
-    fetch("https://stakerinfo.herokuapp.com/auth/validatorEntry", requestOptions)
+    fetch("https://final-explorer.herokuapp.com/validatorInfo", requestOptions)
       .then(response => response.text())
       .then(result => console.log(result))
       .catch(error => console.log('error', error));

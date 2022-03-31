@@ -88,7 +88,7 @@ const ListDelegator = () => {
         let customObject={
           address:contract[0],
           delegator:contract[6][i],
-          amount:datagetnew[0].toString(),
+          amount:datagetnew[1].toString(),
         }
         let check=customList.find(item=>item.address===list[i][0])
         if(check==undefined){
@@ -188,7 +188,7 @@ const ListDelegator = () => {
                             </TableCell>
 
                             <TableCell>
-                              {item.amount/1000000000000000000}
+                              {item.amount.slice(0, -18)}
                             </TableCell>
 
                             {/* <TableCell>

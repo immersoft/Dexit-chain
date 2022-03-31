@@ -22,7 +22,7 @@ const DetailsBox = () => {
   web3.setProvider("https://testnet.dexit.network");
   // web3.setProvider("http://datafeed.dexit.network");
 
-console.log(Connection)
+// console.log(Connection)
 
   const getLatestBlockNumber = async () => {
     try {
@@ -97,7 +97,7 @@ console.log(Connection)
   async function getBalanceData() {
     try {
       let list = await Connection.getHighestValidators();
-      console.log(list,"listssss")
+      // console.log(list,"listssss")
       setHighestCount(list.length)
     } catch (error) {
       console.log(error);
@@ -116,7 +116,7 @@ console.log(Connection)
         let total = counterTsx + counter;
         console.log(total, "total");
         setApiTotal(counter + counterTsx);
-        postTransactionCounts(40000, 12612);
+        postTransactionCounts(currentBlock, total);
       // }
     } catch (error) {
       console.log(error);
@@ -244,7 +244,7 @@ console.log(Connection)
                         </Typography>
                         <Typography sx={{ textAlign: "end" }}>
                           {votingPower
-                            ? votingPower / 1000000000000000000
+                            ? votingPower.slice(0, -18)
                             : "0"}
                         </Typography>
                       </Box>

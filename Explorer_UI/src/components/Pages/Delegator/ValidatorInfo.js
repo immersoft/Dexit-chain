@@ -118,7 +118,7 @@ const ValidatorInfo = () => {
             redirect: 'follow'
           };
           
-          fetch(`https://stakerinfo.herokuapp.com/auth/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
+          fetch(`https://final-explorer.herokuapp.com/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
             .then(response => response.text())
             .then(result =>{ console.log(JSON.parse(result))
                 setValidatorDetailsLocal(JSON.parse(result))
@@ -176,7 +176,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Name"
                     defaultValue="foo"
-                    value={validatorsDetailsLocal ? validatorsDetailsLocal.name:"-"}
+                    value={validatorsDetailsLocal ? validatorsDetailsLocal.data.Name:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
@@ -186,7 +186,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Description"
                     defaultValue="foo"
-                    value={validatorsDetailsLocal ? validatorsDetailsLocal.description:"-"}
+                    value={validatorsDetailsLocal ? validatorsDetailsLocal.data.Description:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
@@ -196,7 +196,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Website"
                     defaultValue="foo"
-                    value={validatorsDetailsLocal ? validatorsDetailsLocal.website:"-"}
+                    value={validatorsDetailsLocal ? validatorsDetailsLocal.data.Website:"-"}
                     InputProps={{
                         readOnly: true,
                       }}

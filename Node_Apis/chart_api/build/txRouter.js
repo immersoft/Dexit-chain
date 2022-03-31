@@ -70,7 +70,7 @@ console.log(count, 'final count wait for 24 hours');
 setInterval(function () {
     (0, index1_1.default)();
     console.log("function");
-}, 1000 * 60);
+}, 60000 * 60 * 12);
 router.post("/tx", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(count, "inside post");

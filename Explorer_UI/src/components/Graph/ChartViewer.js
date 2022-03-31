@@ -2,7 +2,7 @@ import React from "react";
 import Chart from "react-apexcharts";
 
 export default function ChartViewer(props) {
-  console.log("fatataqtata----",props)
+  // console.log("fatataqtata----",props)
   let a;
   //   const ref = useRef("");
   //   useEffect(() => {

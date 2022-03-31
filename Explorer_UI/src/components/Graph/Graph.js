@@ -41,15 +41,15 @@ function Graph() {
 	const [data, updateData] = useState([]);
 
 	useEffect(() => {
-		axios.get("http://explorer-chart.herokuapp.com/transactions").then((res)=>{
+		axios.get("https://final-explorer.herokuapp.com/transactions").then((res)=>{
 			console.log("ressasdjksjkdhdfs",res.data.data)
 			updateData(res.data.data);
 
 		})
-		axios.get("https://explorer-api-1.herokuapp.com/transactions")
-        .then((res) => {
+		// axios.get("https://explorer-api-1.herokuapp.com/transactions")
+        // .then((res) => {
 		//  updateData(res.data.data);
-        });
+        // });
 	  }, []);
 
 	return (
