@@ -43,7 +43,7 @@ const DetailsBox = () => {
       redirect: "follow",
     };
 
-    fetch("https://explorerdxt.herokuapp.com/transactions", requestOptions)
+    fetch("https://dxt-explorer.herokuapp.com/blockstransactions", requestOptions)
       .then((response) => response.text())
       .then((result) => {
         // console.log(JSON.parse(result))
@@ -67,13 +67,13 @@ const DetailsBox = () => {
     });
 
     var requestOptions = {
-      method: "PUT",
+      method: "POST",
       headers: myHeaders,
       body: raw,
       redirect: "follow",
     };
 
-    fetch("https://explorerdxt.herokuapp.com/update:1", requestOptions)
+    fetch("https://dxt-explorer.herokuapp.com/transactioncountupdate/1", requestOptions)
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log("error", error));
@@ -116,7 +116,7 @@ const DetailsBox = () => {
         let total = counterTsx + counter;
         console.log(total, "total");
         setApiTotal(counter + counterTsx);
-        postTransactionCounts(currentBlock, total);
+        postTransactionCounts(1952, 349);
       // }
     } catch (error) {
       console.log(error);
