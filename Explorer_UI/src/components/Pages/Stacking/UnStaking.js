@@ -182,7 +182,7 @@ const UnStaking = () => {
           let dataget = await Connection.getValidatorInfo(list[i]);
           if (dataget[6].length != 0) {
               //Delegator Details
-              console.log(dataget[6],"delegator details")
+              // console.log(dataget[6],"delegator details")
             for (let j = 0; j < dataget[6].length; j++) {
               if (dataget[6][j].toLowerCase() === account) {
                 let dataget22 = await Connection.getValidatorInfo(
@@ -209,11 +209,11 @@ const UnStaking = () => {
                 );
 
                 if (check == undefined) {
-                  console.log(data,"ifcheck")
+                  // console.log(data,"ifcheck")
                 customList.push(data);
               }
                 // customList.push(data);
-                console.log(data,"first call")
+                // console.log(data,"first call")
 
               } 
               else if (dataget[6][j].toLowerCase() !== account && dataget[0].toLowerCase() === account) {
@@ -221,7 +221,7 @@ const UnStaking = () => {
                     dataget[0],
                     dataget[0]
                 );
-                console.log(dataget,"infoDetails")
+                // console.log(dataget,"infoDetails")
                 let data = {
                   address: dataget[0],
                   totalAmount: dataget[3].toString(),
@@ -781,7 +781,10 @@ const handleJailed=async()=>{
                                                    item?.address.toLowerCase()!==account ?
                                                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                                                    <CircularProgress />
-                                                 </Box>:'Found'
+                                                 </Box>: 
+                                                 <div style={{textAlign:"center",margin:"15%"}}>
+                                                      <Typography variant="h5">No Transaction Found</Typography>
+                                                  </div>
                                                }
                                             </Table>
 
