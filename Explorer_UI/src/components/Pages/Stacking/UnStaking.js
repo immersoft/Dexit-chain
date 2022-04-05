@@ -214,7 +214,6 @@ const UnStaking = () => {
               }
                 // customList.push(data);
                 // console.log(data,"first call")
-
               } 
               else if (dataget[6][j].toLowerCase() !== account && dataget[0].toLowerCase() === account) {
                 let infoDetails = await Connection.getStakingInfo(
@@ -392,6 +391,8 @@ const UnStaking = () => {
       if (abc) {
         setLoading(false);
         toast.success("Withdraw successfull")
+        window.location.reload();
+
         getBalanceData()
       }
       console.log(delegateWithdrwal, "delegateWithdrwal");
@@ -421,7 +422,10 @@ const UnStaking = () => {
       let abc = await claimButton.wait();
       if (abc) {
         setLoading(false);
+
         toast.success("Claim successfull")
+        window.location.reload();
+
       }
     } 
     catch (error) {
@@ -439,6 +443,8 @@ const UnStaking = () => {
       if (abc) {
         setLoading(false);
         toast.success("Claim successfull")
+        window.location.reload();
+
       }
     } catch (error) {
       setLoading(false);
@@ -450,9 +456,23 @@ const UnStaking = () => {
 
 const handleJailed=async()=>{
   try {
-    let unjailing=await Connection.unJailed()
+    handleModalClose()
+    setLoading(true)
+    let ethe=bigInt(1*10 ** 18)
+    let unjailing=await Connection.unJailed({value:ethe.value})
     console.log(unjailing,"unjailing")
+    let abc = await unjailing.wait();
+    if(abc){
+      setLoading(false);
+      window.location.reload();
+
+      toast.success("Unjail successfull")
+
+    }
   } catch (error) {
+    setLoading(false);
+    toast.error(error.data.message);
+
     console.log(error)
   }
 }

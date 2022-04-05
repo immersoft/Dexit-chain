@@ -42,7 +42,7 @@ function Graph() {
 
 	useEffect(() => {
 		axios.get(" https://dxt-explorer.herokuapp.com/transactions").then((res)=>{
-			console.log("ressasdjksjkdhdfs",res.data.data)
+			// console.log("ressasdjksjkdhdfs",res.data.data)
 			updateData(res.data.data);
 
 		})

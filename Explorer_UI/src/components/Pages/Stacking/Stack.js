@@ -52,7 +52,7 @@ const Stack = () => {
   const getAccounts = async () => {
     try {
       account = await window.ethereum.selectedAddress;
-      console.log("account",account)
+      // console.log("account",account)
       setAccount(account);
     } catch (error) {
       console.log(error);
@@ -69,7 +69,7 @@ const Stack = () => {
   }
 
   useEffect(() => {
-      console.log("eeeeffect")
+      // console.log("eeeeffect")
     getAccounts();
     //   totalBalance()
   }, [account]);
@@ -171,9 +171,9 @@ const Stack = () => {
     const charsToShow = strLen - sepLen;
     const frontChars = Math.ceil(charsToShow / 2);
     const backChars = Math.floor(charsToShow / 2);
-console.log("return  ",fullStr?.substr(0, frontChars) +
-separator +
-fullStr?.substr(fullStr?.length - backChars))
+// console.log("return  ",fullStr?.substr(0, frontChars) +
+// separator +
+// fullStr?.substr(fullStr?.length - backChars))
     return (
       fullStr?.substr(0, frontChars) +
       separator +
@@ -219,7 +219,7 @@ fullStr?.substr(fullStr?.length - backChars))
               Staking
             </Typography>
             <div className="text_input">
-                {console.log("accccccccc---",account)}
+                {/* {console.log("accccccccc---",account)} */}
               <TextField
                 id="outlined-basic"
                 label="Staker Address"

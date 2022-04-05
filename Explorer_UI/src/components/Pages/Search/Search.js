@@ -21,7 +21,9 @@ const Search = () => {
   const [searchInput, setSearchInput] = useState("");
   const [showLoader, setShowLoader] = useState(false);
   const web3 = new Web3();
-  web3.setProvider("https://testnet.dexit.network");
+  // web3.setProvider("http://192.168.1.41:8545");
+  web3.setProvider("https://testnet.dexit.network");  
+
   // web3.setProvider("http://datafeed.dexit.network");
 
   const navigate = useNavigate();

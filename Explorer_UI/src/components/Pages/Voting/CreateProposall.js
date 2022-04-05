@@ -183,7 +183,7 @@ export default function CreateProposall() {
                     htmlFor="validatorAddress"
                     style={{ paddingTop: "1rem", fontSize: "1.1rem" }}
                   >
-                    Set Amount
+                    Set Value
                   </label>
                   <TextField
                     id="outlined-basic"

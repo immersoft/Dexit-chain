@@ -19,7 +19,9 @@ const DetailsBox = () => {
   const [hightCount,setHighestCount]=useState()
 
   const web3 = new Web3();
-  web3.setProvider("https://testnet.dexit.network");
+  // web3.setProvider("http://192.168.1.41:8545");
+  web3.setProvider("https://testnet.dexit.network");  
+
   // web3.setProvider("http://datafeed.dexit.network");
 
 // console.log(Connection)
@@ -27,10 +29,10 @@ const DetailsBox = () => {
   const getLatestBlockNumber = async () => {
     try {
       let contract = await Contract.totalDXTStake();
-      console.log(contract.toString(),"kklklklklkl")
+      // console.log(contract.toString(),"kklklklklkl")
       setVotingPower(contract.toString());
       let currentBlock = await web3.eth.getBlockNumber();
-      console.log(currentBlock, "currentBlock");
+      // console.log(currentBlock, "currentBlock");
       setToggleState(!toggleState);
     } catch (error) {
       console.log(error);
@@ -57,7 +59,7 @@ const DetailsBox = () => {
   };
 
   const postTransactionCounts = (blocknum, totalCount) => {
-    console.log("called");
+    // console.log("called");
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -111,12 +113,12 @@ const DetailsBox = () => {
       setApiTotal(counter);
       let currentBlock = await web3.eth.getBlockNumber();
       let counterTsx = await web3.eth.getBlockTransactionCount(currentBlock);
-      console.log(currentBlock, "currentBlock");
+      // console.log(currentBlock, "currentBlock");
       // if (counterTsx) {
         let total = counterTsx + counter;
-        console.log(total, "total");
+        // console.log(total, "total");
         setApiTotal(counter + counterTsx);
-        postTransactionCounts(1952, 349);
+        postTransactionCounts(currentBlock, total);
       // }
     } catch (error) {
       console.log(error);

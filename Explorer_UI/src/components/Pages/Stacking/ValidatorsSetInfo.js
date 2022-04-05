@@ -73,7 +73,7 @@ const ValidatorSetInfo = () => {
       if (list) {
         for (let i = 0; i < list.length; i++) {
           let dataget = await Connection.getValidatorInfo(list[i]);
-          console.log(dataget, "dataget");
+          // console.log(dataget, "dataget");
           let totalVotingPower =
             (dataget[3].toString() / contract.toString()) * 100;
           let customObject = {
@@ -101,7 +101,7 @@ const ValidatorSetInfo = () => {
   };
 
   const numberOfDelegators = (validatorAddress) => {
-    console.log(validatorAddress, "validatorAddress");
+    // console.log(validatorAddress, "validatorAddress");
     if (validatorAddress) {
       navigate("/delegator_count", {
         state: { validatorAddress: validatorAddress },
@@ -165,11 +165,11 @@ const ValidatorSetInfo = () => {
                               </TableCell>
 
                               <TableCell>
-                                {item.amount / 1000000000000000000}
+                                {item.amount.slice(0, -18)}
                               </TableCell>
 
                               <TableCell>
-                                {item.amount / 1000000000000000000}/
+                                {item.amount.slice(0, -18)}/
                                 {item.votingpower.toFixed(2)}%
                               </TableCell>
 

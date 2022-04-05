@@ -14,13 +14,13 @@ const ValidatorInfo = () => {
     const[loading,setLoading]=useState(false)
     const[transactionSuccess,setTransactionsSuccess]=useState(false)
     const[showAmountWarning,setShowamountWarning]=useState(false);
-    const[validatorsDetailsLocal,setValidatorDetailsLocal]=useState()
+    const[validatorsDetailsLocal,setValidatorDetailsLocal]=useState(null)
     // console.log("getdata", getDetails)
     // console.log(Connection,"data")
     
     useEffect(()=>{
         listOfActive()
-        getValidatorInfo()
+        getValidatorInfoDetails()
     },[])
   
     const listOfActive= async()=>{
@@ -110,17 +110,18 @@ const ValidatorInfo = () => {
     // const handleChange = (event) => {
     //   setName(event.target.value);
     // };
-    const getValidatorInfo=()=>{
+    const getValidatorInfoDetails=()=>{
         if(getDetails){
-            console.log(getDetails,"getdetails")
+            console.log(getDetails.address.toLowerCase(),"getdetails")
         var requestOptions = {
             method: 'GET',
             redirect: 'follow'
           };
           
-          fetch(`https://final-explorer.herokuapp.com/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
+          fetch(`https://dxt-explorer.herokuapp.com/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
             .then(response => response.text())
-            .then(result =>{ console.log(JSON.parse(result))
+            .then(result =>{ 
+                // console.log(JSON.parse(result))
                 setValidatorDetailsLocal(JSON.parse(result))
             })
             .catch(error => console.log('error', error));
@@ -175,8 +176,7 @@ const ValidatorInfo = () => {
                 <TextField
                     id="outlined-uncontrolled"
                     label="Name"
-                    defaultValue="foo"
-                    value={validatorsDetailsLocal ? validatorsDetailsLocal.data.Name:"-"}
+                    value={validatorsDetailsLocal!=null ? validatorsDetailsLocal.data.Name:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
@@ -186,7 +186,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Description"
                     defaultValue="foo"
-                    value={validatorsDetailsLocal ? validatorsDetailsLocal.data.Description:"-"}
+                    value={validatorsDetailsLocal!=null ? validatorsDetailsLocal.data.Description:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
@@ -196,7 +196,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Website"
                     defaultValue="foo"
-                    value={validatorsDetailsLocal ? validatorsDetailsLocal.data.Website:"-"}
+                    value={validatorsDetailsLocal!=null ? validatorsDetailsLocal.data.Website:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
