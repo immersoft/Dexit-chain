@@ -5,6 +5,7 @@ import router from "./txRouter";
 import express, { Request, Response } from "express";
 import { getRepository, InsertQueryBuilder, Timestamp } from "typeorm";
 import {getConnection} from "typeorm";
+import {TransactionTimesEntity} from "./txChart.entity";
 
 import { TransactionEntity } from "./txHistoryCount.entity";
 import { Http2ServerRequest } from "http2";
@@ -21,13 +22,14 @@ const web3 = new Web3();
 
 
 web3.setProvider("https://testnet.dexit.network");
+// web3.setProvider("http://datafeed.dexit.network");
 
 
 let start =1;
 let init=1;
 let daylastblock=0;
 let count=0;
-let ft = 1646289053;
+let ft = 1648732435;
 export default async function searchTransactionByBlock() {
 
 
@@ -38,7 +40,7 @@ let currentBlock = await web3.eth.getBlockNumber()
         let getBlockDetails = await web3.eth.getBlock(i);
                 if(getBlockDetails.timestamp>= ft){
                     daylastblock= getBlockDetails.number;
-                    console.log(daylastblock);
+                    // console.log(daylastblock);
                    counttransactionperday();
                    ft=ft+86400;
                     break;
@@ -75,7 +77,7 @@ console.log(count,'count');
 await getConnection()
     .createQueryBuilder()
     .insert()
-    .into(TransactionTable)
+    .into(TransactionTimesEntity)
     .values([
         { totalcount: count}
      ])

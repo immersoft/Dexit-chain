@@ -5,7 +5,7 @@ import { idText } from "typescript";
 import searchTransactionByBlock from "./index1";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import {TransactionTimesEntity} from "./txChart.entity";
-
+import {BlockTransactionEntity} from './txTransactionCount.entity'
 import { TransactionTable } from "./txTable";
 import * as Swap from "./swap/swap";
 const bigInt = require ("big-integer");
@@ -29,23 +29,24 @@ router.get("/transactions", async function (req: Request, res: Response) {
   console.log(ID.length);
   
   
-let t=0;
- t=t+5;
-  if(ID.length>=15){
-    const we=txRepo.createQueryBuilder().delete()
-    .from(TransactionTimesEntity)
-    .where("id <= :id", { id: ID[14] })
-    .execute()
-  }
+// let t=0;
+//  t=t+5;
+//   if(ID.length>=15){
+//     const we=txRepo.createQueryBuilder().delete()
+//     .from(TransactionTimesEntity)
+//     .where("id <= :id", { id: ID[14] })
+//     .execute()
+//   }
 });
 
-const count=   searchTransactionByBlock();
+const count=searchTransactionByBlock();
 console.log(count,'final count wait for 24 hours')
 
 setInterval(function(){ 
   searchTransactionByBlock();
   console.log("function")
-   },60000*60*12);
+   }, 60000*60*3);
+
  
 router.post("/tx", async function (req: Request, res: Response) {
   
@@ -76,6 +77,36 @@ router.post("/validatorInfo", async function (req: Request, res: Response) {
 
 
 
+router.get("/blockstransactions", async function (req: Request, res: Response) {
+  const txRepo = getRepository(BlockTransactionEntity);
+  const transactions = await txRepo.find()
+  // console.log("hi")
+  res.json({ data: transactions });
+});
+
+
+router.post("/blockstransactioncount", async function (req: Request, res: Response) {
+  const txRepo = getRepository(BlockTransactionEntity);
+  const tx = await txRepo.create(req.body);
+  
+  const results = await txRepo.save(tx);
+  return res.send(results);
+});
+
+router.post('/transactioncountupdate/:id', async function (req: Request, res: Response) {
+ try {
+  const txRepo = getRepository(BlockTransactionEntity);
+  // console.log(req.body,"body data")
+
+  const tx = await txRepo.create(req.body);
+  const { count , start } = req.body;
+   const results = await txRepo.update({id: 1}, {count:count,start:start});
+  return res.send(results);
+ } catch (error) {
+   console.log(error)
+ }
+ 
+});
 
 /*********************Swap Router*************************/
 

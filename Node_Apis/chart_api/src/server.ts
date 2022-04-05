@@ -4,8 +4,9 @@ import { createConnection, getRepository } from "typeorm";
 import { transactionHistoryCount } from "./txHistory";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import {TransactionTimesEntity} from "./txChart.entity";
-
 import {SwapTable} from "./swap/swapHistory";
+import {BlockTransactionEntity} from './txTransactionCount.entity'
+
 import Router from "./txRouter";
 import Web3 from "web3";
 import { TransactionTable } from "./txTable";
@@ -21,13 +22,13 @@ export const connection = createConnection({
   username: "mrabouuj",
   password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
   database: "mrabouuj",
-  entities: [TransactionEntity,TransactionTable,SwapTable,TransactionTimesEntity],
+  entities: [TransactionEntity,TransactionTable,SwapTable,TransactionTimesEntity,BlockTransactionEntity],
   synchronize: true,
   logging: false,
 })
   .then(async(connection) => {
   
-    const repository = connection.getRepository(TransactionEntity);
+    const repository = connection.getRepository(TransactionTimesEntity);
 
    
     console.log("Connection has been established successfully.");
