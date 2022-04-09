@@ -398,8 +398,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
     {
         address staker = msg.sender; //Delegator Address
         uint256 stakeamount = msg.value; // Stake Amount
-
-        if (stakeamount < 0) {
+        require(stakeamount > 0, "Can't stake 0 DXT");
+        if (stakeamount <= 0) {
             return false;
         }
         // Struct Validator & Delegator
