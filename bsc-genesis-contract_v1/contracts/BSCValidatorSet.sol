@@ -335,7 +335,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         require(stakeamount > 0, "Can't Stake 0 DXT");
 
         if (valInfo.amount == 0 && Status.NotExist == valInfo.status) {
-             require(stakeamount >= minimumStakeAmount, "Must Stake 10 or More");
+            require(stakeamount >= minimumStakeAmount, "Must Stake 10000 DXT or More");
             valInfo.validator = staker;
             valInfo.status = Status.Created;
             valInfo.amount = valInfo.amount.add(stakeamount);
