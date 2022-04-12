@@ -148,13 +148,6 @@ export default function CreateProposall() {
                   >
                     Variable name
                   </label>
-                  {/* <TextField
-                    id="outlined-basic"
-                    // label="Var name"
-                    variant="outlined"
-                    sx={{ mt: 1 }}
-                    value="minimumStakeAmount"
-                  /> */}
                   <FormControl sx={{ minWidth: 222 }}>
                     <Select
                       value={variableName}
@@ -248,7 +241,7 @@ export default function CreateProposall() {
                     sx={{ mt: 5 }}
                     onClick={() => createProposal()}
                   >
-                    Create Propasal
+                    Create Proposal
                   </Button>
                 )}
               </div>

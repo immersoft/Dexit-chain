@@ -187,8 +187,21 @@ export default function Navbar() {
           </IconButton>
         </MenuItem>
 
-
         <MenuItem>
+          <IconButton
+            size="small"
+            aria-label="show 4 new mails"
+            color="inherit"
+            onClick={() => handleFaucet()}
+          >
+            <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
+              Faucet
+            </span>
+          </IconButton>
+        </MenuItem>
+
+
+        {/* <MenuItem>
           <IconButton
             size="small"
             aria-label="show 4 new mails"
@@ -199,7 +212,7 @@ export default function Navbar() {
             Voting
             </span>
           </IconButton>
-        </MenuItem>
+        </MenuItem> */}
   
   
         {/* <MenuItem>
@@ -215,6 +228,18 @@ export default function Navbar() {
             <Blockchains />
           </IconButton>
         </MenuItem> */}
+
+        <MenuItem>
+          <IconButton
+            size="large"
+            aria-label="show 17 new notifications"
+            color="inherit"
+            // onClick={() => handleRoute()}
+          >
+            <Voting/>
+
+          </IconButton>
+        </MenuItem>
 
         <MenuItem>
           <IconButton
@@ -262,6 +287,10 @@ export default function Navbar() {
 
     const handleDeposite=()=>{
       navigate('/deposit')
+    }
+
+    const handleFaucet=()=>{
+      navigate('/faucet')
     }
 
 
@@ -337,6 +366,23 @@ export default function Navbar() {
                 }}
               >
                 Blocks
+              </span>
+            </Button>
+
+            <Button
+              id="demo-customized-button"
+              onClick={() => handleFaucet()}
+              disableElevation
+              sx={{ border: "none", color: "#7A93B4" }}
+            >
+              <span
+                style={{
+                  fontSize: "14px",
+                  // marginLeft: "12px",
+                  textTransform: "none"
+                }}
+              >
+                Faucet
               </span>
             </Button>
 

@@ -35,7 +35,14 @@ const Search = () => {
         let blockDetails = await web3.eth.getBlock(searchInput);
         console.log(blockDetails, "blockDetails");
         navigate(`/block/${searchInput}`, { state: { blockDetails: blockDetails } });
-      } else if (searchInput.length > 10) {
+      }
+      else if(searchInput.length==42){
+        let balance=await web3.eth.getBalance(searchInput)
+        console.log(balance,"balance")
+        navigate(`/address/${searchInput}`, { state: { balance: balance } });
+        
+      } 
+      else if (searchInput.length > 42) {
         navigate("/hashinfo", { state: { details: searchInput } });
       }
     } catch (error) {

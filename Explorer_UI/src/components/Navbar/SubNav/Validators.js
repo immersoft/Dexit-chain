@@ -109,7 +109,7 @@ export default function Validators() {
         </MenuItem>
 
         <MenuItem onClick={handleValidatorInfo} disableRipple>
-          Highest Validator Leaderboard
+          Active Validators Leaderboard
         </MenuItem>
 
         {/* <MenuItem onClick={handleDelegatorsList} disableRipple>

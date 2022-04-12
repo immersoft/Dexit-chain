@@ -18,6 +18,7 @@ import Proposal from "../../../Contract";
 
 
 const columns = [
+  { id: "rank", label: "Rank", minWidth: 20 },
   { id: "address", label: "Address", minWidth: 50 },
   { id: "amount", label: "Amount", minWidth: 50 },
   { id: "votingpower", label: "Voting Power/%", minWidth: 50 },
@@ -44,7 +45,8 @@ const TransactionTable = () => {
     const[claimLoader,setClaimLoader]=useState(false)
     const[checkList,setCheckList]=useState(false)
     const[maximumValidator,setMaximumValidator]=useState(3)
-
+    const[highestValidatorList,setHighestValidatorList]=useState()
+   
     // console.log(Connection,"connections")
 
     const getAccounts = async () => {
@@ -94,7 +96,7 @@ const TransactionTable = () => {
      if(list){
       for(let i=0;i<list.length;i++){
         let dataget=await Connection.getValidatorInfo(list[i])
-        let totalVotingPower=((dataget[3].toString().slice(0, -18))/(contract.toString().slice(0, -18)))*100
+        let totalVotingPower=((dataget[3].toString()/1000000000000000000)/(contract.toString()/1000000000000000000))*100
         let customObject={
           address:list[i],
           amount:dataget[3].toString(),
@@ -181,8 +183,21 @@ const maxValidator=async()=>{
 
 useEffect(()=>{
   maxValidator()
+  highestValidator()
 },[])
 
+const highestValidator=async()=>{
+  try {
+    console.log("function called");
+    let list = await Connection.getHighestValidators();
+    console.log(list,"highest Validator list")
+    setHighestValidatorList(list)
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// console.log(highestValidatorList,"highestValidatorList")
   return (
     <>
       <ToastContainer  />
@@ -215,13 +230,12 @@ useEffect(()=>{
           }}
         >
           <Typography variant="h6">
-            Validators Top Leaderboard (Blocks Validated)
+            Validators Leaderboard
           </Typography>
           <Box sx={{ flexGrow: 1, mt: 2 }}>
             <TableContainer component={Paper}>
               
                     <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
-                   {/* {console.log("ddddd-19-93-1932",dd,dd.length)} */}
                     { dd.length>0 ?
                     <>
                         <TableHead>
@@ -252,20 +266,24 @@ useEffect(()=>{
                                       "&:last-child td, &:last-child th": { border: 0 },
                                     }}
                                     >
-                                    <TableCell component="th" scope="row">
-                                      {item.address}
-                                    </TableCell>
+                                      <TableCell component="th" scope="row">
+                                        {index+1}
+                                      </TableCell>
+
+                                      <TableCell component="th" scope="row">
+                                        {item.address}
+                                      </TableCell>
                                       
                                       <TableCell>
-                                        {item.amount.slice(0, -18)}
+                                        {item.amount.slice(0,-18)}
                                       </TableCell>
           
                                       <TableCell>
-                                      {item.amount.slice(0, -18)}/{item.votingpower.toFixed(2)}%
+                                      {item.amount.slice(0,-18)}/{item.votingpower.toFixed(2)}%
                                       </TableCell>
           
                                       <TableCell>
-                                        {item.status===2 ? <Button variant={(index<maximumValidator) ? "contained":"outlined"} color={(index<maximumValidator)?"success":"warning"} size='small'>{(index<maximumValidator) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
+                                        {item.status===2 ? <Button variant={(index<=maximumValidator) ? "contained":"outlined"} color={(highestValidatorList.includes(item.address))?"success":"warning"} size='small'>{(highestValidatorList.includes(item.address)) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
                                         
                                       </TableCell>
           

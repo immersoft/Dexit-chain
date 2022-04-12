@@ -138,8 +138,6 @@ const Vote = (props) => {
       }
     } catch (error) {
       setShowLoader(false);
-
-
       // setshowWarning(error.data.message);
       if(error.code ===4001){
         toast.error(error.message)

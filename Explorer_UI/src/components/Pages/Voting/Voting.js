@@ -59,6 +59,8 @@ const Voting = () => {
   let [proposalDetails, setproposalDetails] = useState([]);
   let [proposalData, setProposalData] = useState();
   let [miniValue, setMiniValue] = useState();
+  let detailsList=[]
+  const[proposalListData,setProposalListData]=useState()
   const [openAlert, setOpenAlert] = React.useState(false);
   const [senIdToVoteComp, setsenIdToVoteComp] = useState("");
   const [showLoader, setShowLoader] = useState(false);
@@ -88,6 +90,9 @@ const Voting = () => {
       console.log(error);
     }
   };
+
+
+  // console.log(proposalData, "proposalData");
 
   const minimumStakeValue = async () => {
     try {
@@ -171,12 +176,18 @@ const Voting = () => {
       let ab = [];
       for (let j = 0; j < checkPropsal.length; j++) {
         let proposalsss = await Proposal.proposals(checkPropsal[j]);
-        // console.log("getetetetetet", proposalsss[0]);
+        // console.log("getetetetetet", proposalsss.variable_name);
         // getProposalDetails(proposalList[0]);
-
+        let newObj={
+          id:checkPropsal[j],
+          name:proposalsss.variable_name,
+          value:proposalsss.variable_value.toString()
+        }
+        detailsList.push(newObj)
         // console.log(proposalsss, "proposalsss");
         ab.push(proposalsss);
       }
+      setProposalListData(detailsList)
       setproposalDetails(ab);
     } catch (error) {
       console.log(error);
@@ -247,10 +258,28 @@ const Voting = () => {
     );
   };
 
+  const shortenAccountId = (fullStr) => {
+    const strLen = 40;
+    const separator = "...";
+
+    if (fullStr?.length <= strLen) return fullStr;
+
+    const sepLen = separator.length;
+    const charsToShow = strLen - sepLen;
+    const frontChars = Math.ceil(charsToShow / 3);
+    const backChars = Math.floor(charsToShow / 3);
+
+    return (
+      fullStr?.substr(0, frontChars) +
+      separator +
+      fullStr?.substr(fullStr?.length - backChars)
+    );
+  };
+
   return (
     <>
       
-      <div>
+    <div>
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -299,10 +328,10 @@ const Voting = () => {
                       >
                         <Grid item>Value </Grid>
                         <Grid item>
-                          {console.log(
+                          {/* {console.log(
                             "cheehhskhskhs",
                             proposalData.variable_value.toString()
-                          )}
+                          )} */}
                           {proposalData.variable_name === "MaxValidators"
                             ? proposalData.variable_value.toString()
                             : proposalData.variable_value.toString() /
@@ -357,8 +386,6 @@ const Voting = () => {
       </Modal>
     </div>
 
-
-
       <ToastContainer />
       <Typography variant='h4' style={{ textAlign: "center" }}>Voting</Typography>
       <Grid container sx={{pl:7,pr:7}}>
@@ -370,12 +397,24 @@ const Voting = () => {
               </Typography>
               <Divider />
               <div >
-                {proposalList.length > 0 ? (
-                  proposalList.map((val, key) => {
+                {proposalListData ? (
+                  proposalListData.map((val, key) => {
                     return (
                       <>
-                        <Grid container sx={{ display: "flex" }}>
-                          <Grid item xs={8}>
+                        <Grid container sx={{ display: "flex" ,alignItems:'center',textAlign:'center'}}>
+                          <Grid xs={1}>
+                            {key+1}
+                          </Grid>
+                          <Grid item xs={3}>
+                            {val.name}
+                          </Grid>
+
+                          <Grid item xs={2}>
+                            {val.value<51?val.value:val.value/1000000000000000000}
+                            {/* {console.log(val.value.length<2?val.value:val.value/1000000000000000000,"valuess")} */}
+                          </Grid>
+
+                          <Grid item xs={2}>
                             <div style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
                             <Typography
                               sx={{
@@ -384,7 +423,7 @@ const Voting = () => {
                               }}
                               pt={1}
                             >
-                              {val}{" "}
+                              {shortenAccountId(val.id)}{" "}
                             </Typography>
                             </div>
                           </Grid>
@@ -395,7 +434,7 @@ const Voting = () => {
                                   marginLeft: "0.5rem",
                                   cursor: "pointer",
                                 }}
-                                onClick={() => copyHash(val)}
+                                onClick={() => copyHash(val.id)}
                               />
                             </span>
                           </Grid>
@@ -420,7 +459,7 @@ const Voting = () => {
                           >
                             <Button
                               variant="outlined"
-                              onClick={() => getProposalDetails(val)}
+                              onClick={() => getProposalDetails(val.id)}
                             >
                               Info
                             </Button>

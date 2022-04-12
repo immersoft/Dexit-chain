@@ -26,7 +26,9 @@ import Voting from "./components/Pages/Voting/Voting";
 import DepositeTable from "./components/Pages/Deposite/DepositeTable";
 import CreateProposall from "./components/Pages/Voting/CreateProposall";
 import MyProposal from "./components/Pages/Voting/MyProposal";
-import Tokenswap from "./components/Pages/Tokenswap/Tokenswap";
+import UnStaking2 from "./components/Pages/Stacking/UnStaking2";
+import Faucet from "./components/Pages/Faucet/Faucet";
+import SearchBalance from "./components/Pages/SearchData/SearchBalance";
 
 function App() {
   return (
@@ -70,15 +72,7 @@ function App() {
               </>
             }
           />
-          
-          <Route
-            path="/swapping"
-            element={
-              <>
-                <Tokenswap />
-              </>
-            }
-          />
+
           <Route
             path="/transactionDetails"
             element={
@@ -179,6 +173,24 @@ function App() {
           />
 
           <Route
+            path="/address/:address"
+            element={
+              <>
+                <SearchBalance/>
+              </>
+            }
+          />
+
+          <Route
+            path="/faucet"
+            element={
+              <>
+                <Faucet />
+              </>
+            }
+          />
+
+          <Route
             path="/graph"
             element={
               <>
@@ -238,6 +250,16 @@ function App() {
               </>
             }
           />
+
+        <Route
+            path="/unstaking2"
+            element={
+              <>
+                <UnStaking2/>
+              </>
+            }
+          />
+
           <Route
             path="/my-proposal"
             element={

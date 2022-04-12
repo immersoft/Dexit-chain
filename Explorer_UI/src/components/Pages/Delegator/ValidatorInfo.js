@@ -95,7 +95,7 @@ const ValidatorInfo = () => {
             setLoading(false)
             console.log(error)
             if(error.code===4001){
-                toast.error(error.message)
+                toast.error(error.message.split(":").pop())
 
             }
             else if(error.data.message){
@@ -118,7 +118,7 @@ const ValidatorInfo = () => {
             redirect: 'follow'
           };
           
-          fetch(`https://dxt-explorer.herokuapp.com/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
+          fetch(`https://final-explorer.herokuapp.com/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
             .then(response => response.text())
             .then(result =>{ 
                 // console.log(JSON.parse(result))

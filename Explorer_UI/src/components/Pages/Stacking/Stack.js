@@ -114,7 +114,7 @@ const Stack = () => {
   // }
 
   const handleStakeSubmit = async () => {
-    if (stakerAmount < 10000 || !stakerAmount || validatorName =='' || validatorDescription=='' || website=='') {
+    if (stakerAmount < 10 || !stakerAmount || validatorName =='' || validatorDescription=='' || website=='') {
       setstakeamountWarning(true);
       // buttons
       //   alert("Stake amount should be Greater than 10000");
@@ -122,7 +122,7 @@ const Stack = () => {
       setOpen(true);
       //   setStakerAmount(0);
       return null;
-    } else if (stakerAmount >= 10000) {
+    } else if (stakerAmount >= 10) {
       setshowloadingBtn(true);
 
       setstakeamountWarning(false);

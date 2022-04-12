@@ -117,20 +117,43 @@ const UnStaking = () => {
   const[withdrawAmount,setWithdrawAmount]=useState(0)
   const[delegateWithdrawModal,setDelegateWithdrawModal]=useState(false)
   const [ValidatorAddForDel,setValidatorAddForDel]=useState()
+  const[popupBalance,setpopupBalance]=useState()
+  const[delegateBalance,setDelegateBalance]=useState()
+  const[isLength,setIsLength]=useState(false)
 
-  const handleDelegateWithdrawModal=(validatorAddress)=>{
+  const handleDelegateWithdrawModal=(validatorAddress,amount)=>{
     setValidatorAddForDel(validatorAddress)
+    setDelegateBalance(amount)
     setDelegateWithdrawModal(true)
   }
 
   const handleDelegateWithdrawModalClose=()=>{
+    setWithdrawAmount(0)
     setDelegateWithdrawModal(false)
   }
 
-  const handleWithdrawModal=()=>setWithdrawModal(true)
-  const handleWithdrawModalClose=()=>setWithdrawModal(false)
+  const handleWithdrawModal=(balance)=>{
+    setpopupBalance(balance)
+    setWithdrawModal(true)
+  
+  }
 
-  const handleModalOpen = () => setModalOpen(true);
+  const handleDelegateWithdrawMaxAmount=()=>{
+    setWithdrawAmount(delegateBalance/1000000000000000000)
+  }
+
+  const handleWithdrawMaxAmount=()=>{
+    setWithdrawAmount(popupBalance/1000000000000000000)
+  }
+
+  const handleWithdrawModalClose=()=>{
+    setWithdrawAmount(0)
+    setWithdrawModal(false)
+  }
+
+  const handleModalOpen = () => {
+    setModalOpen(true)
+  };
   const handleModalClose = () => setModalOpen(false);
 
   const handleChange = (event, newValue) => {
@@ -182,9 +205,9 @@ const UnStaking = () => {
           let dataget = await Connection.getValidatorInfo(list[i]);
           if (dataget[6].length != 0) {
               //Delegator Details
-              // console.log(dataget[6],"delegator details")
             for (let j = 0; j < dataget[6].length; j++) {
               if (dataget[6][j].toLowerCase() === account) {
+                console.log(dataget[6][j], ":account");
                 let dataget22 = await Connection.getValidatorInfo(
                   dataget[6][j]
                 );
@@ -210,8 +233,10 @@ const UnStaking = () => {
 
                 if (check == undefined) {
                   // console.log(data,"ifcheck")
-                customList.push(data);
+                  customList.push(data);
+                  setIsLength(true)
               }
+              console.log(isLength,"isLength Delegator")
                 // customList.push(data);
                 // console.log(data,"first call")
               } 
@@ -236,7 +261,10 @@ const UnStaking = () => {
                 if (check == undefined) {
                     console.log(data,"ifcheck")
                   customList.push(data);
+                  setIsLength(true)
+
                 }
+                console.log(isLength,"isLength delegated Validator")
                 // customList.push(data)
               }
             }
@@ -259,7 +287,16 @@ const UnStaking = () => {
                 income:dataget[4].toString()/1000000000000000000,
                 totalIncome:dataget[5].toString()/1000000000000000
               };
-              customList.push(customObject);
+              let check = customList.find(
+                (item) => item.address.toLowerCase() === account
+              );
+                if (check == undefined) {
+                  // console.log(data,"ifcheck")
+                // customList.push(data);
+                customList.push(customObject);
+                setIsLength(true)
+                }
+                console.log(isLength,"isLength Validator 0 delegator")
             }
           }
         }
@@ -273,7 +310,8 @@ const UnStaking = () => {
     }
   };
 
-  console.log(dd,"dddddddddddd")
+  // console.log(dd.length,"dddddddddddd")
+  // console.log(isLength,"outside")
 
   useEffect(() => {
     getBalanceData();
@@ -316,10 +354,10 @@ const UnStaking = () => {
 
       console.log("errrrr", error);
       if (error.code ===4001) {
-        toast.error(error.message);
+        toast.error(error.message.split(":").pop());
       } else if (error.data.message) {
         setUnstakeDelegateError(error);
-        toast.error(error.data.message);
+        toast.error(error.data.message.split(":").pop());
       }
     }
 
@@ -345,8 +383,8 @@ const UnStaking = () => {
       if (error.code ===4001) {
         toast.error(error.message);
       }
-     else if (error.data.message) {
-        toast.error(error.data.message);
+     else if (error.data.message.split(":").pop()) {
+        toast.error(error.data.message.split(":").pop());
       }
     }
   };
@@ -367,10 +405,10 @@ const UnStaking = () => {
       console.log("der",error);
       setLoading(false);
       if (error.code===4001) {
-        toast.error(error.message);
+        toast.error(error.message.split(":").pop());
       }
        else if (error.data) {
-         console.log("Errorrrrrr---",error.data.message)
+         console.log("Errorrrrrr---",error.data.message.split(":").pop())
          toast.error(error.data.message);
         // setDeUnstakeError(error);
         setDeUnstake(true);
@@ -402,12 +440,12 @@ const UnStaking = () => {
       console.log(error)
       if(error.code ===4001){
         console.log("if")
-        toast.error(error.message);
+        toast.error(error.message.split(":").pop());
       }
       else if (error.data.message) {
         console.log("else if")
 
-        toast.error(error.data.message);
+        toast.error(error.data.message.split(":").pop());
       }
 
 
@@ -530,15 +568,19 @@ const handleJailed=async()=>{
         <Fade in={withdrawModal}>
           <Box sx={style}>
             <Typography variant="h4" sx={{textAlign:"center",fontWeight:"700"}}>Withdraw Amount</Typography>
-            <div style={{display:"flex",justifyContent:"space-evenly",alignItems:"center",marginTop:"1rem"}}>
+            <div style={{display:"flex",justifyContent:"center",alignItems:"center",marginTop:"1rem"}}>
               <TextField
             required
             id="outlined-required"
-            label="Required"
+            label="Amount"
             value={withdrawAmount}
             onChange={(e)=>setWithdrawAmount(e.target.value)}
+            InputProps={{endAdornment: <Button variant="contained" onClick={()=>handleWithdrawMaxAmount()}>Max</Button>}}
+          
           />
-
+            </div>
+            <div style={{display:"flex",justifyContent:"center",alignItems:"center",marginTop:"1rem"}}>
+            {/* <Button variant="outlined" onClick={()=>handleWithdrawMaxAmount()}>Max</Button> */}
             <Button variant="outlined" onClick={()=>handleWithdraw()}>Confirm</Button>
             </div>
           </Box>
@@ -561,16 +603,20 @@ const handleJailed=async()=>{
         <Fade in={delegateWithdrawModal}>
           <Box sx={style}>
             <Typography variant="h4" sx={{textAlign:"center",fontWeight:"700"}}>Withdraw Amount</Typography>
-            <div style={{display:"flex",justifyContent:"space-evenly",alignItems:"center",marginTop:"1rem"}}>
+            <div style={{display:"flex",justifyContent:"center",alignItems:"center",marginTop:"1rem"}}>
               <TextField
             required
             id="outlined-required"
-            label="Required"
+            label="Amount"
             value={withdrawAmount}
             onChange={(e)=>setWithdrawAmount(e.target.value)}
+            InputProps={{endAdornment: <Button variant="contained" onClick={()=>handleDelegateWithdrawMaxAmount()}>Max</Button>}}
           />
+            </div>
 
-            <Button variant="outlined" onClick={()=>delegateWithDraw()}>Confirm</Button>
+            <div style={{display:"flex",justifyContent:"center",alignItems:"center",marginTop:"1rem"}}>
+              {/* <Button variant="outlined" onClick={()=>handleDelegateWithdrawMaxAmount()}>Max</Button> */}
+              <Button variant="outlined" onClick={()=>delegateWithDraw()}>Confirm</Button>
             </div>
           </Box>
         </Fade>
@@ -638,7 +684,7 @@ const handleJailed=async()=>{
                                                {
                                                    item.address.toLowerCase()===account && item.amount!=0 && item.totalAmount !=undefined ?(
                                                       
-                                                   <>
+                                                    <>
                                                     <TableHead>
                                                       <TableRow
                                                         className="heading_table"
@@ -684,11 +730,11 @@ const handleJailed=async()=>{
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? item.amount.slice(0, -18) : "-"}
+                                                {item ? item.amount/1000000000000000000 : "-"}
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? item.totalAmount.slice(0, -18) : "-"}
+                                                {item ? item.totalAmount/1000000000000000000 : "-"}
                                               </TableCell>
                                               
 
@@ -705,7 +751,7 @@ const handleJailed=async()=>{
                                                         )
                                                       }
                                                     >
-                                                      Delegate Un-Stake
+                                                     Undelegate
                                                     </Button>
                                                    
                                                 </TableCell>
@@ -716,11 +762,12 @@ const handleJailed=async()=>{
                                                       success
                                                       onClick={() =>
                                                         handleDelegateWithdrawModal(
-                                                          item.validatorAddress
+                                                          item.validatorAddress,
+                                                          item.amount
                                                         )
                                                       }
                                                     >
-                                                     Delegate Withdraw
+                                                     Withdraw
                                                     </Button>
                                                    
                                                 </TableCell>
@@ -745,7 +792,7 @@ const handleJailed=async()=>{
                                                       variant="outlined"
                                                       success
                                                       onClick={() =>
-                                                        handleWithdrawModal()
+                                                        handleWithdrawModal(item.amount)
                                                       }
                                                     >
                                                       Withdraw
@@ -773,7 +820,7 @@ const handleJailed=async()=>{
                                                        delegateClaim(item.validatorAddress)
                                                      }
                                                    >
-                                                     Delegate Claim
+                                                    Claim
                                                    </Button>
                                                   
                                                  </TableCell>
@@ -793,7 +840,7 @@ const handleJailed=async()=>{
                                                  </TableCell>
                                               )
                                             }
-                                            </TableRow>
+                                                      </TableRow>
                                                       </TableBody>
                                                     </>
                                                    )
@@ -803,7 +850,7 @@ const handleJailed=async()=>{
                                                    <CircularProgress />
                                                  </Box>: 
                                                  <div style={{textAlign:"center",margin:"15%"}}>
-                                                      <Typography variant="h5">No Transaction Found</Typography>
+                                                      <Typography variant="h5">Not Found</Typography>
                                                   </div>
                                                }
                                             </Table>

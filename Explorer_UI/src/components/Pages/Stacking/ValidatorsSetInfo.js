@@ -13,6 +13,7 @@ import Connection from "../../../Contract";
 import { useNavigate } from "react-router-dom";
 
 const columns = [
+  { id: "rank", label: "Rank", minWidth: 20 },
   { id: "address", label: "Address", minWidth: 50 },
   { id: "amount", label: "Amount", minWidth: 50 },
   { id: "votingpower", label: "Voting Power/%", minWidth: 50 },
@@ -121,7 +122,7 @@ const ValidatorSetInfo = () => {
             background: "#F8FAFD",
           }}
         >
-          <Typography variant="h6">Top 3 Highest Validators</Typography>
+          <Typography variant="h6">Active Validators</Typography>
           <Box sx={{ flexGrow: 1, mt: 2 }}>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
@@ -148,7 +149,7 @@ const ValidatorSetInfo = () => {
                   { 
                     dd.slice(0).sort(function(a,b){
                       return b.amount -a .amount;
-                    }).map((item) => {
+                    }).map((item,index) => {
                       return (
                         <>
                         <TableBody>
@@ -160,6 +161,11 @@ const ValidatorSetInfo = () => {
                               }}
                               // onClick={()=>validatorDetailsData(item)}
                             >
+
+                              <TableCell component="th" scope="row">
+                                {index+1}
+                              </TableCell>
+
                               <TableCell component="th" scope="row">
                                 {item.address}
                               </TableCell>
