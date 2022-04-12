@@ -1184,7 +1184,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             }
             // require(value % 2 != 0, "Please set a odd value only");
             require(value >= 3, "MaxValidators can't be less then 2");
-            require(value < currentValidators.length,"can be upto currentValidators length");
+            require(value <= currentValidators.length,"can be upto currentValidators length");
             require(value <= 51,"value can't be more than 51");
         }
         // generate proposal id
