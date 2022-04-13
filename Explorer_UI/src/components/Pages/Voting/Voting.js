@@ -15,13 +15,20 @@ import {
   Modal,
   Fade,
 } from "@mui/material";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
+import TableRow from "@mui/material/TableRow";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useTheme } from "@mui/material/styles";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import React, { useState, useEffect } from "react";
 import Proposal from "../../../Contract";
 import bigInt from "big-integer";
-import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import Vote from "./Vote";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -49,6 +56,17 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+
+
+const columns = [
+  { id: "sno", label: "S No.", minWidth: 50 },
+  { id: "name", label: "Name", minWidth: 50 },
+  { id: "value", label: "Value", minWidth: 50 },
+  { id: "id", label: "ID", minWidth: 50 },
+  { id: "copy", label: "Copy", minWidth: 50 },
+  { id: "info", label: "More Info", minWidth: 50 }
+];
+
 
 const Voting = () => {
   const [stakerAmount, setStakerAmount] = useState("");
@@ -235,8 +253,6 @@ const Voting = () => {
   const [variableName, setVariableName] = React.useState("");
 
   const handleChange = async (event) => {
-    // console.log("eevevvve", event.target.value);
-
     const {
       target: { value },
     } = event;
@@ -253,8 +269,6 @@ const Voting = () => {
     }
     setVariableName(
       value
-      // On autofill we get a stringified value.
-      // typeof value === 'string' ? value.split(',') : value,
     );
   };
 
@@ -387,8 +401,7 @@ const Voting = () => {
     </div>
 
       <ToastContainer />
-      <Typography variant='h4' style={{ textAlign: "center" }}>Voting</Typography>
-      <Grid container sx={{pl:7,pr:7}}>
+      {/* <Grid container sx={{pl:7,pr:7}}>
         <Grid xs={12} sm={12} md={12}>
           <Card sx={{ mt: 3, backgroundColor: "#F8FAFD", boxShadow: 1 }} item>
             <Box sx={{ flexFlow: 1, p: 2 }}>
@@ -396,6 +409,7 @@ const Voting = () => {
                 All proposal list
               </Typography>
               <Divider />
+
               <div >
                 {proposalListData ? (
                   proposalListData.map((val, key) => {
@@ -411,7 +425,6 @@ const Voting = () => {
 
                           <Grid item xs={2}>
                             {val.value<51?val.value:val.value/1000000000000000000}
-                            {/* {console.log(val.value.length<2?val.value:val.value/1000000000000000000,"valuess")} */}
                           </Grid>
 
                           <Grid item xs={2}>
@@ -477,98 +490,107 @@ const Voting = () => {
                   </>
                 )}
               </div>
-
-              {/* <Grid sx={{mt:2}}>
-                <Typography variant="h5" pt={3} pb={2} textAlign={"center"}>
-                  Proposal details
-                </Typography>
-                {proposalData ? (
-                  <>
-                    <Card
-                      sx={{
-                        paddingLeft: "1rem",
-                        paddingRight: "1rem",
-                        boxShadow: 0,
-                        backgroundColor: "#F8FAFD",
-                      }}
-                    >
-                      <Grid
-                        container
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        pt={2}
-                        pb={2}
-                      >
-                        <Grid item>Proposer address</Grid>
-                        <Grid item>{proposalData.proposer}</Grid>
-                        <Divider />
-                      </Grid>
-
-                      <Grid
-                        container
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        pt={2}
-                        pb={2}
-                      >
-                        <Grid item>Value </Grid>
-                        <Grid item>
-                          {console.log(
-                            "cheehhskhskhs",
-                            proposalData.variable_value.toString()
-                          )}
-                          {proposalData.variable_name === "MaxValidators"
-                            ? proposalData.variable_value.toString()
-                            : proposalData.variable_value.toString() /
-                              1000000000000000000}
-                        </Grid>
-                        <Divider />
-                      </Grid>
-
-                      <Grid
-                        container
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        pt={2}
-                        pb={2}
-                      >
-                        <Grid item>Name </Grid>
-                        <Grid item>{proposalData.variable_name}</Grid>
-                        <Divider />
-                      </Grid>
-
-                      <Grid
-                        container
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        pt={2}
-                        pb={2}
-                      >
-                        <Grid item>Status </Grid>
-                        <Grid item>
-                          {proposalData[11] === true ? "True" : "False"}
-                        </Grid>
-                        <Divider />
-                      </Grid>
-                    </Card>
-                  </>
-                ) : (
-                  <>
-                    <Typography sx={{ textAlign: "center", mt: 5 }}>
-                      No data found
-                    </Typography>{" "}
-                  </>
-                )}
-              </Grid> */}
             </Box>
           </Card>
         </Grid>
-      </Grid>
-      {/* <Grid container sx={{p:2}}>
-        <Grid item md={12} sm={12} xs={12}>
-          <Vote data={senIdToVoteComp} />
-        </Grid>
       </Grid> */}
+          <Typography variant="h5" sx={{ display:"flex",justifyContent:"center" }}>
+              All proposal list
+            </Typography>
+      <Grid container sx={{pl:7,pr:7}}>
+           
+      <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
+                  <TableHead>
+                    <TableRow
+                        className="heading_table"
+                        sx={{ background: "#F8FAFD" }}
+                    >
+                        {columns.map((column) => (
+                        <TableCell
+                            key={column.id}
+                            align={column.align}
+                            style={{ top: 57, minWidth: column.minWidth }}
+                        >
+                            {column.label}
+                        </TableCell>
+                        ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {
+                      proposalListData ? 
+                      proposalListData.map((val,key)=>{
+                        return(
+                          <>
+                          <TableRow>
+                            <TableCell>
+                              {key+1}
+                            </TableCell>
+
+                            <TableCell>
+                              {val.name}
+                            </TableCell>
+
+                            <TableCell>
+                            {val.value<51?val.value:val.value/1000000000000000000}
+                            </TableCell>
+
+                            <TableCell>
+                            {shortenAccountId(val.id)}{" "}
+                            </TableCell>
+
+                            <TableCell>
+                              <ContentCopyIcon
+                                style={{
+                                  marginLeft: "0.5rem",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => copyHash(val.id)}
+                              />
+                            </TableCell>
+
+                            {openAlert ? (
+                            <Snackbar
+                              open={openAlert}
+                              autoHideDuration={2000}
+                              onClose={() => setOpenAlert(false)}
+                            >
+                              <Alert
+                                onClose={() => setOpenAlert(false)}
+                                severity="info"
+                              >
+                                Hash Copied
+                              </Alert>
+                            </Snackbar>
+                          ) : null}
+
+                            <TableCell>
+                              <Button
+                                variant="outlined"
+                                onClick={() => getProposalDetails(val.id)}
+                              >
+                                Info
+                              </Button>
+                            </TableCell>
+
+                          </TableRow>
+                          </>
+                        )
+                      })
+                      : (
+                        <>
+                          <Typography sx={{ textAlign: "center", m: 2 }}>
+                            No data found
+                          </Typography>{" "}
+                        </>
+                      )
+                    }
+                   
+                  </TableBody>
+              </Table> 
+      </TableContainer>
+      </Grid>
     </>
   );
 };

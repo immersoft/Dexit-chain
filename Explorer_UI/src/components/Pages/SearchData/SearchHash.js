@@ -47,7 +47,7 @@ function TabPanel(props) {
 const SearchHash = () => {
     const location=useLocation();
     const getDetails=location.state.details
-    console.log("getdata",getDetails)
+    // console.log("getdata",getDetails)
     const timeStamp=location.state.blockTime
     const navigate=useNavigate()
     const web3 = new Web3();
@@ -98,7 +98,7 @@ const SearchHash = () => {
     const handleChangeState=()=>{
         navigate('/')
     }
-    console.log(getDetails,"Hello TransactionDetails");
+    // console.log(getDetails,"Hello TransactionDetails");
   
         useEffect(()=>{
             getInfo()

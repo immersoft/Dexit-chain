@@ -24,15 +24,12 @@ const DetailsBox = () => {
 
   // web3.setProvider("http://datafeed.dexit.network");
 
-// console.log(Connection)
 
   const getLatestBlockNumber = async () => {
     try {
       let contract = await Contract.totalDXTStake();
-      // console.log(contract.toString(),"kklklklklkl")
       setVotingPower(contract.toString());
       let currentBlock = await web3.eth.getBlockNumber();
-      // console.log(currentBlock, "currentBlock");
       setToggleState(!toggleState);
     } catch (error) {
       console.log(error);
@@ -59,7 +56,6 @@ const DetailsBox = () => {
   };
 
   const postTransactionCounts = (blocknum, totalCount) => {
-    // console.log("called");
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -99,7 +95,6 @@ const DetailsBox = () => {
   async function getBalanceData() {
     try {
       let list = await Connection.getHighestValidators();
-      // console.log(list,"listssss")
       setHighestCount(list.length)
     } catch (error) {
       console.log(error);
@@ -113,13 +108,9 @@ const DetailsBox = () => {
       setApiTotal(counter);
       let currentBlock = await web3.eth.getBlockNumber();
       let counterTsx = await web3.eth.getBlockTransactionCount(currentBlock);
-      // console.log(currentBlock, "currentBlock");
-      // if (counterTsx) {
         let total = counterTsx + counter;
-        // console.log(total, "total");
         setApiTotal(counter + counterTsx);
         postTransactionCounts(currentBlock, 151);
-      // }
     } catch (error) {
       console.log(error);
     }

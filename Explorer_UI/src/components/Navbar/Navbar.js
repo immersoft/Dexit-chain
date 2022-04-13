@@ -15,10 +15,11 @@ import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import { GifBox } from "@mui/icons-material";
 import './Navbar.css'
-
+import InsertLinkIcon from '@mui/icons-material/InsertLink';
 import metaMaskLogo from "../../Image/metamask.svg";
 import Web3 from "web3";
 import Voting from "./SubNav/Voting";
+import Connect from "./SubNav/Connect";
 export default function Navbar() {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -251,8 +252,21 @@ export default function Navbar() {
             <Validators />
           </IconButton>
         </MenuItem>
-  
+
         <MenuItem>
+          <IconButton
+            size="large"
+            aria-label="show 17 new notifications"
+            color="inherit"
+            // onClick={() => handleRoute()}
+          >
+            {/* <Validators /> */}
+            <Connect/>
+
+          </IconButton>
+        </MenuItem>
+  
+        {/* <MenuItem>
           <IconButton
             size="large"
             aria-label="show more"
@@ -262,7 +276,7 @@ export default function Navbar() {
           >
             <CardMedia component="img" height="50" image={metaMaskLogo} />
           </IconButton>
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
     );
   
@@ -425,6 +439,10 @@ export default function Navbar() {
             <Box sx={{ml:1}}>
               <Validators />
             </Box>
+
+            <Box sx={{ml:1}}>
+              <Connect/>
+            </Box>
             {/*<Button
               id="demo-customized-button"
               color="error"
@@ -433,15 +451,15 @@ export default function Navbar() {
             >
               Connect
             </Button>*/}
-            <IconButton
+            {/* <IconButton
               size="large"
               aria-label="show more"
               aria-haspopup="true"
               onClick={connectWalletHandler}
               color="inherit"
             >
-              <CardMedia component="img" height="50" image={metaMaskLogo} />
-            </IconButton>
+              <Button variant="outlined" size="small" startIcon={<InsertLinkIcon />}>Connet Wallet</Button>
+            </IconButton> */}
           </Box>
           <Box></Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>

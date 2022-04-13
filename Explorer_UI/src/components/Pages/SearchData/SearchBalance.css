@@ -1,0 +1,30 @@
+.address_size{
+    font-size: 1rem;
+}
+
+.address_label{
+    text-align: center;
+}
+
+
+.second_box{
+    margin-left:12px;
+}
+
+@media screen and (max-width: 600px) {
+    .address_size{
+        font-size: 0.8rem !important;
+    }
+
+   
+}
+    
+@media screen and (max-width: 900px) {
+    .address_label{
+        text-align: start;
+    }
+    .second_box{
+        margin-left:0px !important;
+        margin-top: 10px;
+    }
+}
