@@ -19,6 +19,8 @@ import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import { GifBox } from "@mui/icons-material";
 import metaMaskLogo from "../../Image/metamask.svg";
+import Voting from "../Navbar/SubNav/Voting";
+import Connect from "../Navbar/SubNav/Connect";
 
 const Header3 = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -117,6 +119,10 @@ const Header3 = () => {
     navigate('/voting')
   }
 
+  const handleFaucet=()=>{
+    navigate('/faucet')
+  }
+
   const mobileMenuId = "primary-search-account-menu-mobile";
 
   const renderMobileMenu = (
@@ -189,7 +195,46 @@ const Header3 = () => {
         </IconButton>
       </MenuItem>
 
+
       <MenuItem>
+        <IconButton
+            size="small"
+            aria-label="show 4 new mails"
+            color="inherit"
+            onClick={() => handleFaucet()}
+          >
+            <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
+              Faucet
+            </span>
+        </IconButton>
+      </MenuItem>
+
+      <MenuItem>
+          <IconButton
+            size="small"
+            aria-label="show 4 new mails"
+            color="inherit"
+            onClick={() => handleSwap()}
+          >
+            <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
+              Swap
+            </span>
+          </IconButton>
+        </MenuItem>
+
+      <MenuItem>
+          <IconButton
+            size="large"
+            aria-label="show 17 new notifications"
+            color="inherit"
+            // onClick={() => handleRoute()}
+          >
+            <Voting/>
+
+          </IconButton>
+        </MenuItem>
+
+      {/* <MenuItem>
           <IconButton
             size="small"
             aria-label="show 4 new mails"
@@ -200,7 +245,7 @@ const Header3 = () => {
             Voting
             </span>
           </IconButton>
-        </MenuItem>
+        </MenuItem> */}
 
       {/* <MenuItem>
         <IconButton
@@ -227,6 +272,16 @@ const Header3 = () => {
       </MenuItem>
 
       <MenuItem>
+          <IconButton
+            size="large"
+            aria-label="show 17 new notifications"
+            color="inherit"
+          >
+            <Connect/>
+          </IconButton>
+        </MenuItem>
+
+      {/* <MenuItem>
         <IconButton
           size="large"
           aria-label="show more"
@@ -236,7 +291,7 @@ const Header3 = () => {
         >
           <CardMedia component="img" height="50" image={metaMaskLogo} />
         </IconButton>
-      </MenuItem>
+      </MenuItem> */}
     </Menu>
   );
 
@@ -248,6 +303,9 @@ const Header3 = () => {
     navigate("/unstaking")
   }
 
+  const handleSwap=()=>{
+    navigate('/swap')
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -310,7 +368,46 @@ const Header3 = () => {
               </span>
             </Button>
 
+
             <Button
+              id="demo-customized-button"
+              onClick={() => handleFaucet()}
+              disableElevation
+              sx={{ border: "none", color: "#7A93B4" }}
+            >
+              <span
+                style={{
+                  fontSize: "14px",
+                  // marginLeft: "12px",
+                  textTransform: "none"
+                }}
+              >
+                Faucet
+              </span>
+            </Button>
+
+            <Button
+              id="demo-customized-button"
+              onClick={() => handleSwap()}
+              disableElevation
+              sx={{ border: "none", color: "#7A93B4" }}
+            >
+              <span
+                style={{
+                  fontSize: "14px",
+                  // marginLeft: "12px",
+                  textTransform: "none"
+                }}
+              >
+                Swap
+              </span>
+            </Button>
+
+            <Box sx={{ml:1}}>
+                <Voting/>
+            </Box>
+
+            {/* <Button
               id="demo-customized-button"
               onClick={()=>handleVoting()}
               disableElevation
@@ -325,7 +422,7 @@ const Header3 = () => {
               >
                 Voting
               </span>
-            </Button>
+            </Button> */}
 
             {/* <Box
               size="large"
@@ -342,7 +439,12 @@ const Header3 = () => {
             <Box>
               <Validators />
             </Box>
-            <IconButton
+
+            <Box sx={{ml:1}}>
+              <Connect/>
+            </Box>
+
+            {/* <IconButton
               size="large"
               aria-label="show more"
               aria-haspopup="true"
@@ -350,7 +452,7 @@ const Header3 = () => {
               color="inherit"
             >
               <CardMedia component="img" height="50" image={metaMaskLogo} />
-            </IconButton>
+            </IconButton> */}
           </Box>
           <Box></Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>

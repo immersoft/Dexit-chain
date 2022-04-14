@@ -201,6 +201,19 @@ export default function Navbar() {
           </IconButton>
         </MenuItem>
 
+        <MenuItem>
+          <IconButton
+            size="small"
+            aria-label="show 4 new mails"
+            color="inherit"
+            onClick={() => handleSwap()}
+          >
+            <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
+              Swap
+            </span>
+          </IconButton>
+        </MenuItem>
+
 
         {/* <MenuItem>
           <IconButton
@@ -258,9 +271,7 @@ export default function Navbar() {
             size="large"
             aria-label="show 17 new notifications"
             color="inherit"
-            // onClick={() => handleRoute()}
           >
-            {/* <Validators /> */}
             <Connect/>
 
           </IconButton>
@@ -305,6 +316,10 @@ export default function Navbar() {
 
     const handleFaucet=()=>{
       navigate('/faucet')
+    }
+
+    const handleSwap=()=>{
+      navigate('/swap')
     }
 
 
@@ -400,6 +415,23 @@ export default function Navbar() {
               </span>
             </Button>
 
+            <Button
+              id="demo-customized-button"
+              onClick={() => handleSwap()}
+              disableElevation
+              sx={{ border: "none", color: "#7A93B4" }}
+            >
+              <span
+                style={{
+                  fontSize: "14px",
+                  // marginLeft: "12px",
+                  textTransform: "none"
+                }}
+              >
+                Swap
+              </span>
+            </Button>
+
             {/* <Button
               id="demo-customized-button"
               onClick={()=>handleVoting()}
@@ -461,7 +493,6 @@ export default function Navbar() {
               <Button variant="outlined" size="small" startIcon={<InsertLinkIcon />}>Connet Wallet</Button>
             </IconButton> */}
           </Box>
-          <Box></Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"

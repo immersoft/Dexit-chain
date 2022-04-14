@@ -29,6 +29,7 @@ import MyProposal from "./components/Pages/Voting/MyProposal";
 import UnStaking2 from "./components/Pages/Stacking/UnStaking2";
 import Faucet from "./components/Pages/Faucet/Faucet";
 import SearchBalance from "./components/Pages/SearchData/SearchBalance";
+import Swap from "./components/Pages/Swap/Swap";
 
 function App() {
   return (
@@ -132,6 +133,15 @@ function App() {
             element={
               <>
                 <AllBlock />
+              </>
+            }
+          />
+
+        <Route
+            path="/swap"
+            element={
+              <>
+                <Swap />
               </>
             }
           />

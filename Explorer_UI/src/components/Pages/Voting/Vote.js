@@ -10,6 +10,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import React, { useState, useEffect } from "react";
 import Proposal from "../../../Contract";
@@ -30,6 +31,7 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const Vote = (props) => {
   let { data } = props;
+  const [openAlert, setOpenAlert] = React.useState(false);
 
   const [stakerAmount, setStakerAmount] = useState("");
   const [validatorlist, setValidatorlist] = useState([]);
@@ -108,7 +110,12 @@ const Vote = (props) => {
 
   
 
- 
+  const copyHash = (val) => {
+    console.log("side");
+    navigator.clipboard.writeText(val);
+    setOpenAlert(true);
+  };
+
 
   
   const submitProposal = async () => {
@@ -157,7 +164,7 @@ const Vote = (props) => {
     <>
       <ToastContainer />
 
-      <Card sx={{ mt: 3, boxShadow: 3, mx: 5, mb: 3, pb: 1,backgroundColor:'#F8FAFD' }}>
+      <Card sx={{ mt: 3, boxShadow: 3, pb: 1,backgroundColor:'#F8FAFD' }}>
         <Box sx={{ flexGrow: 1 }}>
           <Typography
             variant="h5"
@@ -179,9 +186,32 @@ const Vote = (props) => {
               id="outlined-basic"
               label="Proposal Id:"
               variant="outlined"
-              sx={{ mt: 1, width: "50%" }}
+              sx={{ mt: 1, width: "90%" }}
               value={proposalId}
             />
+
+        <ContentCopyIcon
+           style={{
+            cursor: "pointer",
+            }}
+            onClick={() => copyHash(proposalId)}
+         />
+
+      {openAlert ? (
+            <Snackbar
+             open={openAlert}
+             autoHideDuration={2000}
+             onClose={() => setOpenAlert(false)}
+            >
+            <Alert
+             onClose={() => setOpenAlert(false)}
+             severity="info"
+             >
+            Hash Copied
+            </Alert>
+          </Snackbar>
+         ) : null
+         }
           </div>
           <div
             style={{ display: "flex", justifyContent: "center", padding: "2%" }}

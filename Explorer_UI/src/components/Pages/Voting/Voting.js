@@ -14,6 +14,7 @@ import {
   MenuItem,
   Modal,
   Fade,
+  CircularProgress,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -34,6 +35,7 @@ import Vote from "./Vote";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { ToastContainer, toast } from "react-toastify";
 import Backdrop from '@mui/material/Backdrop';
+import './Voting.css'
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -62,8 +64,7 @@ const columns = [
   { id: "sno", label: "S No.", minWidth: 50 },
   { id: "name", label: "Name", minWidth: 50 },
   { id: "value", label: "Value", minWidth: 50 },
-  { id: "id", label: "ID", minWidth: 50 },
-  { id: "copy", label: "Copy", minWidth: 50 },
+  { id: "address", label: "Address", minWidth: 50 },
   { id: "info", label: "More Info", minWidth: 50 }
 ];
 
@@ -194,12 +195,13 @@ const Voting = () => {
       let ab = [];
       for (let j = 0; j < checkPropsal.length; j++) {
         let proposalsss = await Proposal.proposals(checkPropsal[j]);
-        // console.log("getetetetetet", proposalsss.variable_name);
+        // console.log("getetetetetet", proposalsss);
         // getProposalDetails(proposalList[0]);
         let newObj={
           id:checkPropsal[j],
           name:proposalsss.variable_name,
-          value:proposalsss.variable_value.toString()
+          value:proposalsss.variable_value.toString(),
+          proposerAddress:proposalsss.proposer
         }
         detailsList.push(newObj)
         // console.log(proposalsss, "proposalsss");
@@ -497,100 +499,111 @@ const Voting = () => {
           <Typography variant="h5" sx={{ display:"flex",justifyContent:"center" }}>
               All proposal list
             </Typography>
-      <Grid container sx={{pl:7,pr:7}}>
-           
-      <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
-                  <TableHead>
-                    <TableRow
-                        className="heading_table"
-                        sx={{ background: "#F8FAFD" }}
-                    >
-                        {columns.map((column) => (
-                        <TableCell
-                            key={column.id}
-                            align={column.align}
-                            style={{ top: 57, minWidth: column.minWidth }}
+       {  proposalListData!=undefined?
+
+        <Grid container sx={{pl:7,pr:7}}>
+          <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
+                      <TableHead>
+                        <TableRow
+                            className="heading_table"
+                            sx={{ background: "#F8FAFD" }}
                         >
-                            {column.label}
-                        </TableCell>
-                        ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {
-                      proposalListData ? 
-                      proposalListData.map((val,key)=>{
-                        return(
-                          <>
-                          <TableRow>
-                            <TableCell>
-                              {key+1}
-                            </TableCell>
-
-                            <TableCell>
-                              {val.name}
-                            </TableCell>
-
-                            <TableCell>
-                            {val.value<51?val.value:val.value/1000000000000000000}
-                            </TableCell>
-
-                            <TableCell>
-                            {shortenAccountId(val.id)}{" "}
-                            </TableCell>
-
-                            <TableCell>
-                              <ContentCopyIcon
-                                style={{
-                                  marginLeft: "0.5rem",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() => copyHash(val.id)}
-                              />
-                            </TableCell>
-
-                            {openAlert ? (
-                            <Snackbar
-                              open={openAlert}
-                              autoHideDuration={2000}
-                              onClose={() => setOpenAlert(false)}
+                            {columns.map((column) => (
+                            <TableCell
+                                key={column.id}
+                                align={column.align}
+                                style={{ top: 57, minWidth: column.minWidth }}
                             >
-                              <Alert
-                                onClose={() => setOpenAlert(false)}
-                                severity="info"
-                              >
-                                Hash Copied
-                              </Alert>
-                            </Snackbar>
-                          ) : null}
-
-                            <TableCell>
-                              <Button
-                                variant="outlined"
-                                onClick={() => getProposalDetails(val.id)}
-                              >
-                                Info
-                              </Button>
+                                {column.label}
                             </TableCell>
+                            ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {
+                          proposalListData ? 
+                          proposalListData.map((val,key)=>{
+                            return(
+                              <>
+                              <TableRow>
+                                <TableCell>
+                                  {key+1}
+                                </TableCell>
 
-                          </TableRow>
-                          </>
-                        )
-                      })
-                      : (
-                        <>
-                          <Typography sx={{ textAlign: "center", m: 2 }}>
-                            No data found
-                          </Typography>{" "}
-                        </>
-                      )
-                    }
-                   
-                  </TableBody>
-              </Table> 
-      </TableContainer>
-      </Grid>
+                                <TableCell>
+                                  {val.name}
+                                </TableCell>
+
+                                <TableCell>
+                                {val.value<51?val.value:val.value/1000000000000000000}
+                                </TableCell>
+
+                                <TableCell>
+                                  {val.proposerAddress}
+                                {/* {shortenAccountId(val.proposerAddress)}{" "} */}
+                                </TableCell>
+
+                                {/* <TableCell>
+                                  <ContentCopyIcon
+                                    style={{
+                                      marginLeft: "0.5rem",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() => copyHash(val.id)}
+                                  />
+                                </TableCell> */}
+
+                                {openAlert ? (
+                                <Snackbar
+                                  open={openAlert}
+                                  autoHideDuration={2000}
+                                  onClose={() => setOpenAlert(false)}
+                                >
+                                  <Alert
+                                    onClose={() => setOpenAlert(false)}
+                                    severity="info"
+                                  >
+                                    Hash Copied
+                                  </Alert>
+                                </Snackbar>
+                              ) : null}
+
+                                <TableCell>
+                                  <Button
+                                    variant="outlined"
+                                    onClick={() => getProposalDetails(val.id)}
+                                  >
+                                    Info
+                                  </Button>
+                                </TableCell>
+
+                              </TableRow>
+                              </>
+                            )
+                          })
+                          : (
+                            <>
+                              <Typography sx={{ textAlign: "center", m: 2 }}>
+                                No data found
+                              </Typography>{" "}
+                            </>
+                          )
+                        }
+                      
+                      </TableBody>
+                  </Table> 
+          </TableContainer>
+        </Grid>
+      :
+      <>  
+      <div className="voting_loader">
+        <Box >
+          <CircularProgress />
+        </Box>
+      </div>
+      </>
+}
     </>
   );
 };
