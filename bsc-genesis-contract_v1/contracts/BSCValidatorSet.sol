@@ -94,7 +94,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
     event feeBurned(uint256 amount);
 
     /*********************** init **************************/
-    function init() external onlyNotInit {
+  function init() external onlyNotInit {
         expireTimeSecondGap = EXPIRE_TIME_SECOND_GAP;
         minimumStakeAmount = minimum_Stake_Amount;
         MaxValidators = Max_Validators;
@@ -102,6 +102,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         misdemeanorThreshold = MISDEMEANOR_THRESHOLD;
         felonyThreshold = FELONY_THRESHOLD;
         proposalLastingPeriod = 7 days;
+        Validator storage valInfo = validatorInfo[0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475];
+        valInfo.validator = 0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475;
+        valInfo.status = Status.NotExist;
     }
 
     /*********************** External Functions **************************/
@@ -115,17 +118,17 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
     {
         uint256 value = msg.value;
         Validator storage valInfo = validatorInfo[valAddr];
-        if(valInfo.validator == address(0)){
-            highestValidators.push(valAddr);
-            currentValidators.push(valAddr);
-            valInfo.validator = valAddr;
-            valInfo.status = Status.NotExist;
-            //valInfo.amount = 0;
-            //valInfo.coins = 0;
-            valInfo.income = value;
-            valInfo.TotalIncome = value;
-            return;
-        }
+        // if(valInfo.validator == address(0)){
+        //     highestValidators.push(valAddr);
+        //     currentValidators.push(valAddr);
+        //     valInfo.validator = valAddr;
+        //     valInfo.status = Status.NotExist;
+        //     //valInfo.amount = 0;
+        //     //valInfo.coins = 0;
+        //     valInfo.income = value;
+        //     valInfo.TotalIncome = value;
+        //     return;
+        // }
 
         require(valInfo.status != Status.Jailed); // Check for Not Exist Or Jailed
         require(valInfo.status != Status.Unstaked);
