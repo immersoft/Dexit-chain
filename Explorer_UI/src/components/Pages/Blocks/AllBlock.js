@@ -183,6 +183,8 @@ export default function Blocks() {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   const handleChangePage = (event, newPage) => {
+    console.log("page called next")
+    Init()
     setPage(newPage);
   };
 

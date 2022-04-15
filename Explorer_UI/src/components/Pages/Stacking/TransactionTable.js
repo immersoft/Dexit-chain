@@ -15,6 +15,8 @@ import './TransactionTable.css';
 import loader from "../../../Image/graphics-07.gif";
 import { toast, ToastContainer } from "react-toastify";
 import Proposal from "../../../Contract";
+import fromExponential from 'from-exponential';
+
 
 
 const columns = [
@@ -190,13 +192,31 @@ const highestValidator=async()=>{
   try {
     console.log("function called");
     let list = await Connection.getHighestValidators();
-    console.log(list,"highest Validator list")
+    // console.log(list,"highest Validator list")
     setHighestValidatorList(list)
   } catch (error) {
     console.log(error);
   }
 }
 
+
+const shortenAccountId = (fullStr) => {
+  const strLen = 30;
+  const separator = "...";
+
+  if (fullStr?.length <= strLen) return fullStr;
+
+  const sepLen = separator.length;
+  const charsToShow = strLen - sepLen;
+  const frontChars = Math.ceil(charsToShow / 3);
+  const backChars = Math.floor(charsToShow / 3);
+
+  return (
+    fullStr?.substr(0, frontChars) +
+    separator +
+    fullStr?.substr(fullStr?.length - backChars)
+  );
+};
 // console.log(highestValidatorList,"highestValidatorList")
   return (
     <>
@@ -271,7 +291,7 @@ const highestValidator=async()=>{
                                       </TableCell>
 
                                       <TableCell component="th" scope="row">
-                                        {item.address}
+                                        {shortenAccountId(item.address)}
                                       </TableCell>
                                       
                                       <TableCell>
@@ -296,15 +316,15 @@ const highestValidator=async()=>{
                                       </TableCell>
                                     
                                       <TableCell>
-                                        {item.incomingCoins/1000000000000000000}
+                                        {fromExponential(item.incomingCoins/1000000000000000000)}
                                       </TableCell>
           
                                       <TableCell>
-                                        {item.incomingTotalCoins/1000000000000000000}
+                                        {fromExponential(item.incomingTotalCoins/1000000000000000000)}
                                       </TableCell>
           
                                       <TableCell>
-                                       {item.address.toLowerCase() === account ?  <Button variant="outlined" onClick={()=>handleClaim()}>Claim</Button> : <Button variant="contained" disabled>Claim</Button>}
+                                       {item.address.toLowerCase() === account && item.incomingCoins!=0 ?  <Button variant="outlined" onClick={()=>handleClaim()}>Claim</Button> : <Button variant="contained" disabled>Claim</Button>}
                                       </TableCell>
           
           

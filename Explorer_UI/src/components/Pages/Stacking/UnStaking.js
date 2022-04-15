@@ -21,6 +21,7 @@ import {
   CircularProgress,
   Fade,
   TextField,
+  Tooltip,
 } from "@mui/material";
 // import { Box } from "@mui/system";
 import Connection from "../../../Contract";
@@ -34,6 +35,9 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import loader from "../../../Image/graphics-07.gif";
 import { toast, ToastContainer } from "react-toastify";
+import InfoIcon from '@mui/icons-material/Info';
+import fromExponential from 'from-exponential';
+
 
 const columns = [
   // { id: "id", label: "UniqueId", minWidth: 20 },
@@ -460,7 +464,6 @@ const UnStaking = () => {
       let abc = await claimButton.wait();
       if (abc) {
         setLoading(false);
-
         toast.success("Claim successfull")
         window.location.reload();
 
@@ -468,7 +471,7 @@ const UnStaking = () => {
     } 
     catch (error) {
       setLoading(false);
-      toast.error(error.data.message);
+      toast.error(error.data.message.split(":").pop());
       console.log(error)
     } 
   }
@@ -515,11 +518,28 @@ const handleJailed=async()=>{
   }
 }
 
+
+const shortenAccountId = (fullStr) => {
+  const strLen = 30;
+  const separator = "....";
+
+  if (fullStr?.length <= strLen) return fullStr;
+
+  const sepLen = separator.length;
+  const charsToShow = strLen - sepLen;
+  const frontChars = Math.ceil(charsToShow / 3);
+  const backChars = Math.floor(charsToShow / 3);
+
+  return (
+    fullStr?.substr(0, frontChars) +
+    separator +
+    fullStr?.substr(fullStr?.length - backChars)
+  );
+};
   return (
     <>
       <ToastContainer  />
     <div>
-      {/* <Button onClick={handleModalOpen}>Open modal</Button> */}
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -690,15 +710,29 @@ const handleJailed=async()=>{
                                                         className="heading_table"
                                                         sx={{ background: "#F8FAFD" }}
                                                       >
-                                                        {columns.map((column,index) => (
-                                                          <TableCell
+                                                        
+                                                        {columns.map((column,index) => 
+                                                          column.label =='Income'  ? 
+                                                         <TableCell
                                                             key={index}
                                                             align={column.align}
                                                             style={{ top: 57, minWidth: column.minWidth }}
+                                                            sx={{display:"flex"}}
+                                                          >
+                                                            {column.label}
+                                                            <Tooltip title="Income Info">
+                                                              <InfoIcon fontSize="small" sx={{ml:1}}/>
+                                                            </Tooltip>
+                                                          </TableCell>
+                                                          :
+                                                          <TableCell
+                                                            key={index}
+                                                            align={column.align}
+                                                            style={{ top: 57, minWidth: column.minWidth,alignItems:"center" }}
                                                           >
                                                             {column.label}
                                                           </TableCell>
-                                                        ))}
+                                                        )}
                                                       </TableRow>
                                                     </TableHead>
                                                       <TableBody>
@@ -713,7 +747,7 @@ const handleJailed=async()=>{
                                                 component="th"
                                                 scope="row"
                                               >
-                                                {item.address}
+                                                {shortenAccountId(item.address)}
                                               </TableCell>
 
                                               <TableCell
@@ -721,7 +755,7 @@ const handleJailed=async()=>{
                                                 scope="row"
                                               >
                                                 {item.validatorAddress
-                                                  ? item.validatorAddress
+                                                  ? shortenAccountId(item.validatorAddress)
                                                   : "-"}
                                               </TableCell>
 
@@ -802,40 +836,66 @@ const handleJailed=async()=>{
                                               )}
                                               
                                               <TableCell>
-                                                {item ? item.income : "-"}
+                                                {item ? fromExponential(item.income) : "-"}
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? item.totalIncome : "-"}
+                                                {item ? fromExponential(item.totalIncome) : "-"}
                                               </TableCell>
                                             
                                             {
                                               item.validatorAddress ? (
                                               // <>
-                                                <TableCell>                            
-                                                   <Button
-                                                     variant="outlined"
-                                                     success
-                                                     onClick={() =>
-                                                       delegateClaim(item.validatorAddress)
-                                                     }
-                                                   >
-                                                    Claim
-                                                   </Button>
-                                                  
+                                                <TableCell>   
+                                                  {item.income==0 ?
+                                                    <Button
+                                                    variant="outlined"
+                                                    success
+                                                    disabled
+                                                    onClick={() =>
+                                                      delegateClaim(item.validatorAddress)
+                                                    }
+                                                  >
+                                                  Claim
+                                                  </Button>
+                                                :
+                                                  <Button
+                                                  variant="outlined"
+                                                  success
+                                                  onClick={() =>
+                                                    delegateClaim(item.validatorAddress)
+                                                  }
+                                                >
+                                                Claim
+                                                </Button>
+                                          }                         
                                                  </TableCell>
                                               ):
                                               (
-                                                <TableCell>                            
-                                                   <Button
-                                                     variant="outlined"
-                                                     success
-                                                     onClick={() =>
-                                                       handleClaim()
-                                                     }
-                                                   >
-                                                     Claim
-                                                   </Button>
+                                                <TableCell> 
+                                                  {item.income==0 ?
+                                                      <Button
+                                                      variant="outlined"
+                                                      success
+                                                      disabled
+                                                      onClick={() =>
+                                                        handleClaim()
+                                                      }
+                                                      >
+                                                      Claim
+                                                      </Button>
+                                                      :
+                                                      <Button
+                                                      variant="outlined"
+                                                      success
+                                                      onClick={() =>
+                                                        handleClaim()
+                                                      }
+                                                      >
+                                                      Claim
+                                                      </Button>
+
+                                                  }                           
                                                   
                                                  </TableCell>
                                               )
@@ -853,8 +913,7 @@ const handleJailed=async()=>{
                                                       <Typography variant="h5">Not Found</Typography>
                                                   </div>
                                                }
-                                            </Table>
-
+                                                </Table>
                                                </>
                                            )
                                        }

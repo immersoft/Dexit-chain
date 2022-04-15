@@ -61,6 +61,7 @@ export default function Connect() {
   const [defaultAccount, setDefaultAccount] = useState(null);
   const [userBalance, setUserBalance] = useState(null);
   const [connButtonText, setConnButtonText] = useState("Connect Wallet");
+  const[walletAddress,setWalletAddress]=useState(null)
 
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -241,8 +242,39 @@ export default function Connect() {
     }
   }
 
+  React.useEffect(() => {
+    if (window.ethereum) {
+      // detect Network account change
+      window.ethereum.on("chainChanged", function (networkId) {
+        // getNetworkDetails();
+      });
+      window.ethereum.on("accountsChanged", function (accounts) {
+        if (accounts[0]) {
+          console.log(accounts[0]) 
+          setWalletAddress(accounts[0])         
+        }
+      });
+    }
+  }, []);
+
   return (
     <div>
+      {walletAddress !=null ? 
+       <Button
+       id="demo-customized-button"
+       aria-controls={open ? "demo-customized-menu" : undefined}
+       aria-haspopup="true"
+       aria-expanded={open ? "true" : undefined}
+       variant="contained"
+       color="success"
+       disableElevation
+       onClick={handleClick}
+       startIcon={<InsertLinkIcon sx={{transform:"rotate(135deg)"}} />}
+       
+     >
+     <span style={{textTransform:"none"}}>Connected</span>
+     </Button>
+      :
       <Button
         id="demo-customized-button"
         aria-controls={open ? "demo-customized-menu" : undefined}
@@ -252,11 +284,12 @@ export default function Connect() {
         disableElevation
         onClick={handleClick}
         startIcon={<InsertLinkIcon sx={{transform:"rotate(135deg)"}} />}
-        // endIcon={<KeyboardArrowDownIcon />}
         
       >
       <span style={{textTransform:"none"}}>Connect Wallet</span>
       </Button>
+      }
+      
       <StyledMenu
         id="demo-customized-menu"
         MenuListProps={{
@@ -267,7 +300,7 @@ export default function Connect() {
         onClose={handleClose}
       >
         <MenuItem onClick={connectWalletHandler} disableRipple>
-          Connect Metamask
+         {walletAddress!=null ? <>Metamask Connected</> : <>Connect Metamask</>} 
         </MenuItem>
 
         <MenuItem onClick={()=>addNetwork("web3","false")} disableRipple>
