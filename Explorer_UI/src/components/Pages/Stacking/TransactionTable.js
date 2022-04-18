@@ -7,7 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import { Card, Typography,Button, CircularProgress, } from "@mui/material";
+import { Card, Typography,Button, CircularProgress, Tooltip, } from "@mui/material";
 import { Box } from "@mui/system";
 import Connection from "../../../Contract";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ import loader from "../../../Image/graphics-07.gif";
 import { toast, ToastContainer } from "react-toastify";
 import Proposal from "../../../Contract";
 import fromExponential from 'from-exponential';
+import InfoIcon from '@mui/icons-material/Info';
 
 
 
@@ -37,7 +38,7 @@ const columns = [
 
 
 const TransactionTable = () => {
-    const [dd,setDD] = useState([])
+    const [dd,setDD] = useState()
     // console.log("TXTABLE",dd);
     const navigate = useNavigate();
     const [listData,setListData]=useState(false)
@@ -125,21 +126,6 @@ const TransactionTable = () => {
   }
 
 
-  const listState=()=>{
-    if(dd.length!=0){
-      console.log("listed collection")
-        return dd.map(async(item,index)=>{
-            return(
-                <>
-                {/* {console.log(await getAmount(item[0]),"fdfdfdfd")}
-                {console.log(await Connection.stakeValidatorBalance(item[0]))}
-                {console.log(item[0],"item")} */}
-                </>
-            )
-        })
-    }
-}
-
       
   useEffect(() => {
     getBalanceData();
@@ -151,7 +137,6 @@ const TransactionTable = () => {
   }
 
 const numberOfDelegators=(validatorAddress)=>{
-  console.log(validatorAddress,"validatorAddress")
   if(validatorAddress){
     navigate('/delegator_count', { state: { validatorAddress: validatorAddress } })
   }
@@ -159,7 +144,6 @@ const numberOfDelegators=(validatorAddress)=>{
 
 
 const handleClaim=async()=>{
-  console.log(account,"called")
   try {
     setClaimLoader(true)
     const claimButton=await Connection.claimValidatorReward()
@@ -168,14 +152,12 @@ const handleClaim=async()=>{
       setClaimLoader(false);
       toast.success("Claim successfull")
     }
-    console.log(claimButton,"claimButton")
   } catch (error) {
     setClaimLoader(false);
     toast.error(error.data.message);
     console.log(error)
   }
 }
-// console.log(dd.length,"jjjj")
 
 const maxValidator=async()=>{
   let value = await Proposal.currentValue("MaxValidators");
@@ -256,22 +238,89 @@ const shortenAccountId = (fullStr) => {
             <TableContainer component={Paper}>
               
                     <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
-                    { dd.length>0 ?
+                    { dd!=undefined ?
                     <>
                         <TableHead>
                           <TableRow
                               className="heading_table"
                               sx={{ background: "#F8FAFD" }}
                           >
-                              {columns.map((column) => (
                               <TableCell
-                                  key={column.id}
-                                  align={column.align}
-                                  style={{ top: 57, minWidth: column.minWidth }}
+                                  style={{ top: 57, minWidth: 20 }}
                               >
-                                  {column.label}
+                                Rank
                               </TableCell>
-                              ))}
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                Address
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                <div style={{display:"flex"}}>
+                                  Amount
+                                  <Tooltip title="Info">
+                                    <InfoIcon/>
+                                  </Tooltip>
+                                </div>
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                Voting Power/%
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                Status
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                No. of Delegators
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                Delegate
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                <div style={{display:"flex"}}>
+                                  Income
+                                  <Tooltip title="Info">
+                                    <InfoIcon/>
+                                  </Tooltip>
+                                </div>
+                                
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                <div style={{display:"flex"}}>
+                                  Total Income
+                                  <Tooltip title="Info">
+                                    <InfoIcon/>
+                                  </Tooltip>
+                                </div>
+                                
+                              </TableCell>
+
+                              <TableCell
+                                  style={{ top: 57, minWidth: 50 }}
+                              >
+                                Claim
+                              </TableCell>
                           </TableRow>
                         </TableHead>
                         {
@@ -303,7 +352,7 @@ const shortenAccountId = (fullStr) => {
                                       </TableCell>
           
                                       <TableCell>
-                                        {item.status===2 ? <Button variant={(index<=maximumValidator) ? "contained":"outlined"} color={(highestValidatorList.includes(item.address))?"success":"warning"} size='small'>{(highestValidatorList.includes(item.address)) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
+                                        {item.status===2 ? <Button variant={(highestValidatorList.includes(item.address)) ? "contained":"outlined"} color={(highestValidatorList.includes(item.address))?"success":"warning"} size='small'>{(highestValidatorList.includes(item.address)) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
                                         
                                       </TableCell>
           
@@ -337,7 +386,7 @@ const shortenAccountId = (fullStr) => {
                       </>
                         :
                     <>
-                    {dd.length===0 ? noList==true?
+                    {dd===undefined ? noList==true?
                     <div style={{textAlign:"center",margin:"15%"}}>
                       <Typography variant="h5">No Transaction Found</Typography>
                     </div>

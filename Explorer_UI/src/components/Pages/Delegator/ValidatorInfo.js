@@ -16,7 +16,7 @@ const ValidatorInfo = () => {
     const[showAmountWarning,setShowamountWarning]=useState(false);
     const[validatorsDetailsLocal,setValidatorDetailsLocal]=useState(null)
     // console.log("getdata", getDetails)
-    // console.log(Connection,"data")
+    // console.log(validatorsDetailsLocal,"data")
     
     useEffect(()=>{
         listOfActive()
@@ -121,7 +121,6 @@ const ValidatorInfo = () => {
           fetch(`https://final-explorer.herokuapp.com/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
             .then(response => response.text())
             .then(result =>{ 
-                // console.log(JSON.parse(result))
                 setValidatorDetailsLocal(JSON.parse(result))
             })
             .catch(error => console.log('error', error));
@@ -137,7 +136,6 @@ const ValidatorInfo = () => {
      <Box sx={{ display: 'flex',justifyContent:"center" ,padding:"10%"}}>
      <div style={{display:"flex",flexDirection:"column",textAlign:"center"}}>
        <img src={loader} width={250} height={120}/>
-        {/* <CircularProgress variant="determinate" value={progress} size={70} sx={{textAlign:"center"}}/> */}
         <span style={{fontSize:"1.2rem",lineHeight:"0",color:"grey"}}>Please Wait...</span>
         </div>
     </Box>
@@ -150,8 +148,7 @@ const ValidatorInfo = () => {
         <Typography variant="h4" sx={{textAlign:"center"}}>Validator Details</Typography>
         <Card sx={{ display: 'flex', alignItems: 'center',flexDirection:"column",boxShadow:"none",p:3}}>
             <Box sx={{ flexGrow: 1,'& .MuiTextField-root': { m: 1 ,width:'100%'} }}   
-            component="form"
-               
+                component="form"
                 noValidate
                 autoComplete="off">
               
@@ -241,7 +238,7 @@ const ValidatorInfo = () => {
                     onChange={(e)=>setPrice(e.target.value)}
                 />
                 
-                <Button variant='outlined' primary sx={{m:1}} onClick={()=>delegateStake(getDetails)}>Stake</Button>
+                <Button variant='outlined' primary sx={{m:1}} onClick={()=>delegateStake(getDetails)}>Delegate</Button>
               
             </Box>
         </Card>

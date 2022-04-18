@@ -219,7 +219,7 @@ const Voting = () => {
       handleOpen()
       setsenIdToVoteComp(id);
       let proposalsss = await Proposal.proposals(id);
-      console.log(proposalsss, "proposalsss");
+      // console.log(proposalsss, "proposalsss");
       setProposalData(proposalsss);
     } catch (error) {
       console.log(error);

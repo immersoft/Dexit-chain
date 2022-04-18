@@ -75,7 +75,7 @@ const Vote = (props) => {
   const minimumStakeValue = async () => {
     try {
       let initialValue = await Proposal.minimumStakeAmount();
-      console.log(initialValue, "initialValue");
+      // console.log(initialValue, "initialValue");
       setupdateValue(initialValue / 1000000000000000000);
     } catch (error) {
       console.log(error);
@@ -121,16 +121,11 @@ const Vote = (props) => {
   const submitProposal = async () => {
     setShowLoader(true);
     setshowWarning("");
-    // console.log("proposal id",proposalId)
-    // console.log("proposal icon color",submitProposalIconColor )
-    // console.log("text  votwe",submitProposalIconColor ===null ,!proposalId)
     if (submitProposalIconColor===null || !proposalId) {
       setShowLoader(false);
-
       return toast.warning("Please select Like or Unlike & Proposal id.");
     }
     try {
-      console.log("submitProposal", proposalId, submitProposalIconColor);
       let submit = await Proposal.voteProposal(
         proposalId,
         submitProposalIconColor.toString()
@@ -143,9 +138,9 @@ const Vote = (props) => {
         proposalVotedetails();
         toast.success("Voting success.")
       }
-    } catch (error) {
+    } 
+    catch (error) {
       setShowLoader(false);
-      // setshowWarning(error.data.message);
       if(error.code ===4001){
         toast.error(error.message)
       }
@@ -157,12 +152,11 @@ const Vote = (props) => {
   };
   const proposalVotedetails = async () => {
     let proposalVotedetails = await Proposal.proposals(proposalId);
-    console.log(proposalVotedetails, "proposalVotedetails");
   };
 
   return (
     <>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
 
       <Card sx={{ mt: 3, boxShadow: 3, pb: 1,backgroundColor:'#F8FAFD' }}>
         <Box sx={{ flexGrow: 1 }}>
@@ -235,7 +229,7 @@ const Vote = (props) => {
             </div>
           </div>
           <div style={{ textAlign: "center" }}>
-            {showWarning ===
+            {/* {showWarning ===
             "execution reverted: You can't vote for a proposal twice" ? (
               <Grid
                 item
@@ -249,7 +243,7 @@ const Vote = (props) => {
               </Grid>
             ) : (
               ""
-            )}
+            )} */}
             {showLoader === true ? (
               <LoadingButton
                 sx={{ paddingLeft: "1.3rem", paddingRight: "1.3rem" }}

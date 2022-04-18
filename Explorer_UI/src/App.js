@@ -18,7 +18,7 @@ import AllTransactions from "./components/Pages/AllTransactions/AllTransactions.
 import TransactionTable from "./components/Pages/Stacking/TransactionTable.js";
 import ValidatorsSetInfo from "./components/Pages/Stacking/ValidatorsSetInfo";
 import Graph from "./components/Graph/Graph.js";
-import UnStaking from "./components/Pages/Stacking/UnStaking.js";
+import UnStaking from "./components/Pages/Stacking/UnStakingHome.js";
 import Transactions from "./components/Pages/Table/Transactions";
 import TransactionDetails from './components/Pages/Table/TransactionDetails'
 import ListDelegator from "./components/Pages/Delegator/ListDelegator";
@@ -26,7 +26,7 @@ import Voting from "./components/Pages/Voting/Voting";
 import DepositeTable from "./components/Pages/Deposite/DepositeTable";
 import CreateProposall from "./components/Pages/Voting/CreateProposall";
 import MyProposal from "./components/Pages/Voting/MyProposal";
-import UnStaking2 from "./components/Pages/Stacking/UnStaking2";
+import ValidatorUnstake from "./components/Pages/Stacking/ValidatorUnstake";
 import Faucet from "./components/Pages/Faucet/Faucet";
 import SearchBalance from "./components/Pages/SearchData/SearchBalance";
 import Swap from "./components/Pages/Swap/Swap";
@@ -265,7 +265,7 @@ function App() {
             path="/unstaking2"
             element={
               <>
-                <UnStaking2/>
+                <ValidatorUnstake/>
               </>
             }
           />
