@@ -16,3 +16,9 @@
     text-decoration: none;
     color: #fff;
 }
+
+@media screen and (max-width: 768px) {
+    .css-15zeepj-MuiPaper-root-MuiAppBar-root{
+       height: 10vh;
+    }
+}

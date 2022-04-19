@@ -255,7 +255,17 @@ export default function Connect() {
         }
       });
     }
+    getAccounts()
   }, []);
+
+  const getAccounts = async () => {
+    try {
+        let account = await window.ethereum.selectedAddress;
+        setWalletAddress(account);
+    } catch (error) {
+        console.log(error);
+    }
+};
 
   return (
     <div>

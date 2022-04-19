@@ -49,7 +49,7 @@ export default function Blocks() {
   
       let currentBlock = await web3.eth.getBlockNumber();
       setCallFunction(!callFunction)
-      for (let j = currentBlock - 7; j <=currentBlock; j++) {
+      for (let j = currentBlock - 5; j <=currentBlock; j++) {
         let getBlockDetails = await web3.eth.getBlock(j);
         bc.push(getBlockDetails);
       }

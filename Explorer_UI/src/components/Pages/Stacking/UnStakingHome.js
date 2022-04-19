@@ -213,16 +213,16 @@ const UnStakingHome = () => {
               //Delegator Details
             for (let j = 0; j < dataget[6].length; j++) {
               if (dataget[6][j].toLowerCase() === account) {
-                console.log(dataget[6][j], ":account");
+                // console.log(dataget[6][j], ":account");
                 let dataget22 = await Connection.getValidatorInfo(
                   dataget[6][j]
                 );
-                console.log(dataget[6][j],"dataget")
+                // console.log(dataget[6][j],"dataget")
                 let infoDetails = await Connection.getStakingInfo(
                   dataget[6][j],
                   dataget[0]
                 );
-                console.log(infoDetails,"infoDetails")
+                // console.log(infoDetails,"infoDetails")
                 let data = {
                   address: dataget[6][j],
                   validatorAddress: dataget[0],
@@ -242,7 +242,7 @@ const UnStakingHome = () => {
                   customList.push(data);
                   setIsLength(true)
               }
-              console.log(isLength,"isLength Delegator")
+              // console.log(isLength,"isLength Delegator")
                 // customList.push(data);
                 // console.log(data,"first call")
               } 
@@ -283,7 +283,7 @@ const UnStakingHome = () => {
               //   account,
               //   account
               // );
-            console.log(dataget,"validator")
+              // console.log(dataget,"validator")
 
               let customObject = {
                 address: dataget[0],
@@ -297,12 +297,12 @@ const UnStakingHome = () => {
                 (item) => item.address.toLowerCase() === account
               );
                 if (check == undefined) {
-                  // console.log(data,"ifcheck")
+                // console.log(data,"ifcheck")
                 // customList.push(data);
                 customList.push(customObject);
                 setIsLength(true)
                 }
-                console.log(isLength,"isLength Validator 0 delegator")
+                // console.log(isLength,"isLength Validator 0 delegator")
             }
           }
         }

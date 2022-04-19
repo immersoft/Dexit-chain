@@ -23,9 +23,14 @@ const SearchBox = () => {
     try {
       if (searchInput.length <= 10) {
         let blockDetails = await web3.eth.getBlock(searchInput);
-        console.log(blockDetails, "blockDetails");
         navigate(`/block/${searchInput}`, { state: { blockDetails: blockDetails } });
-      } else if (searchInput.length > 10) {
+      } 
+      else if(searchInput.length==42){
+        let balance=await web3.eth.getBalance(searchInput)
+        navigate(`/address/${searchInput}`, { state: { balance: balance ,account:searchInput} });
+        
+      } 
+      else if (searchInput.length > 42) {
         navigate("/hashinfo", { state: { details: searchInput } });
       }
     } catch (error) {
@@ -64,7 +69,7 @@ const SearchBox = () => {
     >
       <InputBase
         sx={{ ml: 1, flex: 1 }}
-        placeholder="Search by Block number/Txn Hash"
+        placeholder="Search by Address/Block number/Txn Hash"
         // inputProps={{ 'aria-label': 'search google maps' }}
         fullWidth
         value={searchInput}

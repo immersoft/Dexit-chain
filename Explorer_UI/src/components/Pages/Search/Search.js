@@ -38,7 +38,7 @@ const Search = () => {
       }
       else if(searchInput.length==42){
         let balance=await web3.eth.getBalance(searchInput)
-        console.log(balance,"balance")
+        // console.log(balance,"balance")
         navigate(`/address/${searchInput}`, { state: { balance: balance ,account:searchInput} });
         
       } 

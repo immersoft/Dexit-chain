@@ -102,6 +102,14 @@ const DetailsBox = () => {
   }
 
 
+  useEffect(() => {
+    clearInterval(id);
+  }, []);
+
+  const id = setInterval(() => {
+    getTransactionCounts();
+  }, 60000 * 2);
+
   const blockTransactionCount = async (result) => {
     try {
       let counter = result.data[0].count;
@@ -110,7 +118,7 @@ const DetailsBox = () => {
       let counterTsx = await web3.eth.getBlockTransactionCount(currentBlock);
         let total = counterTsx + counter;
         setApiTotal(counter + counterTsx);
-        postTransactionCounts(currentBlock, 151);
+        postTransactionCounts(currentBlock, total);
     } catch (error) {
       console.log(error);
     }

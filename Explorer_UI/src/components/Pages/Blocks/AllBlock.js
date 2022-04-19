@@ -138,12 +138,12 @@ export default function Blocks() {
   }, []);
 
   useEffect(() => {
-    // clearInterval(id);
+    clearInterval(id);
   }, []);
 
-  // const id = setInterval(() => {
-  //   Init();
-  // }, 30000);
+  const id = setInterval(() => {
+    Init();
+  }, 15000);
 
 
 // useEffect(()=>{
@@ -159,7 +159,7 @@ export default function Blocks() {
 
 
   async function Init() {
-    console.log("called init blocks");
+    // console.log("called init blocks");
     let ab = [];
     let bc = [];
 
@@ -176,14 +176,14 @@ export default function Blocks() {
   }
 
   const rows = dd;
-  console.log(rows, "rows");
+  // console.log(rows, "rows");
   //   console.log(rows.length,"rows length")
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   const handleChangePage = (event, newPage) => {
-    console.log("page called next")
+    // console.log("page called next")
     Init()
     setPage(newPage);
   };
@@ -194,11 +194,10 @@ export default function Blocks() {
   };
 
   const singleTransactionDetails = (row) => {
-    console.log(row, "number");
+    // console.log(row, "number");
     navigate("/blockdetails", { state: { row: row } });
     setSingleBlock(row);
     setShowDetails(true);
-    // console.log(row,"single transaction details")
   };
 
   const handleChangeState = () => {
@@ -250,7 +249,7 @@ export default function Blocks() {
 
   return (
     <>
-    <Grid container>
+    <Grid container sx={{display:"flex",alignItems:"center"}}>
       <Grid xs={12} md={4}>
         <img  height={100}  src={dexitLogo} style={{cursor:"pointer"}} onClick={()=>handleHome()}/>
       </Grid>
@@ -260,7 +259,10 @@ export default function Blocks() {
       </Grid>
     </Grid>
       
+      <div style={{marginTop:"-1rem"}}>
       <Header3 />
+      </div>
+
       <div className="container-fluid">
         <Card sx={{ p: 2, boxShadow: "none", background: "#F8F9FA" }}>
           <Typography variant="h5" component="h2">
