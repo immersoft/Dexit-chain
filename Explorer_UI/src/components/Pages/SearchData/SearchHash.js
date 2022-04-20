@@ -102,7 +102,7 @@ const SearchHash = () => {
   
         useEffect(()=>{
             getInfo()
-        },[callData])
+        },[])
     
     const getInfo=async()=>{
       try {

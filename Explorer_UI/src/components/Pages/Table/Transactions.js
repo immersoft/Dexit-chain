@@ -33,11 +33,10 @@ Init()
   
 
   async function Init() {
-    console.log("inittt call");
     try {
       let bc = [];
       let currentBlock = await web3.eth.getBlockNumber();
-      for (let j = currentBlock - 15; j < currentBlock; j++) {
+      for (let j = currentBlock - 5; j <= currentBlock; j++) {
         let getBlockDetails = await web3.eth.getBlock(j);
 
         if (getBlockDetails.transactions.length > 0) {

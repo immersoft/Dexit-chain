@@ -14,7 +14,7 @@ const ValidatorInfo = () => {
     const[loading,setLoading]=useState(false)
     const[transactionSuccess,setTransactionsSuccess]=useState(false)
     const[showAmountWarning,setShowamountWarning]=useState(false);
-    const[validatorsDetailsLocal,setValidatorDetailsLocal]=useState(null)
+    const[validatorsDetailsLocal,setValidatorDetailsLocal]=useState()
     // console.log("getdata", getDetails)
     // console.log(validatorsDetailsLocal,"data")
     
@@ -173,7 +173,7 @@ const ValidatorInfo = () => {
                 <TextField
                     id="outlined-uncontrolled"
                     label="Name"
-                    value={validatorsDetailsLocal!=null ? validatorsDetailsLocal.data.Name:"-"}
+                    value={validatorsDetailsLocal!=undefined ? validatorsDetailsLocal.data.Name:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
@@ -183,7 +183,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Description"
                     defaultValue="foo"
-                    value={validatorsDetailsLocal!=null ? validatorsDetailsLocal.data.Description:"-"}
+                    value={validatorsDetailsLocal!=undefined ? validatorsDetailsLocal.data.Description:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
@@ -193,7 +193,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Website"
                     defaultValue="foo"
-                    value={validatorsDetailsLocal!=null ? validatorsDetailsLocal.data.Website:"-"}
+                    value={validatorsDetailsLocal!=undefined ? validatorsDetailsLocal.data.Website:"-"}
                     InputProps={{
                         readOnly: true,
                       }}
@@ -216,7 +216,7 @@ const ValidatorInfo = () => {
         <Typography variant="h4" sx={{textAlign:"center"}}>Delegator Info</Typography>
         <Card sx={{ display: 'flex', alignItems: 'center',boxShadow:"none",p:3}}>
             <Box sx={{ flexGrow: 1 ,'& .MuiTextField-root': { m: 1 ,width:'100%'}}}   
-            component="form"
+                component="form"
                 noValidate
                 autoComplete="off">
                
