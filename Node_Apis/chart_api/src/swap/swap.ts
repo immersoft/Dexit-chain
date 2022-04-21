@@ -2,11 +2,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const Web3 = require("web3");
-const Swap = require("./swapContract");
-const Swap_ADDRESS = require("./swapContract");
+const Swap_ABI = require("./swapContract");
 const Provider = require("@truffle/hdwallet-provider");
-const { ethers } = require("ethers");
-const bigInt = require ("big-integer");
 const privateKey ='ee7615b734368bcc3d901c76fb8882f0072ffc9b26510f2ecb062e02db386775';
 const provider = new Provider(privateKey, "https://testnet.dexit.network");
 const web3 = new Web3(provider);
@@ -14,60 +11,220 @@ app.use(express.json());
 
 
 app.use(cors())
-// const deposit = async () => {
-//   try {
-//     const accounts = await web3.eth.getAccounts();
-//     const Swapobj = new web3.eth.Contract(
-//       Swap.ETHswap_ABI,
-//       Swap.ETHswap_ADDRESS
-//     );
-//     let result = await Swapobj.methods.deposit().send({
-//       from: accounts[0],
-//       value: 100,
-//     });
-//     console.log("result ", result);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-// account,amount
-  const withdraw = async (account:string,amount:bigint,exc_rate:number,txn_hash:string) => {
-  try {
-    const accounts = await web3.eth.getAccounts();
-    const Swapobj = new web3.eth.Contract(
-      Swap.ETHswap_ABI,
-      Swap.ETHswap_ADDRESS
-    );
-    
-    // let owner =await Swapobj.methods._owner().call()
-    // console.log("I am here 1", typeof account, account,typeof amount, amount, typeof exc_rate, exc_rate, typeof txn_hash, txn_hash);
-    
-    let result = await Swapobj.methods.withdraw(account,amount,exc_rate,txn_hash).send({
+
+const contractAddrETH = '0x5f9593a343fB179C1517856A06BAC0626c0eF9F4';
+const contractAddrBSC = '0x5fFD7DE1b3aF0747DBcc2624C27Ee3915AcD5C81';
+const contractAddrDXT = '0x766DC779210d0f64230E94bfBa663E285C148fBb';
+
+const ETHAPI = "https://rinkeby.infura.io/v3/bf991788cf55436c98beee4cc8507b46";
+const BSCAPI = "https://data-seed-prebsc-1-s1.binance.org:8545/";
+const DXTAPI = "https://testnet.dexit.network";
+
+const providerETH = new Provider(privateKey, ETHAPI);
+const providerBSC = new Provider(privateKey, BSCAPI);
+const providerDXT = new Provider(privateKey, DXTAPI);
+
+const web3ETH = new Web3(providerETH);
+const web3BSC = new Web3(providerBSC);
+const web3DXT = new Web3(providerDXT);
+
+const tokenETH = new web3ETH.eth.Contract(
+    Swap_ABI.ABI,
+    contractAddrETH
+)
+
+const tokenBSC = new web3BSC.eth.Contract(
+    Swap_ABI.ABI,
+    contractAddrBSC
+)
+
+const tokenDXT = new web3DXT.eth.Contract(
+    Swap_ABI.ABI,
+    contractAddrDXT
+)
+
+// Function for withdraw ETH
+export const claimETH = async (from:string,amount:bigint,exc_rate:number,transactionHash:string, network:string) => {
+  let status = 'ok';
+  let transactionDetails;
+  console.log("claiming ETH");
+  console.log("from : ",from);
+  console.log("from type : ",typeof(from));
+  from = from.toLowerCase();
+  console.log("from : ",web3.utils.checkAddressChecksum(from));
+  from = await web3.utils.toChecksumAddress(from)
+  console.log(from);
+  
+  console.log("from : ",web3.utils.checkAddressChecksum(from));
+  console.log(transactionHash);
+  
+
+  const hash_value = await tokenETH.methods.transactions(transactionHash).call();
+  console.log("print hash value : ",hash_value);
+  
+  if(hash_value == transactionHash) {
+      console.log("\nTransaction already processed");
+      status = 'error';
+  }
+  if(network == 'BNB'){
+     transactionDetails = await web3BSC.eth.getTransactionReceipt(transactionHash);
+  }else{
+     transactionDetails = await web3DXT.eth.getTransactionReceipt(transactionHash);
+  }
+  
+  console.log("Checking credentials for transactionDetails");
+
+  if(transactionDetails == null) {
+      status = 'invalid hash';
+  }
+
+  console.log("transactionDetails.from : ",transactionDetails.from );
+  console.log("from.toLowerCase() : ",from.toLowerCase());
+  console.log("transactionDetails.to : ",transactionDetails.to);
+  console.log("contractAddrETH.toLowerCase() : ",contractAddrETH.toLowerCase());
+  console.log("transactionDetails.status : ",transactionDetails.status);
+  
+  if (transactionDetails.from == from.toLowerCase() && (transactionDetails.to == contractAddrBSC.toLowerCase() || transactionDetails.to == contractAddrDXT.toLowerCase()) && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+      console.log("\nTransaction details do not match with provided hash");
+      status = '200';
+  }
+ console.log("All checks passed...Finally claiming!");
+  console.log("status is : ", status);
+  
+ if(status == '200'){
+  console.log("again status is : ", status);
+    try {
+      const accounts = await web3.eth.getAccounts();
+      console.log(status);
+      let result = await tokenETH.methods.withdraw(from,amount,exc_rate,transactionHash).send({
         from : accounts[0]
     });
     console.log("result ", result);
-  } catch (error) {
-    console.log(error);
+      console.log("BSC withdraw successfully");
+      
+    } catch (error) {
+      console.log(error);
+    }
   }
-};
 
-// const port = process.env.PORT || 5000;
+}
 
-// withdraw(myadd,amount);
+// Function for withdraw BSC
+export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transactionHash:string, network:string) => {
+  let status = 'ok';
+  let transactionDetails
+  console.log("claiming BSC");
+  console.log("from : ",from);
+  
+  from = web3BSC.utils.toChecksumAddress(from);
+  
+  const hash_value = await tokenBSC.methods.transactions(transactionHash).call();
+  console.log("print hash value : ",hash_value);
+  
+  if(hash_value == transactionHash) {
+      console.log("\nTransaction already processed");
+      status = 'error';
+  }
+  if(network == 'ETH'){
+    transactionDetails = await web3ETH.eth.getTransactionReceipt(transactionHash);
+  }else{
+    transactionDetails = await web3DXT.eth.getTransactionReceipt(transactionHash);
+  }
+  console.log("Checking credentials for transactionDetails",transactionDetails);
 
-// app.post("/withdraw", function (req,res) {
-//   var key1 = req.body.myadd;
-//   var key2 = bigInt(req.body.amount);
-//   withdraw(key1, key2.value);
-//   res.send("API running!");
-// });
+  if(transactionDetails == null) {
+      status = 'invalid hash';
+  }
 
-// app.get("/demo", function (req, res) {
-//   res.send("API 2 running!");
-// });
+  console.log("printing  transactionDetails : ",transactionDetails);
+  console.log("printing from 3 : ",from);
+  
+  console.log("transactionDetails.from : ",transactionDetails.from );
+  console.log("from.toLowerCase() : ",from.toLowerCase());
+  console.log("transactionDetails.to : ",transactionDetails.to);
+  console.log("contractAddrBSC.toLowerCase() : ",contractAddrBSC.toLowerCase());
+  console.log("transactionDetails.status : ",transactionDetails.status);
+  
+  if (transactionDetails.from == from.toLowerCase() && (transactionDetails.to == contractAddrDXT.toLowerCase() || transactionDetails.to == contractAddrETH.toLowerCase()) && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+      console.log("\nTransaction details do not match with provided hash");
+      status = '200';
+  }
+ console.log("All checks passed...Finally claiming!");
+  console.log("status is : ", status);
+  
+ if(status == '200'){
+  console.log("again status is : ", status);
+    try {
+      const accounts = await web3.eth.getAccounts();
+      console.log(status);
+      let result = await tokenBSC.methods.withdraw(from,amount,exc_rate,transactionHash).send({
+        from : accounts[0]
+    });
+    console.log("result ", result);
+      console.log("BSC withdraw successfully");
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-// app.listen(port, () => {
-//   console.log(`server running at port:${port}`);
-// });
+}
 
-export {withdraw}
+// Function for withdraw DXT
+export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transactionHash:string, network:string) => {
+    let status = 'ok';
+    let transactionDetails;
+    console.log("claiming DXT");
+    console.log("from : ",from);
+    
+    from = web3DXT.utils.toChecksumAddress(from);
+    
+    const hash_value = await tokenDXT.methods.transactions(transactionHash).call();
+    console.log("print hash value : ",hash_value);
+    
+    if(hash_value == transactionHash) {
+        console.log("\nTransaction already processed");
+        status = 'error';
+    }
+
+    if(network == 'BNB'){
+      transactionDetails = await web3BSC.eth.getTransactionReceipt(transactionHash);
+    }else{
+      transactionDetails = await web3ETH.eth.getTransactionReceipt(transactionHash);
+    }
+    console.log("Checking credentials for transactionDetails");
+  
+    if(transactionDetails == null) {
+        status = 'invalid hash';
+    }
+  
+    // console.log("transactionDetails.from : ",transactionDetails.from );
+    // console.log("from.toLowerCase() : ",from.toLowerCase());
+    // console.log("transactionDetails.to : ",transactionDetails.to);
+    // console.log("contractAddrDXT.toLowerCase() : ",contractAddrDXT.toLowerCase());
+    // console.log("transactionDetails.status : ",transactionDetails.status);
+    
+    if (transactionDetails.from == from.toLowerCase() && (transactionDetails.to == contractAddrBSC.toLowerCase() || transactionDetails.to == contractAddrETH.toLowerCase()) && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+        console.log("\nTransaction details do not match with provided hash");
+        status = '200';
+    }
+   console.log("All checks passed...Finally claiming!");
+    console.log("status is : ", status);
+    
+   if(status == '200'){
+    console.log("again status is : ", status);
+      try {
+        const accounts = await web3.eth.getAccounts();
+        console.log(status);
+        let result = await tokenDXT.methods.withdraw(from,amount,exc_rate,transactionHash).send({
+          from : accounts[0]
+      });
+      console.log("result ", result);
+        console.log("DXT withdraw successfully");
+        
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+}

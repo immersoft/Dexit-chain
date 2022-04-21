@@ -36,6 +36,7 @@ const typeorm_1 = require("typeorm");
 const index1_1 = __importDefault(require("./index1"));
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
 const txChart_entity_1 = require("./txChart.entity");
+const txTransactionCount_entity_1 = require("./txTransactionCount.entity");
 const Swap = __importStar(require("./swap/swap"));
 const bigInt = require("big-integer");
 const { Client } = require('pg');
@@ -55,14 +56,14 @@ router.get("/transactions", function (req, res) {
         let ID = transactions.map((tx) => tx.id);
         res.json({ data: transactions });
         console.log(ID.length);
-        let t = 0;
-        t = t + 5;
-        if (ID.length >= 15) {
-            const we = txRepo.createQueryBuilder().delete()
-                .from(txChart_entity_1.TransactionTimesEntity)
-                .where("id <= :id", { id: ID[14] })
-                .execute();
-        }
+        // let t=0;
+        //  t=t+5;
+        //   if(ID.length>=15){
+        //     const we=txRepo.createQueryBuilder().delete()
+        //     .from(TransactionTimesEntity)
+        //     .where("id <= :id", { id: ID[14] })
+        //     .execute()
+        //   }
     });
 });
 const count = (0, index1_1.default)();
@@ -70,7 +71,7 @@ console.log(count, 'final count wait for 24 hours');
 setInterval(function () {
     (0, index1_1.default)();
     console.log("function");
-}, 60000 * 60 * 12);
+}, 60000 * 60 * 3);
 router.post("/tx", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(count, "inside post");
@@ -96,13 +97,60 @@ router.post("/validatorInfo", function (req, res) {
         }
     });
 });
+router.get("/blockstransactions", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const txRepo = (0, typeorm_1.getRepository)(txTransactionCount_entity_1.BlockTransactionEntity);
+        const transactions = yield txRepo.find();
+        // console.log("hi")
+        res.json({ data: transactions });
+    });
+});
+router.post("/blockstransactioncount", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const txRepo = (0, typeorm_1.getRepository)(txTransactionCount_entity_1.BlockTransactionEntity);
+        const tx = yield txRepo.create(req.body);
+        const results = yield txRepo.save(tx);
+        return res.send(results);
+    });
+});
+router.post('/transactioncountupdate/:id', function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const txRepo = (0, typeorm_1.getRepository)(txTransactionCount_entity_1.BlockTransactionEntity);
+            // console.log(req.body,"body data")
+            const tx = yield txRepo.create(req.body);
+            const { count, start } = req.body;
+            const results = yield txRepo.update({ id: 1 }, { count: count, start: start });
+            return res.send(results);
+        }
+        catch (error) {
+            console.log(error);
+        }
+    });
+});
 /*********************Swap Router*************************/
-router.post("/withdraw", function (req, res) {
-    var key1 = req.body.account;
+router.post("/withdraw/ETH", function (req, res) {
+    var key1 = req.body.from;
     var key2 = bigInt(req.body.amount);
     var key3 = req.body.exc_rate;
-    var key4 = req.body.txn_hash;
-    const result = Swap.withdraw(key1, key2.value, key3, key4);
+    var key4 = req.body.transactionHash;
+    const result = Swap.claimETH(key1, key2.value, key3, key4);
+    res.send(result);
+});
+router.post("/withdraw/BSC", function (req, res) {
+    var key1 = req.body.from;
+    var key2 = bigInt(req.body.amount);
+    var key3 = req.body.exc_rate;
+    var key4 = req.body.transactionHash;
+    const result = Swap.claimBSC(key1, key2.value, key3, key4);
+    res.send(result);
+});
+router.post("/withdraw/DXT", function (req, res) {
+    var key1 = req.body.from;
+    var key2 = bigInt(req.body.amount);
+    var key3 = req.body.exc_rate;
+    var key4 = req.body.transactionHash;
+    const result = Swap.claimDXT(key1, key2.value, key3, key4);
     res.send(result);
 });
 exports.default = router;

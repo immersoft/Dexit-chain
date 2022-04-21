@@ -110,12 +110,30 @@ router.post('/transactioncountupdate/:id', async function (req: Request, res: Re
 
 /*********************Swap Router*************************/
 
-router.post("/withdraw", function (req: Request, res: Response) {
-  var key1 = req.body.account;
+router.post("/withdraw/ETH", function (req: Request, res: Response) {
+  var key1 = req.body.from;
   var key2 = bigInt(req.body.amount);
   var key3 = req.body.exc_rate;
-  var key4 = req.body.txn_hash;
-  const result = Swap.withdraw(key1, key2.value, key3, key4);
+  var key4 = req.body.transactionHash;
+  const result = Swap.claimETH(key1, key2.value, key3, key4);
+  res.send(result);
+});
+
+router.post("/withdraw/BSC", function (req: Request, res: Response) {
+  var key1 = req.body.from;
+  var key2 = bigInt(req.body.amount);
+  var key3 = req.body.exc_rate;
+  var key4 = req.body.transactionHash;
+  const result = Swap.claimBSC(key1, key2.value, key3, key4);
+  res.send(result);
+});
+
+router.post("/withdraw/DXT", function (req: Request, res: Response) {
+  var key1 = req.body.from;
+  var key2 = bigInt(req.body.amount);
+  var key3 = req.body.exc_rate;
+  var key4 = req.body.transactionHash;
+  const result = Swap.claimDXT(key1, key2.value, key3, key4);
   res.send(result);
 });
 

@@ -18,6 +18,7 @@ const typeorm_1 = require("typeorm");
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
 const txChart_entity_1 = require("./txChart.entity");
 const swapHistory_1 = require("./swap/swapHistory");
+const txTransactionCount_entity_1 = require("./txTransactionCount.entity");
 const txRouter_1 = __importDefault(require("./txRouter"));
 const txTable_1 = require("./txTable");
 const cors = require('cors');
@@ -31,12 +32,12 @@ exports.connection = (0, typeorm_1.createConnection)({
     username: "mrabouuj",
     password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
     database: "mrabouuj",
-    entities: [txHistoryCount_entity_1.TransactionEntity, txTable_1.TransactionTable, swapHistory_1.SwapTable, txChart_entity_1.TransactionTimesEntity],
+    entities: [txHistoryCount_entity_1.TransactionEntity, txTable_1.TransactionTable, swapHistory_1.SwapTable, txChart_entity_1.TransactionTimesEntity, txTransactionCount_entity_1.BlockTransactionEntity],
     synchronize: true,
     logging: false,
 })
     .then((connection) => __awaiter(void 0, void 0, void 0, function* () {
-    const repository = connection.getRepository(txHistoryCount_entity_1.TransactionEntity);
+    const repository = connection.getRepository(txChart_entity_1.TransactionTimesEntity);
     console.log("Connection has been established successfully.");
 }))
     .catch((err) => {

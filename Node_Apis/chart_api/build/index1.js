@@ -15,17 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const web3_1 = __importDefault(require("web3"));
 const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
-const txTable_1 = require("./txTable");
+const txChart_entity_1 = require("./txChart.entity");
 var http = require('http');
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 const web3 = new web3_1.default();
 web3.setProvider("https://testnet.dexit.network");
+// web3.setProvider("http://datafeed.dexit.network");
 let start = 1;
 let init = 1;
 let daylastblock = 0;
 let count = 0;
-let ft = 1646289053;
+let ft = 1648732435;
 function searchTransactionByBlock() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(ft, 'time');
@@ -34,7 +35,7 @@ function searchTransactionByBlock() {
             let getBlockDetails = yield web3.eth.getBlock(i);
             if (getBlockDetails.timestamp >= ft) {
                 daylastblock = getBlockDetails.number;
-                console.log(daylastblock);
+                // console.log(daylastblock);
                 counttransactionperday();
                 ft = ft + 86400;
                 break;
@@ -61,7 +62,7 @@ function searchTransactionByBlock() {
                 yield (0, typeorm_1.getConnection)()
                     .createQueryBuilder()
                     .insert()
-                    .into(txTable_1.TransactionTable)
+                    .into(txChart_entity_1.TransactionTimesEntity)
                     .values([
                     { totalcount: count }
                 ])
