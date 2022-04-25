@@ -93,14 +93,8 @@ export const claimETH = async (from:string,amount:bigint,exc_rate:number,transac
   // console.log("contractAddrETH.toLowerCase() : ",contractAddrETH.toLowerCase());
   // console.log("transactionDetails.status : ",transactionDetails.status);
   
-  if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrBSC.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+  if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrETH.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
       status = '200';
-  }
-  else if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrDXT.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
-    status = '200';
-  }
-  else{
-    console.log("\nTransaction details do not match with provided hash");
   }
 
   // console.log("All checks passed...Finally claiming!");
@@ -155,7 +149,7 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
       status = 'invalid hash';
   }
 
-  // console.log("printing  transactionDetails : ",transactionDetails);
+  console.log("printing  transactionDetails : ",transactionDetails);
   // console.log("printing from 3 : ",from);
   
   // console.log("transactionDetails.from : ",transactionDetails.from );
@@ -164,14 +158,10 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
   // console.log("contractAddrBSC.toLowerCase() : ",contractAddrBSC.toLowerCase());
   // console.log("transactionDetails.status : ",transactionDetails.status);
   
-  if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrETH.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+  if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrBSC.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+    console.log("eth called");
+    
     status = '200';
-  }
-  else if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrDXT.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
-    status = '200';
-  }
-  else{
-    console.log("\nTransaction details do not match with provided hash");
   }
 //  console.log("All checks passed...Finally claiming!");
   console.log("status is : ", status);
@@ -234,14 +224,8 @@ export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transac
     // console.log("contractAddrDXT.toLowerCase() : ",contractAddrDXT.toLowerCase());
     // console.log("transactionDetails.status : ",transactionDetails.status);
     
-    if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrBSC.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+    if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrDXT.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
       status = '200';
-    }
-    else if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrETH.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
-      status = '200';
-    }
-    else{
-      console.log("\nTransaction details do not match with provided hash");
     }
   //  console.log("All checks passed...Finally claiming!");
     console.log("status is : ", status);
