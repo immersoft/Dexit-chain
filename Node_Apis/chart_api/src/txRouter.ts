@@ -136,7 +136,7 @@ router.post('/transactioncountupdate/:id', async function (req: Request, res: Re
     var key5 = req.body.network;
     console.log("key4 : ",key4);
     if(key1 == address){
-      const result = Swap.claimETH(key1, key2.value, key3, key4, key5);
+      const result = await Swap.claimETH(key1, key2.value, key3, key4, key5);
       res.send(result);
     }
   });
@@ -151,7 +151,7 @@ router.post("/withdraw/BSC",async function (req: Request, res: Response) {
   var key5 = req.body.network;
   console.log("key1 : ",key1, "\n address : ",address);
   if(key1 == address){
-    const result = Swap.claimBSC(key1, key2.value, key3, key4, key5);
+    const result = await Swap.claimBSC(key1, key2.value, key3, key4, key5);
     res.send(result);
   }
 });
@@ -172,8 +172,8 @@ router.post("/withdraw/DXT",async function (req: Request, res: Response) {
   console.log("key1 : ",key1, "\n address : ",address);
   
   if(key1 == address){
-    const result = Swap.claimDXT(key1, key2.value, key3, key4, key5);
-    console.log(result);
+    const result = await Swap.claimDXT(key1, key2.value, key3, key4, key5);
+    console.log("this is post API result : ",result);
     res.send(result);
   }
 });

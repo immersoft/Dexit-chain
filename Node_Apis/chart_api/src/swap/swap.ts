@@ -137,16 +137,21 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
   if(hash_value == transactionHash) {
       // console.log("\nTransaction already processed");
       status = 'error';
+      return{status};
   }
   if(network == 'ETH'){
     transactionDetails = await web3ETH.eth.getTransactionReceipt(transactionHash);
-  }else{
+  }else if(network == 'DXT'){
     transactionDetails = await web3DXT.eth.getTransactionReceipt(transactionHash);
+  }else{
+    status = 'Unknown network';
+    return{status};
   }
   // console.log("Checking credentials for transactionDetails",transactionDetails);
 
   if(transactionDetails == null) {
       status = 'invalid hash';
+      return{status};
   }
 
   console.log("printing  transactionDetails : ",transactionDetails);
@@ -159,8 +164,6 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
   // console.log("transactionDetails.status : ",transactionDetails.status);
   
   if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrBSC.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
-    console.log("eth called");
-    
     status = '200';
   }
 //  console.log("All checks passed...Finally claiming!");
@@ -179,7 +182,7 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
     });
     console.log("result ", result);
       console.log("BSC withdraw successfully");
-      
+      return{status ,result};
     } catch (error) {
       console.log(error);
     }
@@ -206,16 +209,17 @@ export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transac
 
     if(network == 'BNB'){
       transactionDetails = await web3BSC.eth.getTransactionReceipt(transactionHash);
-      // console.log("this is network : ",network);
-      
-    }else{
+    }else if(network == 'ETH'){
       transactionDetails = await web3ETH.eth.getTransactionReceipt(transactionHash);
-      // console.log("this is network : ",network ,transactionDetails ,web3ETH);
+    }else{
+      status = 'Unknown network';
+      return{status};
     }
     // console.log("Checking credentials for transactionDetails",transactionDetails, transactionHash ,network);
   
     if(transactionDetails == null) {
         status = 'invalid hash';
+        return{status};
     }
   
     // console.log("transactionDetails.from : ",transactionDetails.from );
@@ -235,19 +239,17 @@ export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transac
 
    if(status == '200'){
     // console.log("again status is : ", status);
-      try {
-        const accounts = await web3.eth.getAccounts();
-        console.log(status);
-        let result = await tokenDXT.methods.withdraw(from,amount,exc_rate,transactionHash).send({
-          from : accounts[0]
-      });
-      console.log("result ", result);
-        // console.log("DXT withdraw successfully");
-        
-      } catch (error) {
-        console.log(error);
-      }
+    try {
+      const accounts = await web3.eth.getAccounts();
+      console.log(status);
+      let result = await tokenDXT.methods.withdraw(from,amount,exc_rate,transactionHash).send({
+        from : accounts[0]
+    });
+    console.log("result ", result);
+      // console.log("DXT withdraw successfully");
+      return{status ,result};
+    } catch (error) {
+      console.log(error);
     }
-    
-
+  }
 }
