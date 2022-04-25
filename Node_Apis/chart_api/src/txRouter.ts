@@ -5,12 +5,15 @@ import { idText } from "typescript";
 import searchTransactionByBlock from "./index1";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import {TransactionTimesEntity} from "./txChart.entity";
-import {BlockTransactionEntity} from './txTransactionCount.entity'
+import {BlockTransactionEntity} from './txTransactionCount.entity';
+import {SwapTable} from "./swap/swapHistory.entity";
 import { TransactionTable } from "./txTable";
 import * as Swap from "./swap/swap";
 const bigInt = require ("big-integer");
 const { Client } = require('pg');
 const router = express.Router();
+const Web3Token = require('web3-token');
+// const SwapTable = require("./swap/swapHistory")
 
 console.log(Swap);
 
@@ -110,31 +113,69 @@ router.post('/transactioncountupdate/:id', async function (req: Request, res: Re
 
 /*********************Swap Router*************************/
 
-router.post("/withdraw/ETH", function (req: Request, res: Response) {
+  router.get("/withdraw/recover", async function (req: Request, res: Response) {
+    const txRepo = getRepository(SwapTable);
+    const transactions = await txRepo.find();
+    let ID = transactions.map((tx) => tx.from)
+    console.log(transactions);    
+    res.json({ data: transactions });
+  });
+
+  router.post("/withdraw/ETH", async function (req: Request, res: Response) { 
+    const token = req.headers['authorization']
+    const {address} = await Web3Token.verify(token);
+    // console.log("printing req : ",req);
+    // console.log("printing req.body.from : ",req.body.from)
+    var key1 = req.body.from;
+    console.log("printing key1 : ",key1);
+    console.log("typeof key1 : ",typeof(key1));
+    
+    var key2 = bigInt(req.body.amount);
+    var key3 = req.body.exc_rate;
+    var key4 = req.body.transactionHash;
+    var key5 = req.body.network;
+    console.log("key4 : ",key4);
+    if(key1 == address){
+      const result = Swap.claimETH(key1, key2.value, key3, key4, key5);
+      res.send(result);
+    }
+  });
+
+router.post("/withdraw/BSC",async function (req: Request, res: Response) {
+  const token = req.headers['authorization']
+  const { address } = await Web3Token.verify(token);
   var key1 = req.body.from;
   var key2 = bigInt(req.body.amount);
   var key3 = req.body.exc_rate;
   var key4 = req.body.transactionHash;
-  const result = Swap.claimETH(key1, key2.value, key3, key4);
-  res.send(result);
+  var key5 = req.body.network;
+  console.log("key1 : ",key1, "\n address : ",address);
+  if(key1 == address){
+    const result = Swap.claimBSC(key1, key2.value, key3, key4, key5);
+    res.send(result);
+  }
 });
 
-router.post("/withdraw/BSC", function (req: Request, res: Response) {
+router.post("/withdraw/DXT",async function (req: Request, res: Response) {
+  
+  const token = req.headers['authorization']
+  const { address } = await Web3Token.verify(token);
+  console.log("printing req.body : ",req.body);
+  
   var key1 = req.body.from;
   var key2 = bigInt(req.body.amount);
   var key3 = req.body.exc_rate;
   var key4 = req.body.transactionHash;
-  const result = Swap.claimBSC(key1, key2.value, key3, key4);
-  res.send(result);
-});
+  var key5 = req.body.network;
+  var key6 = key2.toString();
 
-router.post("/withdraw/DXT", function (req: Request, res: Response) {
-  var key1 = req.body.from;
-  var key2 = bigInt(req.body.amount);
-  var key3 = req.body.exc_rate;
-  var key4 = req.body.transactionHash;
-  const result = Swap.claimDXT(key1, key2.value, key3, key4);
-  res.send(result);
+  console.log("key1 : ",key1, "\n address : ",address);
+  
+  if(key1 == address){
+    const result = Swap.claimDXT(key1, key2.value, key3, key4, key5);
+    console.log(result);
+    res.send(result);
+  }
 });
 
  export default router;

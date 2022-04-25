@@ -1,9 +1,11 @@
+const SwapTable = require("./swapHistory.entity");
 const express = require("express");
 const app = express();
 const cors = require("cors");
 const Web3 = require("web3");
 const Swap_ABI = require("./swapContract");
 const Provider = require("@truffle/hdwallet-provider");
+const getRepository = require("typeorm");
 const privateKey ='ee7615b734368bcc3d901c76fb8882f0072ffc9b26510f2ecb062e02db386775';
 const provider = new Provider(privateKey, "https://testnet.dexit.network");
 const web3 = new Web3(provider);
@@ -47,23 +49,23 @@ const tokenDXT = new web3DXT.eth.Contract(
 export const claimETH = async (from:string,amount:bigint,exc_rate:number,transactionHash:string, network:string) => {
   let status = 'ok';
   let transactionDetails;
-  console.log("claiming ETH");
-  console.log("from : ",from);
-  console.log("from type : ",typeof(from));
+  // console.log("claiming ETH");
+  // console.log("from : ",from);
+  // console.log("from type : ",typeof(from));
   from = from.toLowerCase();
-  console.log("from : ",web3.utils.checkAddressChecksum(from));
-  from = await web3.utils.toChecksumAddress(from)
+  // console.log("from : ",web3.utils.checkAddressChecksum(from));
+  from = web3.utils.toChecksumAddress(from)
   console.log(from);
   
-  console.log("from : ",web3.utils.checkAddressChecksum(from));
+  // console.log("from : ",web3.utils.checkAddressChecksum(from));
   console.log(transactionHash);
   
 
   const hash_value = await tokenETH.methods.transactions(transactionHash).call();
-  console.log("print hash value : ",hash_value);
+  // console.log("print hash value : ",hash_value);
   
   if(hash_value == transactionHash) {
-      console.log("\nTransaction already processed");
+      // console.log("\nTransaction already processed");
       status = 'error';
   }
   if(network == 'BNB'){
@@ -72,24 +74,33 @@ export const claimETH = async (from:string,amount:bigint,exc_rate:number,transac
      transactionDetails = await web3DXT.eth.getTransactionReceipt(transactionHash);
   }
   
-  console.log("Checking credentials for transactionDetails");
+  // console.log("Checking credentials for transactionDetails");
 
   if(transactionDetails == null) {
       status = 'invalid hash';
   }
 
-  console.log("transactionDetails.from : ",transactionDetails.from );
-  console.log("from.toLowerCase() : ",from.toLowerCase());
-  console.log("transactionDetails.to : ",transactionDetails.to);
-  console.log("contractAddrETH.toLowerCase() : ",contractAddrETH.toLowerCase());
-  console.log("transactionDetails.status : ",transactionDetails.status);
+  // console.log("transactionDetails.from : ",transactionDetails.from );
+  // console.log("from.toLowerCase() : ",from.toLowerCase());
+  // console.log("transactionDetails.to : ",transactionDetails.to);
+  // console.log("contractAddrETH.toLowerCase() : ",contractAddrETH.toLowerCase());
+  // console.log("transactionDetails.status : ",transactionDetails.status);
   
-  if (transactionDetails.from == from.toLowerCase() && (transactionDetails.to == contractAddrBSC.toLowerCase() || transactionDetails.to == contractAddrDXT.toLowerCase()) && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
-      console.log("\nTransaction details do not match with provided hash");
+  if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrBSC.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
       status = '200';
   }
- console.log("All checks passed...Finally claiming!");
+  else if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrDXT.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+    status = '200';
+  }
+  else{
+    console.log("\nTransaction details do not match with provided hash");
+  }
+
+  // console.log("All checks passed...Finally claiming!");
   console.log("status is : ", status);
+
+  const txRepo = getRepository(SwapTable);
+  await txRepo.insert({from:from,amount:amount,exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
   
  if(status == '200'){
   console.log("again status is : ", status);
@@ -106,15 +117,15 @@ export const claimETH = async (from:string,amount:bigint,exc_rate:number,transac
       console.log(error);
     }
   }
-
+  // return (status,transactionHash)
 }
 
 // Function for withdraw BSC
 export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transactionHash:string, network:string) => {
   let status = 'ok';
   let transactionDetails
-  console.log("claiming BSC");
-  console.log("from : ",from);
+  // console.log("claiming BSC");
+  // console.log("from : ",from);
   
   from = web3BSC.utils.toChecksumAddress(from);
   
@@ -122,7 +133,7 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
   console.log("print hash value : ",hash_value);
   
   if(hash_value == transactionHash) {
-      console.log("\nTransaction already processed");
+      // console.log("\nTransaction already processed");
       status = 'error';
   }
   if(network == 'ETH'){
@@ -130,30 +141,38 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
   }else{
     transactionDetails = await web3DXT.eth.getTransactionReceipt(transactionHash);
   }
-  console.log("Checking credentials for transactionDetails",transactionDetails);
+  // console.log("Checking credentials for transactionDetails",transactionDetails);
 
   if(transactionDetails == null) {
       status = 'invalid hash';
   }
 
-  console.log("printing  transactionDetails : ",transactionDetails);
-  console.log("printing from 3 : ",from);
+  // console.log("printing  transactionDetails : ",transactionDetails);
+  // console.log("printing from 3 : ",from);
   
-  console.log("transactionDetails.from : ",transactionDetails.from );
-  console.log("from.toLowerCase() : ",from.toLowerCase());
-  console.log("transactionDetails.to : ",transactionDetails.to);
-  console.log("contractAddrBSC.toLowerCase() : ",contractAddrBSC.toLowerCase());
-  console.log("transactionDetails.status : ",transactionDetails.status);
+  // console.log("transactionDetails.from : ",transactionDetails.from );
+  // console.log("from.toLowerCase() : ",from.toLowerCase());
+  // console.log("transactionDetails.to : ",transactionDetails.to);
+  // console.log("contractAddrBSC.toLowerCase() : ",contractAddrBSC.toLowerCase());
+  // console.log("transactionDetails.status : ",transactionDetails.status);
   
-  if (transactionDetails.from == from.toLowerCase() && (transactionDetails.to == contractAddrDXT.toLowerCase() || transactionDetails.to == contractAddrETH.toLowerCase()) && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
-      console.log("\nTransaction details do not match with provided hash");
-      status = '200';
+  if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrETH.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+    status = '200';
   }
- console.log("All checks passed...Finally claiming!");
+  else if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrDXT.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+    status = '200';
+  }
+  else{
+    console.log("\nTransaction details do not match with provided hash");
+  }
+//  console.log("All checks passed...Finally claiming!");
   console.log("status is : ", status);
   
+  const txRepo = getRepository(SwapTable);
+  await txRepo.insert({from:from,amount:amount,exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
+
  if(status == '200'){
-  console.log("again status is : ", status);
+  // console.log("again status is : ", status);
     try {
       const accounts = await web3.eth.getAccounts();
       console.log(status);
@@ -174,13 +193,13 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
 export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transactionHash:string, network:string) => {
     let status = 'ok';
     let transactionDetails;
-    console.log("claiming DXT");
-    console.log("from : ",from);
+    // console.log("claiming DXT");
+    // console.log("from : ",from);
     
     from = web3DXT.utils.toChecksumAddress(from);
     
     const hash_value = await tokenDXT.methods.transactions(transactionHash).call();
-    console.log("print hash value : ",hash_value);
+    // console.log("print hash value : ",hash_value);
     
     if(hash_value == transactionHash) {
         console.log("\nTransaction already processed");
@@ -189,10 +208,13 @@ export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transac
 
     if(network == 'BNB'){
       transactionDetails = await web3BSC.eth.getTransactionReceipt(transactionHash);
+      // console.log("this is network : ",network);
+      
     }else{
       transactionDetails = await web3ETH.eth.getTransactionReceipt(transactionHash);
+      // console.log("this is network : ",network ,transactionDetails ,web3ETH);
     }
-    console.log("Checking credentials for transactionDetails");
+    // console.log("Checking credentials for transactionDetails",transactionDetails, transactionHash ,network);
   
     if(transactionDetails == null) {
         status = 'invalid hash';
@@ -204,15 +226,23 @@ export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transac
     // console.log("contractAddrDXT.toLowerCase() : ",contractAddrDXT.toLowerCase());
     // console.log("transactionDetails.status : ",transactionDetails.status);
     
-    if (transactionDetails.from == from.toLowerCase() && (transactionDetails.to == contractAddrBSC.toLowerCase() || transactionDetails.to == contractAddrETH.toLowerCase()) && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
-        console.log("\nTransaction details do not match with provided hash");
-        status = '200';
+    if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrBSC.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+      status = '200';
     }
-   console.log("All checks passed...Finally claiming!");
+    else if (transactionDetails.from == from.toLowerCase() && transactionDetails.to == contractAddrDXT.toLowerCase() && transactionDetails.status == true) {     // Needs to be converted to lower case since Metamasks check sum requires some letters to be capital and addresses returned from transaction hash are in lowercase
+      status = '200';
+    }
+    else{
+      console.log("\nTransaction details do not match with provided hash");
+    }
+  //  console.log("All checks passed...Finally claiming!");
     console.log("status is : ", status);
     
+    const txRepo = getRepository(SwapTable);
+    await txRepo.insert({from:from,amount:amount,exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
+
    if(status == '200'){
-    console.log("again status is : ", status);
+    // console.log("again status is : ", status);
       try {
         const accounts = await web3.eth.getAccounts();
         console.log(status);
@@ -220,7 +250,7 @@ export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transac
           from : accounts[0]
       });
       console.log("result ", result);
-        console.log("DXT withdraw successfully");
+        // console.log("DXT withdraw successfully");
         
       } catch (error) {
         console.log(error);

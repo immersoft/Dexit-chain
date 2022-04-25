@@ -4,7 +4,7 @@ import { createConnection, getRepository } from "typeorm";
 import { transactionHistoryCount } from "./txHistory";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import {TransactionTimesEntity} from "./txChart.entity";
-import {SwapTable} from "./swap/swapHistory";
+import {SwapTable} from "./swap/swapHistory.entity";
 import {BlockTransactionEntity} from './txTransactionCount.entity'
 
 import Router from "./txRouter";
