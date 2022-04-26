@@ -120,8 +120,15 @@ router.post('/transactioncountupdate/:id', async function (req: Request, res: Re
     if(!transactions){
       return null
     }
-    console.log(transactions);    
+    // console.log(transactions);    
     res.json({transactions});
+  });
+
+  router.get("/withdraw/recover", async function (req: Request, res: Response) {
+    console.log(req.params.from);
+    const txRepo = getRepository(SwapTable);
+    const transactions = await txRepo.find();
+    res.json({ data: transactions });
   });
 
   router.post("/withdraw/ETH", async function (req: Request, res: Response) { 

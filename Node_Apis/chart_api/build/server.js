@@ -17,7 +17,7 @@ const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
 const txChart_entity_1 = require("./txChart.entity");
-const swapHistory_1 = require("./swap/swapHistory");
+const swapHistory_entity_1 = require("./swap/swapHistory.entity");
 const txTransactionCount_entity_1 = require("./txTransactionCount.entity");
 const txRouter_1 = __importDefault(require("./txRouter"));
 const txTable_1 = require("./txTable");
@@ -32,7 +32,7 @@ exports.connection = (0, typeorm_1.createConnection)({
     username: "mrabouuj",
     password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
     database: "mrabouuj",
-    entities: [txHistoryCount_entity_1.TransactionEntity, txTable_1.TransactionTable, swapHistory_1.SwapTable, txChart_entity_1.TransactionTimesEntity, txTransactionCount_entity_1.BlockTransactionEntity],
+    entities: [txHistoryCount_entity_1.TransactionEntity, txTable_1.TransactionTable, swapHistory_entity_1.SwapTable, txChart_entity_1.TransactionTimesEntity, txTransactionCount_entity_1.BlockTransactionEntity],
     synchronize: true,
     logging: false,
 })
