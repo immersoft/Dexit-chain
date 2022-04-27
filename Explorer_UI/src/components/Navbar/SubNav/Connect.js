@@ -9,6 +9,8 @@ import InsertLinkIcon from '@mui/icons-material/InsertLink';
 import { ethers } from "ethers";
 import Web3 from "web3";
 import Web3Eth from 'web3-eth'
+import { BrowserView, MobileView, isBrowser, isMobile } from 'react-device-detect';
+import WalletConnectProvider from "@walletconnect/web3-provider";
 
 
 const StyledMenu = styled((props) => (
@@ -267,10 +269,25 @@ export default function Connect() {
     }
 };
 
+
+const mobileMetamask=async ()=>{
+    if(isMobile) {
+      console.log("mobile");
+    
+    const provider = new WalletConnectProvider({
+      infuraId: "27e484dcd9e3efcfd25a83a78777cdf1",
+    });
+    
+    //  Enable session (triggers QR Code modal)
+    await provider.enable();
+    }
+}
+
   return (
     <div>
+      <BrowserView>
       {walletAddress !=null ? 
-       <Button
+      <Button
        id="demo-customized-button"
        aria-controls={open ? "demo-customized-menu" : undefined}
        aria-haspopup="true"
@@ -283,7 +300,7 @@ export default function Connect() {
        
      >
      <span style={{textTransform:"none"}}>Connected</span>
-     </Button>
+      </Button>
       :
       <Button
         id="demo-customized-button"
@@ -299,6 +316,7 @@ export default function Connect() {
       <span style={{textTransform:"none"}}>Connect Wallet</span>
       </Button>
       }
+      </BrowserView>
       
       <StyledMenu
         id="demo-customized-menu"
@@ -318,6 +336,39 @@ export default function Connect() {
         </MenuItem>
        
       </StyledMenu>
+
+      <MobileView>
+      {walletAddress !=null ? 
+      <Button
+       id="demo-customized-button"
+       aria-controls={open ? "demo-customized-menu" : undefined}
+       aria-haspopup="true"
+       aria-expanded={open ? "true" : undefined}
+       variant="contained"
+       color="success"
+       disableElevation
+       onClick={mobileMetamask}
+       startIcon={<InsertLinkIcon sx={{transform:"rotate(135deg)"}} />}
+       
+     >
+     <span style={{textTransform:"none"}}>Connected</span>
+      </Button>
+      :
+      <Button
+        id="demo-customized-button"
+        aria-controls={open ? "demo-customized-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        variant="outlined"
+        disableElevation
+        onClick={mobileMetamask}
+        startIcon={<InsertLinkIcon sx={{transform:"rotate(135deg)"}} />}
+        
+      >
+      <span style={{textTransform:"none"}}>Connect Wallet</span>
+      </Button>
+      }
+      </MobileView>
     </div>
   );
 }

@@ -115,8 +115,12 @@ export default function AllTransactions() {
   // Avoid a layout jump when reaching the last page with empty rows.
 
   const [dd, setdd] = useState([]);
+  const[dummyData,setDummyData]=useState([])
+
 
   useEffect(() => {
+    reInit()
+
     Init();
   }, []);
 
@@ -126,10 +130,9 @@ export default function AllTransactions() {
 
   // const id = setInterval(() => {
   //   Init();
-  // }, 3000);
+  // }, 4000);
   
   async function Init() {
-    // console.log("init");
     let ab = [];
     let bc = [];
 
@@ -149,13 +152,40 @@ export default function AllTransactions() {
       }
       // console.log("updating the collection of transactions");
       setdd([...dd, ...bc]);
+      // setDummyData([...dummyData, ...bc]);
+
     } catch (error) {
       console.log(error);
     }   
   }
 
+  async function reInit() {
+    try {
+      let demo = [];
+      let blocksDetails=[372530,372554,373094]
+      for (let j =0; j < blocksDetails.length; j++) {
+        let getBlockDetails = await web3.eth.getBlock(blocksDetails[j]);
+
+        if (getBlockDetails.transactions.length > 0) {
+          for (let k = 0; k < getBlockDetails.transactions.length; k++) {
+            let getTransactionDetails = await web3.eth.getTransactionReceipt(
+              getBlockDetails.transactions[k]
+            );
+            console.log(getTransactionDetails)
+            demo.push(getTransactionDetails);
+          }
+        }
+      }
+      setDummyData([...dummyData, ...demo]);
+      // setdd([...dd, ...bc]);
+      console.log(demo,"demo")
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
   const rows = dd;
-  console.log(rows,"transactions")
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
@@ -234,7 +264,7 @@ export default function AllTransactions() {
     <>
   <Grid container>
       <Grid xs={12} md={4}>
-        <img   height={100}  src={dexitLogo} style={{cursor:"pointer"}} onClick={()=>handleHome()}/>
+        <img height={100}  src={dexitLogo} style={{cursor:"pointer"}} onClick={()=>handleHome()}/>
       </Grid>
       
       <Grid xs={12} md={8}>
@@ -324,13 +354,41 @@ export default function AllTransactions() {
                 )}
               </TableBody>
             ) : (
-              <TableRow align="center">
-                <TableCell colSpan={12} align="center">
-                    <Box sx={{ display: 'flex',justifyContent:"center" }}>
-                        <CircularProgress />
-                    </Box>
-                </TableCell>
-              </TableRow>
+              <TableBody>
+                {dummyData
+                .slice(0)
+                .reverse()
+                .map((row, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } ,cursor:"pointer"}}
+                    onClick={()=>handleViewTransaction(row.transactionHash)}
+                  >
+                    <TableCell align="left">
+                    {shortenAccountId(row.transactionHash)}
+                    </TableCell>
+                    <TableCell align="left">{row.blockNumber}</TableCell>
+                    {/* <TableCell align="left">{blockDetailsData ? moment.unix(blockDetailsData.timestamp).format("YYYY-MM-DD h:mm:ss a") :"-"}</TableCell> */}
+                    <TableCell align="left" >{shortenAccountId(row.from)}</TableCell>
+                    <TableCell align="center" style={{width:40}}><ArrowCircleRightRoundedIcon/></TableCell>
+                    <TableCell align="left">{row.to==null ? shortenAccountId(row.contractAddress) : row.to}</TableCell>
+                    <TableCell align="left">{shortenAccountId(row.blockHash)}</TableCell>
+                    {/* {console.log(row.contractAddress,"contractAddress")} */}
+                  </TableRow>
+                ))}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 53 * emptyRows }}>
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+              // <TableRow align="center">
+              //   <TableCell colSpan={12} align="center">
+              //       <Box sx={{ display: 'flex',justifyContent:"center" }}>
+              //           <CircularProgress />
+              //       </Box>
+              //   </TableCell>
+              // </TableRow>
             )}
             <TableFooter>
               <TableRow>

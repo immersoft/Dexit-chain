@@ -137,13 +137,13 @@ export default function Blocks() {
     Init();
   }, []);
 
-  useEffect(() => {
-    clearInterval(id);
-  }, []);
+  // useEffect(() => {
+  //   clearInterval(id);
+  // }, []);
 
-  const id = setInterval(() => {
-    Init();
-  }, 15000);
+  // const id = setInterval(() => {
+  //   Init();
+  // }, 15000);
 
 
 // useEffect(()=>{
@@ -165,7 +165,7 @@ export default function Blocks() {
 
     try {
       let currentBlock = await web3.eth.getBlockNumber();
-      for (let j = currentBlock - 15; j <= currentBlock; j++) {
+      for (let j = currentBlock - 15; j < currentBlock; j++) {
         let getBlockDetails = await web3.eth.getBlock(j);
         bc.push(getBlockDetails);
       }

@@ -23,10 +23,11 @@ export default function Transactions() {
   // web3.setProvider("http://datafeed.dexit.network");
 
   const [dd, setdd] = useState([]);
+  const[dummyData,setDummyData]=useState([])
   
   useEffect(() => {
-
-Init()    
+    Init()    
+    reInit()
     return () => {
     }
   }, [])
@@ -49,6 +50,33 @@ Init()
         }
       }
       setdd([...dd, ...bc]);
+      // setDummyData([...dd, ...bc]);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  async function reInit() {
+    try {
+      let demo = [];
+      let blocksDetails=[372530,372554]
+      for (let j =0; j < blocksDetails.length; j++) {
+        let getBlockDetails = await web3.eth.getBlock(blocksDetails[j]);
+
+        if (getBlockDetails.transactions.length > 0) {
+          for (let k = 0; k < getBlockDetails.transactions.length; k++) {
+            let getTransactionDetails = await web3.eth.getTransactionReceipt(
+              getBlockDetails.transactions[k]
+            );
+            demo.push(getTransactionDetails);
+          }
+        }
+      }
+      setDummyData([...dummyData, ...demo]);
+      // setdd([...dd, ...bc]);
+      console.log(demo,"demo")
     } catch (error) {
       console.log(error);
     }
@@ -167,15 +195,54 @@ Init()
                   </TableRow>
                 ))}
               </TableBody>
-            ) : (
-              <TableRow align="center">
-                <TableCell colSpan={12} align="center">
-                  <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <CircularProgress />
-                  </Box>
-                </TableCell>
-              </TableRow>
-            )}{" "}
+            ) :
+             (
+              <TableBody>
+              {( dummyData
+                ).slice(0)
+                .reverse().map((row, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    "&:last-child td, &:last-child th": { border: 0 },
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleTransactionInfo(row.transactionHash)}
+                >
+                  <TableCell component="th" scope="row">
+                    <span id="block_number">
+                      <Avatar sx={{ mr: 1 }}>Tx</Avatar>
+                      {shortenAccountId(row.transactionHash)}
+                    </span>
+                  </TableCell>
+                  <TableCell align="left">
+                    From{" "}
+                    <span style={{ color: "#6F98DB" }}>
+                      {shortenAccountId(row.from)}
+                    </span>
+                    <br />
+                    To{" "}
+                    <span style={{ color: "#6F98DB" }}>
+                      {row.to == null
+                        ? shortenAccountId(row.contractAddress)
+                        : shortenAccountId(row.to)}
+                    </span>
+                  </TableCell>
+                  <TableCell align="left">{row.blockNumber}</TableCell>
+
+                  {/* <TableCell align="left">{row.to==null ? shortenAccountId(row.contractAddress) : shortenAccountId(row.to)}</TableCell> */}
+                  {/* <TableCell align="left">{shortenAccountId(row.blockHash)}</TableCell> */}
+                </TableRow>
+              ))}
+            </TableBody>
+              // <TableRow align="center">
+              //   <TableCell colSpan={12} align="center">
+              //     <Box sx={{ display: "flex", justifyContent: "center" }}>
+              //       <CircularProgress />
+              //     </Box>
+              //   </TableCell>
+              // </TableRow>
+            )}
           </Table>
           <Button
             className="blocksBtn"

@@ -112,7 +112,7 @@ const Header3 = () => {
   };
 
   const handleBlock = () => {
-    navigate("/blocks");
+    navigate("/allblocks");
   };
 
   const handleVoting=()=>{

@@ -5,6 +5,9 @@ import fromExponential from 'from-exponential';
 import Connection from "../../../Deposite";
 import bigInt from 'big-integer';
 import Web3 from 'web3';
+import Web3Token from 'web3-token';
+import axios from "axios";
+import SwapHistory from './SwapHistory';
 
 const Swap = () => {
     const [fromValue, setFromValue] = React.useState('');
@@ -20,6 +23,8 @@ const Swap = () => {
     const[bnbUSDPrice,setBNBUSDPrice]=useState()
     let [account, setAccount] = useState("");
     const web3 = new Web3();
+    const[historyData,setHistoryData]=useState()
+
 
     // console.log(Connection,"contract",account)
 
@@ -27,6 +32,7 @@ const Swap = () => {
         try {
           account = await window.ethereum.selectedAddress;
           setAccount(account);
+          console.log("printing account in get account : ",account);
         } catch (error) {
           console.log(error);
         }
@@ -52,7 +58,25 @@ const Swap = () => {
         try {
             console.log(account)
             let valueAmount=bigInt(enteredAmount*10**18)
-            let depositeAmount=await Connection.deposit({value:valueAmount.value})
+            let depositeAmount;
+
+            switch(toValue) {
+              case 'ETH':
+                // code block
+                depositeAmount = await Connection.webETH.deposit({value:valueAmount.value})
+                break;
+              case 'BNB':
+                // code block
+                depositeAmount = await Connection.webBSC.deposit({value:valueAmount.value})
+                break;
+              case 'DXT':
+                // code block
+                depositeAmount = await Connection.webDXT.deposit({value:valueAmount.value})
+                break;
+              default:
+                // code block
+            }
+            
             console.log(depositeAmount,"depositeAmount")
             console.log(swapAmount,"swapAmount")
             let abc=await depositeAmount.wait()
@@ -70,29 +94,68 @@ const Swap = () => {
        
     }
 
-    const withdrawApi=(hash,amount)=>{
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-
-        var raw = JSON.stringify({
-        "account": account,
-        "amount": parseInt(amount),
-        "exc_rate": 1,
-        "txn_hash": hash,
-        });
-
-        var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
+    const withdrawApi= async (hash,amount)=>{
+      console.log(toValue,"called")
+        // var myHeaders = new Headers();
+        // myHeaders.append("Content-Type", "application/json");
+        console.log("printing account : ",account);
+        var data = {
+          "from": account,
+          "amount": parseInt(amount),
+          "exc_rate": 1,
+          "transactionHash": hash,
+          "network":fromValue,
         };
+        console.log("printing data : ",data);
+        // var raw = await JSON.stringify(data);
+        // console.log("printing raw : ",raw);
+        // var requestOptions = {
+        //   method: 'POST',
+        //   headers: myHeaders,
+        //   body: raw,
+        //   redirect: 'follow'
+        // };
 
-        fetch("https://dxt-explorer.herokuapp.com/withdraw", requestOptions)
-        .then(response => response.text())
-        .then(result => console.log(result))
-        .catch(error => console.log('error', error));
-            }
+        // fetch("https://dxt-explorer.herokuapp.com/withdraw", requestOptions)
+        // .then(response => response.text())
+        // .then(result => console.log(result))
+        // .catch(error => console.log('error', error));
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const address = (await web3.eth.getAccounts())[0];
+        const token = await Web3Token.sign(msg => web3.eth.personal.sign(msg, address), '1d');
+        switch(toValue) {
+          case 'ETH':
+            // code block
+            console.log ("insite ETH");
+            // attaching token to axios authorization header
+            axios.post('http://localhost:5000/withdraw/ETH',  data , {
+              headers: {
+                'Authorization': token,
+              }
+            })
+          break;
+          case 'BNB':
+            // code block
+            axios.post('http://localhost:5000/withdraw/BSC', data, {
+              headers: {
+                'Authorization': token,
+              }
+            })
+          break;
+          case 'DXT':
+            // code block
+            axios.post('http://localhost:5000/withdraw/DXT', data, {
+              headers: {
+                'Authorization': token,
+              }
+            })
+          break;
+          default:
+            // code block
+            console.log("choose valid token");
+        }
+    }
 
     async function fetchBNBDetails() {
         const response = await fetch(
@@ -132,6 +195,7 @@ const Swap = () => {
       }
 
     useEffect(()=>{
+        getHistory()
         fetchBNBDetails()
         fetchETHDetails()
         fetchDXTDetails()
@@ -198,7 +262,20 @@ const Swap = () => {
 }
 
 
-   
+const getHistory=()=>{
+  var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+    
+    fetch("http://localhost:5000/withdraw/recover", requestOptions)
+      .then(response => response.text())
+      .then(result => {
+          setHistoryData(JSON.parse(result))
+          console.log(JSON.parse(result))
+      })
+      .catch(error => console.log('error', error));
+}
 
   return (
     <>
@@ -286,8 +363,12 @@ const Swap = () => {
             </Grid>
           </Box>
         </Card>
-      </div>
 
+       
+      </div>
+      <div>
+          <SwapHistory historyDataAll={historyData}/>
+        </div>
     </>
   )
 }

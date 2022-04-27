@@ -30,6 +30,7 @@ import ValidatorUnstake from "./components/Pages/Stacking/ValidatorUnstake";
 import Faucet from "./components/Pages/Faucet/Faucet";
 import SearchBalance from "./components/Pages/SearchData/SearchBalance";
 import Swap from "./components/Pages/Swap/Swap";
+import TokenDeploy from "./components/Pages/TokenDeploy/TokenDeploy";
 
 function App() {
   return (
@@ -124,6 +125,15 @@ function App() {
             element={
               <>
                 <SearchHash />
+              </>
+            }
+          />
+
+          <Route
+            path="/deploy"
+            element={
+              <>
+                <TokenDeploy />
               </>
             }
           />

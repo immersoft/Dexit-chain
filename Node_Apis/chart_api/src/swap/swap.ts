@@ -101,7 +101,7 @@ export const claimETH = async (from:string,amount:bigint,exc_rate:number,transac
   console.log("status is : ", status);
 
   const txRepo = getRepository(SwapTable);
-  await txRepo.insert({from:from,amount:amount.toString(),exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
+  await txRepo.insert({from:from.toLowerCase(),amount:amount.toString(),exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
   
  if(status == '200'){
   console.log("again status is : ", status);
@@ -170,7 +170,7 @@ export const claimBSC = async (from:string,amount:bigint,exc_rate:number,transac
   console.log("status is : ", status);
   
   const txRepo = getRepository(SwapTable);
-  await txRepo.insert({from:from,amount:amount.toString(),exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
+  await txRepo.insert({from:from.toLowerCase(),amount:amount.toString(),exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
 
  if(status == '200'){
   // console.log("again status is : ", status);
@@ -235,7 +235,7 @@ export const claimDXT = async (from:string,amount:bigint,exc_rate:number,transac
     console.log("status is : ", status);
     
     const txRepo = getRepository(SwapTable);
-    await txRepo.insert({from:from,amount:amount.toString(),exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
+    await txRepo.insert({from:from.toLowerCase(),amount:amount.toString(),exc_rate:exc_rate,transactionHash:transactionHash,network:network,tx_status:status})
 
    if(status == '200'){
     // console.log("again status is : ", status);

@@ -41,7 +41,7 @@ function Graph() {
 	const [data, updateData] = useState([]);
 
 	useEffect(() => {
-		axios.get("https://final-explorer.herokuapp.com/transactions").then((res)=>{
+		axios.get("https://final-dxt.herokuapp.com/transactions").then((res)=>{
 			// console.log("ressasdjksjkdhdfs",res.data.data)
 			updateData(res.data.data);
 

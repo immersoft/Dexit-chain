@@ -42,7 +42,7 @@ const DetailsBox = () => {
       redirect: "follow",
     };
 
-    fetch("https://final-explorer.herokuapp.com/blockstransactions", requestOptions)
+    fetch("https://final-dxt.herokuapp.com/blockstransactions", requestOptions)
       .then((response) => response.text())
       .then((result) => {
         // console.log(JSON.parse(result))
@@ -71,7 +71,7 @@ const DetailsBox = () => {
       redirect: "follow",
     };
 
-    fetch("https://final-explorer.herokuapp.com/transactioncountupdate/1", requestOptions)
+    fetch("https://final-dxt.herokuapp.com/transactioncountupdate/1", requestOptions)
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log("error", error));

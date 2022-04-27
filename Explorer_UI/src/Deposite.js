@@ -1,10 +1,31 @@
 import { ethers } from "ethers";
-
 if (window.ethereum) {
-  const contractAddress= "0x5cfFB20aE061BaE7387Bfe249Ba0b5da87140D5A";
+	console.log("window.ethereum : ",window.ethereum);
+//   const contractAddress= "0x5cfFB20aE061BaE7387Bfe249Ba0b5da87140D5A";
+const contractAddrETH = '0x5f9593a343fB179C1517856A06BAC0626c0eF9F4';
+const contractAddrBSC = '0x5fFD7DE1b3aF0747DBcc2624C27Ee3915AcD5C81';
+const contractAddrDXT = '0x766DC779210d0f64230E94bfBa663E285C148fBb';
   
 
   const contractAbi=[
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "_owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
 	{
 		"inputs": [],
 		"name": "deposit",
@@ -14,8 +35,50 @@ if (window.ethereum) {
 	},
 	{
 		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
+		"name": "getCurrentBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "transactions",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "reciever",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "exc_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "txn_hash",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -54,38 +117,20 @@ if (window.ethereum) {
 	{
 		"stateMutability": "payable",
 		"type": "receive"
-	},
-	{
-		"inputs": [],
-		"name": "_owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getCurrentBalance",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
 	}
 ]
-
   
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  var web = new ethers.Contract(contractAddress, contractAbi, signer);
+
+  var webETH = new ethers.Contract(contractAddrETH, contractAbi, signer);
+  var webBSC = new ethers.Contract(contractAddrBSC, contractAbi, signer);
+  var webDXT = new ethers.Contract(contractAddrDXT, contractAbi, signer);
+  
 }
-export default web;
+console.log("window.ethereum out side : ",window.ethereum);
+export default {
+	webETH,
+	webBSC,
+	webDXT,
+};

@@ -214,6 +214,19 @@ export default function Navbar() {
           </IconButton>
         </MenuItem>
 
+        <MenuItem>
+          <IconButton
+            size="small"
+            aria-label="show 4 new mails"
+            color="inherit"
+            onClick={() => handleDeploy()}
+          >
+            <span style={{ fontSize: "13px", textTransform: "uppercase" }}>
+              Deploy
+            </span>
+          </IconButton>
+        </MenuItem>
+
 
         {/* <MenuItem>
           <IconButton
@@ -322,6 +335,10 @@ export default function Navbar() {
       navigate('/swap')
     }
 
+
+    const handleDeploy=()=>{
+      navigate('/deploy')
+    }
 
   return (
     <>
@@ -432,9 +449,9 @@ export default function Navbar() {
               </span>
             </Button>
 
-            {/* <Button
+            <Button
               id="demo-customized-button"
-              onClick={()=>handleVoting()}
+              onClick={() => handleDeploy()}
               disableElevation
               sx={{ border: "none", color: "#7A93B4" }}
             >
@@ -445,15 +462,15 @@ export default function Navbar() {
                   textTransform: "none"
                 }}
               >
-                Voting
+                Deploy
               </span>
-            </Button> */}
+            </Button>
+
+           
 
 
             <Box sx={{ml:1}}>
-             
                 <Voting/>
-              
             </Box>
 
             {/* <Box
