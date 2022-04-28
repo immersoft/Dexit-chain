@@ -22,6 +22,7 @@ import {
     TableBody,
     CircularProgress,
   } from "@mui/material";
+  import { ethers } from "ethers";
   import LoadingButton from "@mui/lab/LoadingButton";
   import { useTheme } from "@mui/material/styles";
   import OutlinedInput from "@mui/material/OutlinedInput";
@@ -62,12 +63,14 @@ import {
   ];
   
   
-  export default function SwapHistory({historyDataAll}) {
+  export default function SwapHistory({swapCalled}) {
   
     const[allInfo,setAllInfo]=useState()
     const[historyData,setHistoryData]=useState()
     let [account, setAccount] = useState("");
     const[sortedData,setSortedData]=useState()
+    const [currentAccount, setCurrentAccount] = useState("");
+    const [userAddress, setUserAddress] = useState("");
 
     const getAccounts = async () => {
         try {
@@ -77,17 +80,21 @@ import {
           console.log(error)
         }
     };
-    
-    try {
-      window.ethereum.on("accountsChanged", function () {
-        getAccounts();
-      });
-    } catch (error) {
-      console.log(error)
+   
+    const accountChanged=()=>{
+        try {
+            window.ethereum.on("accountsChanged", function () {
+              getAccounts();
+            });
+          } catch (error) {
+            console.log(error)
+          }
     }
+    
    
     useEffect(() => {
       getAccounts();
+      accountChanged()
     },[]);
 
     const getHistory=()=>{
@@ -105,19 +112,73 @@ import {
             .catch(error => console.log('error', error));
     }
 
+    const detailsOn = async () =>{
+        const { ethereum } = window;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const addr = await signer.getAddress();
+        setUserAddress(addr.toString());
+      }
+
+    const checkIfWalletIsConnected = async () =>{
+        try{
+          const { ethereum } = window;
+    
+        //   if(!ethereum){
+        //     console.log("Use Metamask!");
+        //   } else{
+        //     console.log("Ethereum object found", ethereum);
+        //     detailsOn();
+        //   }
+    
+          const accounts = await ethereum.request({method: 'eth_accounts'});
+    
+          if(accounts !== 0){
+            const account = accounts[0];
+            console.log("Found an authorized account ", account);
+            setCurrentAccount(account);
+            detailsOn();
+          } else{
+            console.log("Could not find an authorized account");
+          }
+        } catch(error){
+          console.log(error);
+        }
+      }
+
+    useEffect(()=>{
+        checkIfWalletIsConnected()
+        getAbc()
+    },[])
+
+
+    async function getAbc(){
+        let web3= new Web3(window.ethereum);
+        let ch=await web3.eth.getAccounts();
+        console.log("web3",ch )
+        setAccount(ch[0])         
+    }
 
     const getPastHistory=()=>{
-        var requestOptions = {
-            method: 'GET',
-            redirect: 'follow'
-          };
-          
-          fetch("http://localhost:5000/withdraw/recover/0xe49d9e71bc14552e5a4c4708e5c7c410a269d4c9", requestOptions)
-            .then(response => response.text())
-            .then(result => {console.log(JSON.parse(result))
-                setSortedData(JSON.parse(result))
-            })
-            .catch(error => console.log('error', error));
+    //   getAccounts();
+        console.log("calledpast")
+        if(account){
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow'
+              };
+              
+              console.log(currentAccount,"current")
+              console.log(account,"account")
+    
+              fetch(`http://localhost:5000/withdraw/recover/${account.toLowerCase()}`, requestOptions)
+                .then(response => response.text())
+                .then(result => {console.log(JSON.parse(result),"lllll")
+                    setSortedData(JSON.parse(result))
+                })
+                .catch(error => console.log('error', error));
+        }
+       
     }
 
     const withdrawApi= async (item)=>{
@@ -168,11 +229,10 @@ import {
       }
 
     useEffect(()=>{
-        // getHistory()
         getPastHistory()
-    },[])
+    },[account])
 
-
+    console.log(swapCalled,"swapCalled")
 
     const copyHash = (val) => {
       console.log("side");
@@ -196,6 +256,8 @@ import {
         fullStr?.substr(fullStr?.length - backChars)
       );
     };
+
+    console.log(sortedData,"sortedData")
   
     return (
       <>
@@ -208,7 +270,7 @@ import {
               </Typography>
               <Divider />
   
-                {sortedData !=undefined?
+                {sortedData !=undefined  ?
               <Grid container sx={{pl:3,pr:3}}>
                 <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650, p: 2 }} aria-label="simple table">
@@ -229,6 +291,7 @@ import {
                       </TableRow>
                     </TableHead>
                   <TableBody>
+                      {console.log(sortedData,"sortedData234")}
                     {sortedData ? sortedData.transactions.map((item,index)=>{
                       return(
                         // <>
@@ -296,7 +359,6 @@ import {
                 </Table> 
           </TableContainer>
               </Grid>
-  
               :
               <>           
                <div className="voting_loader">

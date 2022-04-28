@@ -8,6 +8,8 @@ import Web3 from 'web3';
 import Web3Token from 'web3-token';
 import axios from "axios";
 import SwapHistory from './SwapHistory';
+import { ToastContainer, toast } from "react-toastify";
+
 
 const Swap = () => {
     const [fromValue, setFromValue] = React.useState('');
@@ -22,12 +24,16 @@ const Swap = () => {
     const[bnbethPrice,setBNBETHPrice]=useState()
     const[bnbUSDPrice,setBNBUSDPrice]=useState()
     let [account, setAccount] = useState("");
+    const[swapCalled,setSwapCalled]=useState(false)
+
     const web3 = new Web3();
+    web3.setProvider(window.ethereum);  
+
     const[historyData,setHistoryData]=useState()
 
 
     // console.log(Connection,"contract",account)
-
+console.log(account,"account")
     const getAccounts = async () => {
         try {
           account = await window.ethereum.selectedAddress;
@@ -47,7 +53,10 @@ const Swap = () => {
       }, []);
 
     const handleChange = (event) => {
+      console.log(event.target.value,"lklklll");
         setFromValue(event.target.value);
+
+        checkChainId(event.target.value)
     };
 
     const handleToChange = (event) => {
@@ -199,6 +208,7 @@ const Swap = () => {
         fetchBNBDetails()
         fetchETHDetails()
         fetchDXTDetails()
+        checkChainId()
         // swapValue()
     },[])
 
@@ -259,26 +269,69 @@ const Swap = () => {
     
     setSwapAmount(fromExponential(finalAmount))
     deposite(fromExponential(finalAmount))
+    setSwapCalled(!swapCalled)
 }
 
 
-const getHistory=()=>{
-  var requestOptions = {
-      method: 'GET',
-      redirect: 'follow'
-    };
-    
-    fetch("http://localhost:5000/withdraw/recover", requestOptions)
-      .then(response => response.text())
-      .then(result => {
-          setHistoryData(JSON.parse(result))
-          console.log(JSON.parse(result))
-      })
-      .catch(error => console.log('error', error));
-}
+    const getHistory=()=>{
+      var requestOptions = {
+          method: 'GET',
+          redirect: 'follow'
+        };
+        
+        fetch("http://localhost:5000/withdraw/recover", requestOptions)
+          .then(response => response.text())
+          .then(result => {
+              setHistoryData(JSON.parse(result))
+              console.log(JSON.parse(result))
+          })
+          .catch(error => console.log('error', error));
+    }
+
+    const checkChainId=async(value)=>{
+      console.log("callled",value)
+      if(!value){
+        return "";
+      }
+      var network = 0;
+      network = await web3.eth.net.getId().then(function(result) {
+        console.log(result);
+        if(value=="DXT" && result=="899"){
+          console.log("inside if" ,result)
+        }
+
+       else if(value=="ETH" && result=="4"){
+          // if(result=="1" || result=="4"){
+          console.log("eth if condition",result)
+          // }
+        }
+
+       else if(value=="BNB" && result=='97'){
+          // if(result=="56" || result=="97"){
+          console.log("eth if condition",result)
+          // }
+        }
+        else{
+          console.log("else condition")
+          toast.error("Wrong Network");
+        }
+        return result;
+      });
+      console.log(network,"network")
+    }
+
+  // useEffect(()=>{
+  //   if(fromValue==='DXT'){
+  //     var network = 0;
+  //     network = await eth.net.getId();
+  //   }
+
+  // },[fromValue])
 
   return (
     <>
+      <ToastContainer />
+
      <div
         className="stack_modal"
         style={{ display: "flex", justifyContent: "center" }}
@@ -348,7 +401,6 @@ const getHistory=()=>{
                     </MenuItem>
                     <MenuItem value='ETH'>ETH</MenuItem>
                     <MenuItem value='BNB'>BNB</MenuItem>
-                    <MenuItem value='USD'>USD</MenuItem>
                     <MenuItem value='DXT'>DXT</MenuItem>
                     </Select>
                 </FormControl>
@@ -366,8 +418,8 @@ const getHistory=()=>{
 
        
       </div>
-      <div>
-          <SwapHistory historyDataAll={historyData}/>
+        <div>
+          <SwapHistory historyDataAll={historyData} swapCalled={swapCalled}/>
         </div>
     </>
   )

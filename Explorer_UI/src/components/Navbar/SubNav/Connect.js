@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React,{useEffect, useState} from "react";
 import { styled, alpha } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
@@ -246,19 +246,32 @@ export default function Connect() {
 
   React.useEffect(() => {
     if (window.ethereum) {
+      getAbc()
+    
       // detect Network account change
-      window.ethereum.on("chainChanged", function (networkId) {
-        // getNetworkDetails();
-      });
-      window.ethereum.on("accountsChanged", function (accounts) {
-        if (accounts[0]) {
-          console.log(accounts[0]) 
-          setWalletAddress(accounts[0])         
-        }
-      });
+      // window.ethereum.on("chainChanged", function (networkId) {
+      //   // getNetworkDetails();
+      // });
+      // window.ethereum.on("accountsChanged", function (accounts) {
+      //   if (accounts[0]) {
+      //     console.log(accounts[0]) 
+      //     setWalletAddress(accounts[0])         
+      //   }
+      // });
     }
     getAccounts()
   }, []);
+
+  async function getAbc(){
+    let web3= new Web3(window.ethereum);
+    let ch=await web3.eth.getAccounts();
+    console.log("web3",ch )
+    setWalletAddress(ch[0])         
+  }
+
+// useEffect(()=>{
+//   connectWalletHandler()
+// },[])
 
   const getAccounts = async () => {
     try {
@@ -285,7 +298,7 @@ const mobileMetamask=async ()=>{
 
   return (
     <div>
-      <BrowserView>
+      {/* <BrowserView> */}
       {walletAddress !=null ? 
       <Button
        id="demo-customized-button"
@@ -316,7 +329,7 @@ const mobileMetamask=async ()=>{
       <span style={{textTransform:"none"}}>Connect Wallet</span>
       </Button>
       }
-      </BrowserView>
+      {/* </BrowserView> */}
       
       <StyledMenu
         id="demo-customized-menu"
@@ -337,7 +350,7 @@ const mobileMetamask=async ()=>{
        
       </StyledMenu>
 
-      <MobileView>
+      {/* <MobileView>
       {walletAddress !=null ? 
       <Button
        id="demo-customized-button"
@@ -368,7 +381,7 @@ const mobileMetamask=async ()=>{
       <span style={{textTransform:"none"}}>Connect Wallet</span>
       </Button>
       }
-      </MobileView>
+      </MobileView> */}
     </div>
   );
 }
