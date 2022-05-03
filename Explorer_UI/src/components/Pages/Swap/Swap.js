@@ -37,7 +37,7 @@ console.log(account,"account")
     const getAccounts = async () => {
         try {
           account = await window.ethereum.selectedAddress;
-          setAccount(account);
+          // setAccount(account);
           console.log("printing account in get account : ",account);
         } catch (error) {
           console.log(error);
@@ -50,7 +50,17 @@ console.log(account,"account")
     
       useEffect(() => {
         getAccounts();
+        getAbc()
       }, []);
+
+
+      async function getAbc(){
+        let web3= new Web3(window.ethereum);
+        let ch=await web3.eth.getAccounts();
+        console.log("web3",ch )
+        setAccount(ch[0])         
+    }
+
 
     const handleChange = (event) => {
       console.log(event.target.value,"lklklll");
@@ -165,7 +175,7 @@ console.log(account,"account")
             console.log("choose valid token");
         }
     }
-
+     
     async function fetchBNBDetails() {
         const response = await fetch(
           "https://api.coingecko.com/api/v3/coins/binancecoin"
@@ -204,7 +214,7 @@ console.log(account,"account")
       }
 
     useEffect(()=>{
-        getHistory()
+        // getHistory()
         fetchBNBDetails()
         fetchETHDetails()
         fetchDXTDetails()

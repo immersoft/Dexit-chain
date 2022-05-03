@@ -145,7 +145,7 @@ router.post('/transactioncountupdate/:id', async function (req: Request, res: Re
     var key4 = req.body.transactionHash;
     var key5 = req.body.network;
     console.log("key4 : ",key4);
-    if(key1 == address){
+    if(key1.toLowerCase() == address.toLowerCase()){
       const result = await Swap.claimETH(key1, key2.value, key3, key4, key5);
       res.send(result);
     }
@@ -159,8 +159,10 @@ router.post("/withdraw/BSC",async function (req: Request, res: Response) {
   var key3 = req.body.exc_rate;
   var key4 = req.body.transactionHash;
   var key5 = req.body.network;
+  console.log(key1.toLowerCase()==address.toLowerCase(),"insideeee");
+
   console.log("key1 : ",key1, "\n address : ",address);
-  if(key1 == address){
+  if(key1.toLowerCase() == address.toLowerCase()){
     const result = await Swap.claimBSC(key1, key2.value, key3, key4, key5);
     res.send(result);
   }
@@ -180,8 +182,9 @@ router.post("/withdraw/DXT",async function (req: Request, res: Response) {
   var key6 = key2.toString();
 
   console.log("key1 : ",key1, "\n address : ",address);
-  
-  if(key1 == address){
+  console.log(key1.toLowerCase()==address.toLowerCase(),"insideeee");
+
+  if(key1.toLowerCase() == address.toLowerCase()){
     const result = await Swap.claimDXT(key1, key2.value, key3, key4, key5);
     console.log("this is post API result : ",result);
     res.send(result);
