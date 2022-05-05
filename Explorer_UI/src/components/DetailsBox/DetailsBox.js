@@ -17,10 +17,13 @@ const DetailsBox = () => {
   const [toggleApiHandle, setToggleApiHandle] = useState(true);
   const [apiTotal, setApiTotal] = useState();
   const [hightCount,setHighestCount]=useState()
+  const[highestValidatorCounts,setHighestValidatorCounts]=useState(0)
+  const[getVotingPower,setTotalVotingPower]=useState(0)
 
   const web3 = new Web3();
   // web3.setProvider("http://192.168.1.41:8545");
   web3.setProvider("https://testnet.dexit.network");  
+  // web3.setProvider(window.ethereum);  
 
   // web3.setProvider("http://datafeed.dexit.network");
 
@@ -142,7 +145,41 @@ const DetailsBox = () => {
     }
 }
 
+
+const validatorsCount=()=>{
+  var requestOptions = {
+    method: 'GET',
+    redirect: 'follow'
+  };
+  
+  fetch("https://final-dxt.herokuapp.com/getHighestValidators", requestOptions)
+    .then(response => response.text())
+    .then(result =>{ 
+      // console.log(JSON.parse(result))
+      setHighestValidatorCounts(JSON.parse(result))
+    })
+    .catch(error => console.log('error', error));
+}
+
+
+const totalVotingPower=()=>{
+  var requestOptions = {
+    method: 'GET',
+    redirect: 'follow'
+  };
+  
+  fetch("https://final-dxt.herokuapp.com/getvotingpower", requestOptions)
+    .then(response => response.text())
+    .then(result => {
+      // console.log(result)
+      setTotalVotingPower(JSON.parse(result))
+    })
+    .catch(error => console.log('error', error));
+}
+
   useEffect(() => {
+    totalVotingPower()
+    validatorsCount()
     getBalanceData()
     fetchDXTDetails();
   }, []);
@@ -237,15 +274,20 @@ const DetailsBox = () => {
                         <Typography sx={{ color: "gray" }}>
                           ACTIVE VALIDATOR
                         </Typography>
-                        <Typography>{hightCount ? hightCount: "0"}</Typography>
+                        {/* <Typography>{hightCount ? hightCount: "0"}</Typography> */}
+                        <Typography>{highestValidatorCounts!=0 ? highestValidatorCounts.data: "0"}</Typography>
                       </Box>
                       <Box>
                         <Typography sx={{ color: "gray", ml: 4 }}>
                           VOTING POWER
                         </Typography>
                         <Typography sx={{ textAlign: "end" }}>
-                          {votingPower
+                          {/* {votingPower
                             ? votingPower.slice(0, -18)
+                            : "0"} */}
+
+                          {getVotingPower!=0
+                            ? getVotingPower.data.slice(0, -18)
                             : "0"}
                         </Typography>
                       </Box>

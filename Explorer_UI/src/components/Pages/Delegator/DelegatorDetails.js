@@ -289,7 +289,7 @@ const DelegatorDetails = () => {
                             .unix(item.endTime).add(3, 'days').calendar()
                             }
                             </TableCell>
-                            
+                               
                             <TableCell>
                                 <Button variant="outlined" success onClick={()=>unStackAmount(item)}>Un-Stake</Button>
                             </TableCell>
