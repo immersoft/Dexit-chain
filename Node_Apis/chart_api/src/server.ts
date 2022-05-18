@@ -5,7 +5,7 @@ import { transactionHistoryCount } from "./txHistory";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import {TransactionTimesEntity} from "./txChart.entity";
 import {BlockTransactionEntity} from './txTransactionCount.entity'
-
+import {SwapTable} from './swap/swapHistory.entity'
 import Router from "./txRouter";
 import Web3 from "web3";
 import { TransactionTableCounter } from "./txTable";
@@ -22,7 +22,7 @@ export const connection = createConnection({
   username: "mrabouuj",
   password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
   database: "mrabouuj",
-  entities: [TransactionEntity,TransactionTableCounter,TransactionTimesEntity,BlockTransactionEntity],
+  entities: [TransactionEntity,TransactionTableCounter,TransactionTimesEntity,BlockTransactionEntity,SwapTable],
   synchronize: true,
   logging: false,
 })
@@ -42,9 +42,10 @@ app.get("/", function (req,res) {
 });
 
 
+
 app.use(Router);
 
-const port = process.env.PORT || 5000; 
+const port = process.env.PORT || 3000; 
 
 app.listen(port, () => {
   console.log(`server running at port:${port}`);

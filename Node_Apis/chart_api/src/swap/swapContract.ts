@@ -1,7 +1,4 @@
-
-const ETHswap_ADDRESS = "0xf8265648604e8832B00bf1f1CF25F7FA164B8AEc";
-
-const ETHswap_ABI = [
+const ABI = [
 	{
 		"inputs": [],
 		"name": "deposit",
@@ -25,6 +22,16 @@ const ETHswap_ABI = [
 				"internalType": "uint256",
 				"name": "_amount",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "exc_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "txn_hash",
+				"type": "bytes32"
 			}
 		],
 		"name": "withdraw",
@@ -67,10 +74,44 @@ const ETHswap_ABI = [
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "transactions",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "reciever",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "exc_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "txn_hash",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	}
-];
+]
+
 
 module.exports = {
-    ETHswap_ABI,
-    ETHswap_ADDRESS,
+    ABI,
 };
