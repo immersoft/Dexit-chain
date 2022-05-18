@@ -5,15 +5,14 @@ import "./lib/BytesToTypes.sol";
 import "./lib/Memory.sol";
 import "./interface/ISlashIndicator.sol";
 import "./interface/IParamSubscriber.sol";
-//import "./interface/IBSCValidatorSet.sol";
+import "./interface/IBSCValidatorSet.sol";
 import "./lib/SafeMath.sol";
-//import "hardhat/console.sol";
 
-contract BSCValidatorSet is System {
+contract BSCValidatorSet is IBSCValidatorSet, System {
     using SafeMath for uint256;
 
-    uint256 public constant MISDEMEANOR_THRESHOLD = 20;
-    uint256 public constant FELONY_THRESHOLD = 40;
+    uint256 public constant MISDEMEANOR_THRESHOLD = 50;
+    uint256 public constant FELONY_THRESHOLD = 150;
     uint256 public constant EXPIRE_TIME_SECOND_GAP = 1000;
     uint256 public constant MAX_NUM_OF_VALIDATORS = 41;
 
@@ -62,7 +61,6 @@ contract BSCValidatorSet is System {
         _;
     }
 
-    /*********************** events **************************/
     /*********************** init **************************/
    function init() external onlyNotInit {
         expireTimeSecondGap = EXPIRE_TIME_SECOND_GAP;
@@ -71,14 +69,14 @@ contract BSCValidatorSet is System {
         alreadyInit = true;
         misdemeanorThreshold = MISDEMEANOR_THRESHOLD;
         felonyThreshold = FELONY_THRESHOLD;
-        proposalLastingPeriod = 50 minutes;
+        proposalLastingPeriod = 3 days;  //3 days
         Validator storage valInfo = validatorInfo[0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475];
         valInfo.validator = 0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475;
         valInfo.status = Status.NotExist;
     }
 
     /*********************** External Functions **************************/
-    // function deposit(address valAddr) public payable {
+     //function deposit(address valAddr) public payable {
    function deposit(address valAddr)
         external
         payable
@@ -88,41 +86,28 @@ contract BSCValidatorSet is System {
     {
         uint256 value = msg.value;
         Validator storage valInfo = validatorInfo[valAddr];
-        // if(valInfo.validator == address(0)){
-        //     highestValidators.push(valAddr);
-        //     currentValidators.push(valAddr);
-        //     valInfo.validator = valAddr;
-        //     valInfo.status = Status.NotExist;
-        //     //valInfo.amount = 0;
-        //     //valInfo.coins = 0;
-        //     valInfo.income = value;
-        //     valInfo.TotalIncome = value;
-        //     return;
-        // }
 
         require(valInfo.status != Status.Jailed); // Check for Not Exist Or Jailed
         require(valInfo.status != Status.Unstaked);
 
         if(valInfo.amount == 0){
-            // console.log("Came under Deposit", valInfo.amount);
+           
             valInfo.income.add(value);
             valInfo.TotalIncome.add(value);
             return;
         }
         uint256 percentageToTransfer = valInfo.amount.mul(100).div(valInfo.coins);
-        // console.log("% to transfer", percentageToTransfer);
+     
         uint256 rewardAmount = value.mul(percentageToTransfer).div(100);
-        // console.log("RewardAmount", rewardAmount);
+      
         valInfo.income = valInfo.income + rewardAmount; // Reseting income of validator
-        // console.log("Income", valInfo.income);
 
         valInfo.TotalIncome = valInfo.TotalIncome.add(rewardAmount);
-        // console.log("TotalIncome", valInfo.TotalIncome);
 
         uint256 remainingDelegatorRewardAmount = value.sub(rewardAmount); // Remaining delgators reward amount;
-        // console.log("Remaining Delegators Reward amount", remainingDelegatorRewardAmount);
+  
         uint256 totalCoinsByDelegators = valInfo.coins.sub(valInfo.amount);
-        // console.log("Total Coins By delegators", totalCoinsByDelegators);
+   
         distributeRewardToDelegators(
             remainingDelegatorRewardAmount,
             valAddr,
@@ -189,68 +174,48 @@ contract BSCValidatorSet is System {
     address[] public punishValidator;
 
     /**********Constant**********/
-    uint256 public constant minimum_Stake_Amount = 10 ether; // Minimum Stake DXT
-    uint256 public constant Max_Validators = 5; // Total Max Validator
-    uint64 public constant StakingLockPeriod = 10 seconds; // Stake Locking Period
-    uint64 public constant unjailingPeriod = 5 minutes;
-    uint64 public constant RewardClaimingPeriod = 30;
+    uint256 public constant minimum_Stake_Amount = 10000 ether; // Minimum Stake DXT
+    uint256 public constant Max_Validators = 5; // Total Max Validator(5)
+    uint64 public constant StakingLockPeriod = 151200; // Stake Locking Period(7 days)
+    uint64 public constant unjailingPeriod = 2 days;  //2 days
+    uint64 public constant RewardClaimingPeriod = 21600;   //24 hrs 21600
 
     /***************state of the contract******************/
     uint256 public minimumStakeAmount;
     uint256 public MaxValidators;
 
     /**********Events**********/
-    event StakeValidator(
-        address indexed validator,
-        uint256 amount,
-        uint256 time
-    );
+   event StakeValidator(address indexed validator, uint256 amount);
     event StakeDelegator(
         address indexed delegator,
         address indexed validator,
-        uint256 amount,
-        uint256 time
+        uint256 amount
     );
-    event RemoveFromHighestValidators(address indexed validator, uint256 time);
-    event RemoveFromCurrentValidatorsList(
-        address indexed validator,
-        uint256 time
-    );
-    event UnstakeValidator(
-        address indexed validator,
-        uint256 indexed amount,
-        uint256 time
-    );
+    event RemoveFromHighestValidators(address indexed validator);
+    event RemoveFromCurrentValidatorsList(address indexed validator);
+    event UnstakeValidator(address indexed validator);
     event UnstakeDelegator(
         address indexed validator,
-        address indexed delegator,
-        uint256 amount,
-        uint256 time
+        address indexed delegator
     );
     event WithdrawValidatorStaking(
         address indexed validator,
-        uint256 indexed amount,
-        uint256 time
+        uint256 indexed amount
     );
     event WithdrawDelegatorStaking(
         address indexed delegator,
         address indexed validator,
-        uint256 indexed amount,
-        uint256 time
+        uint256 indexed amount
     );
     event DelegatorClaimReward(
         address indexed delegator,
         address indexed validator,
-        uint256 amount,
-        uint256 time
+        uint256 amount
     );
-    event ValidatorClaimReward(
-        address indexed validator,
-        uint256 amount,
-        uint256 time
-    );
-    event PunishValidator(address indexed validator, uint256 time);
-    event RemoveFromPunishValidator(address indexed validator, uint256 time);
+    event ValidatorClaimReward(address indexed validator, uint256 amount);
+    event PunishValidator(address indexed validator);
+    event RemoveFromPunishValidator(address indexed validator);
+
 
     // Function for staking validators
     function stakeValidator() external payable zeroAddress returns (bool) {
@@ -263,10 +228,6 @@ contract BSCValidatorSet is System {
 
         require(stakeamount > 0, "Can't Stake 0 DXT");
         require(valInfo.status != Status.Jailed, "Validator Jailed");
-
-        // if (stakeamount <= 0) {
-        //     return false;
-        // }
 
         if (valInfo.amount == 0 && Status.NotExist == valInfo.status) {
             require(
@@ -332,9 +293,8 @@ contract BSCValidatorSet is System {
         ) {
             highestValidators.push(addValAddress);
         }
-       votePower = calcVotePower();
 
-        emit StakeValidator(staker, stakeamount, block.timestamp);
+        emit StakeValidator(staker, stakeamount);
         totalDXTStake = totalDXTStake.add(stakeamount);
         return true;
     }
@@ -398,8 +358,8 @@ contract BSCValidatorSet is System {
         if (valInfo.status != Status.Staked) {
             valInfo.status = Status.Staked;
         }
-        votePower = calcVotePower();
-        emit StakeDelegator(staker, validator, stakeamount, block.timestamp);
+        //votePower = calcVotePower();
+        emit StakeDelegator(staker, validator, stakeamount);
         totalDXTStake = totalDXTStake.add(stakeamount);
         return true;
     }
@@ -448,8 +408,10 @@ contract BSCValidatorSet is System {
             highestValidators.push(addValAddress);
         }
 
-        votePower = calcVotePower();
-        emit UnstakeValidator(staker, unstakeamount, block.timestamp);
+        //  Update in Struct Proposal
+
+        //votePower = calcVotePower();
+        emit UnstakeValidator(staker);
         return true;
     }
 
@@ -471,9 +433,7 @@ contract BSCValidatorSet is System {
 
         emit UnstakeDelegator(
             validator,
-            delegator,
-            unstakeamount,
-            block.timestamp
+            delegator
         );
         return true;
     }
@@ -550,8 +510,8 @@ contract BSCValidatorSet is System {
         ) {
             highestValidators.push(highValidator);
         }
-        votePower = calcVotePower();
-        emit WithdrawValidatorStaking(staker, amount, block.timestamp);
+        //votePower = calcVotePower();
+        emit WithdrawValidatorStaking(staker, amount);
         totalDXTStake = totalDXTStake.sub(amount);
         return true;
     }
@@ -620,13 +580,12 @@ contract BSCValidatorSet is System {
         }
 
         staker.transfer(amount);
-        votePower = calcVotePower();
+        //votePower = calcVotePower();
 
         emit WithdrawDelegatorStaking(
             staker,
             validator,
-            amount,
-            block.timestamp
+            amount
         );
         totalDXTStake = totalDXTStake.sub(amount);
         return true;
@@ -656,7 +615,7 @@ contract BSCValidatorSet is System {
             rewardClaimRecords[staker] = block.number;
             valInfo.income = 0; // Reseting income of validator
         }
-        emit ValidatorClaimReward(staker, rewardAmount, block.timestamp);
+        emit ValidatorClaimReward(staker, rewardAmount);
         return true;
     }
 
@@ -695,8 +654,7 @@ contract BSCValidatorSet is System {
         emit DelegatorClaimReward(
             delegator,
             validator,
-            staking,
-            block.timestamp
+            staking
         );
         return true;
     }
@@ -731,10 +689,10 @@ contract BSCValidatorSet is System {
 
     /**********************Slashing**********************/
 
-     function slash(address validator) public {
-         punish(validator);
-     }
-    function punish(address validator) private {
+    //  function slash(address validator) public {
+    //      punish(validator);
+    //  }
+    function punish(address validator) external override {  //external override
         //Get The Validator Info to Change Status
         Validator storage valInfo = validatorInfo[validator];
         // Get Punish Record of the Validator
@@ -794,8 +752,8 @@ contract BSCValidatorSet is System {
             // Reset the Validator Missed Block Counter
             valInfo.income = 0;
         }
-        votePower = calcVotePower();
-        emit PunishValidator(validator, block.timestamp);
+        //votePower = calcVotePower();
+        emit PunishValidator(validator);
     }
 
     //Function to Unjailed the validator
@@ -843,7 +801,7 @@ contract BSCValidatorSet is System {
             punishInfo.isPunished = false;
 
             removeFromPunishValidator(requester); // Remove From Punish Record
-            votePower = calcVotePower();
+            //votePower = calcVotePower();
         }
     }
 
@@ -926,7 +884,7 @@ contract BSCValidatorSet is System {
                     highestValidators[k] = highestValidators[n - 1]; //Swapping of addresses and plced unstake validator into last index so that we can pop.
                 }
                 highestValidators.pop();
-                emit RemoveFromHighestValidators(val, block.timestamp);
+                emit RemoveFromHighestValidators(val);
                 break;
             }
         }
@@ -940,7 +898,7 @@ contract BSCValidatorSet is System {
                     currentValidators[i] = currentValidators[n - 1];
                 }
                 currentValidators.pop();
-                emit RemoveFromCurrentValidatorsList(val, block.timestamp);
+                emit RemoveFromCurrentValidatorsList(val);
                 break;
             }
         }
@@ -954,7 +912,7 @@ contract BSCValidatorSet is System {
                     punishValidator[j] = punishValidator[n - 1];
                 }
                 punishValidator.pop();
-                emit RemoveFromPunishValidator(val, block.timestamp);
+                emit RemoveFromPunishValidator(val);
                 break;
             }
         }
@@ -1048,9 +1006,9 @@ contract BSCValidatorSet is System {
         return currentValidators;
     }
 
-    // function getPunishValidators() public view returns (address[] memory) {
-    //     return punishValidator;
-    // }
+    function getPunishValidators() public view returns (address[] memory) {
+        return punishValidator;
+    }
 
     function getPunishInfo(address validator)
         public
@@ -1066,17 +1024,17 @@ contract BSCValidatorSet is System {
         return (p.missedBlockCounter, p.index, p.jailedTime, p.isPunished);
     }
 
-    // function getBlockNumber() public view returns (uint256) {
-    //     return block.number;
-    // }
+    function getBlockNumber() public view returns (uint256) {
+        return block.number;
+    }
 
     function getHighestValidators() public view returns (address[] memory) {
         return highestValidators;
     }
 
-    // function getContractBalance() public view returns (uint256) {
-    //     return address(this).balance;
-    // }
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
 
     /****************Voting Functionality********************/
     uint256 public votePower;
@@ -1117,6 +1075,13 @@ contract BSCValidatorSet is System {
         bool auth;
     }
 
+    struct activeProposal{
+        mapping(address => bool) isEligible;
+        mapping(address => uint256) individualCoins;
+        uint256 totalVotePower;
+    }
+    mapping(bytes32 => activeProposal) public activeProposalMap;
+
     mapping(bytes32 => ProposalInfo) public proposals;
     mapping(address => mapping(bytes32 => VoteInfo)) public votes;
     mapping(address => bytes32[]) public userProposals;
@@ -1149,7 +1114,7 @@ contract BSCValidatorSet is System {
 
     function chcekProposal() public view returns (bytes32[] memory) {
         return ProposalsArray;
-    }
+    } 
 
     function authchangevalues(bytes32 id) public {
         if (
@@ -1183,7 +1148,9 @@ contract BSCValidatorSet is System {
                         validatorInfo[highestValidatorAddress].coins >=
                         minimumStakeAmount &&
                         highestValidatorAddress != address(0)
-                    ) {
+                    )
+                     
+                    {
                         highestValidators.push(highestValidatorAddress);
                     } else {
                         break;
@@ -1228,7 +1195,7 @@ contract BSCValidatorSet is System {
             }
         }
         pass[msg.sender] = false;
-        votePower = calcVotePower();
+        //votePower = calcVotePower();
     }
 
     function createProposal(
@@ -1238,16 +1205,10 @@ contract BSCValidatorSet is System {
     ) external payable onlyValidator returns (bool) {
         //address storage val = msg.sender;
         Validator storage valInfo = validatorInfo[msg.sender];
-        
-        require(
-            valInfo.status != Status.Jailed &&
-                Status.NotExist != valInfo.status &&
-                Status.Unstaked != valInfo.status,
-            "Active validator only"
-        ); // Check for Not Exist Or Jailed
+        require(valInfo.status == Status.Staked,"Only Active Validator"); // Only Active Validator
         address dst = msg.sender;
         //Compare 2 string
-        //Validator can only Made these two proposals.
+        //Validator can only Made these two proposals.onlyValidator
         require(
             keccak256(bytes(vari_name)) == keccak256(bytes("MaxValidators")) ||
                 keccak256(bytes(vari_name)) ==
@@ -1258,12 +1219,6 @@ contract BSCValidatorSet is System {
         require(msg.value == 1 ether, "Must pay 1 DXT");
         // console.log("Calling now User Proposal");
         bytes32[] memory UserProposal = userProposal();
-        // console.log("User Proposal Array Length",UserProposal.length);
-
-        // for(uint j=0;j< UserProposal.length;j++){
-        //     bytes32  abc = UserProposal[j];
-        //     console.logBytes32(abc); 
-        // }
 
         //Restrictions for create proposal for minimum stake amount
         if (
@@ -1331,11 +1286,21 @@ contract BSCValidatorSet is System {
         bytes32 uID = id;
         //Details can't be more than 100 words
         require(bytes(details).length <= 100, "Details too long");
-        // console.logBytes32(pID);
-        // console.logBytes32()
-        //require(proposals[id].createTime == 0, "Proposal already exists");
+      
+        activeProposal storage activeInfo = activeProposalMap[id];
+        uint256 updateCoins = 0;  
+        for (uint256 i = 0; i < highestValidators.length; i++) {   
+            address currentaddr = highestValidators[i];
+            uint256 coins = validatorInfo[currentaddr].coins;
+            activeInfo.isEligible[currentaddr] = true; //  Set IsEligible
+            activeInfo.individualCoins[currentaddr] = coins; // Update individualCoins Map
+            // updTotalCoins = updTotalCoins.add(validatorInfo[currentaddr].coins);
+           updateCoins =  updateCoins.add(coins);
+        }
+        activeInfo.totalVotePower = updateCoins;
+        //console.log("Updated Coins:",updateCoins);
+
         //Set into the mapping
-        // console.log("Filling Up Details Now.....");
         ProposalInfo memory proposal;
         proposal.proposer = msg.sender;
         proposal.dst = dst;
@@ -1350,12 +1315,11 @@ contract BSCValidatorSet is System {
         proposals[id] = proposal;
         ProposalsArray.push(pID);
         
-        votePower = calcVotePower();
+        votePower = activeInfo.totalVotePower;
         emit LogCreateProposal(id, msg.sender, dst, block.timestamp);
         return true;
     }
      
-
     //Will return current values of minimumStakeAmount & MaxValidators
     function currentValue(string memory vari_name)
         public
@@ -1378,24 +1342,20 @@ contract BSCValidatorSet is System {
         return userProposals[msg.sender];
     }
 
-    //All current Validators will vote to that proposal
+    //All Current Highest  Validators will vote to that proposal
     function voteProposal(bytes32 id, string calldata vote)
         external
-        onlyValidator
         returns (bool)
     {
-        bool auth;
-        Validator storage valInfo = validatorInfo[msg.sender];
-        address voter = msg.sender;
-        require(isTopValidator(voter),"Not a active validator");
-        require(
-            valInfo.status != Status.Jailed &&
-                Status.NotExist != valInfo.status &&
-                Status.Unstaked != valInfo.status,
-            "Only Active Validator"
-        ); // Check for Not Exist Or Jailed
-        //check if proposal is comleted or not for this id
-        require(proposals[id].access == true, "Voting completed for this ID");
+        
+       bool auth;
+        activeProposal storage activeInfo = activeProposalMap[id];
+        bool isEligible = activeInfo.isEligible[msg.sender];
+        require(isEligible == true,"Not Eligible");// Check Present in Eligible List 
+        require(proposals[id].access == true, "Voting completed for this ID");//Check if Proposal is Comleted or Not for this id
+        require(proposals[id].createTime != 0, "Proposal not exist"); // Check for Proposal Exist
+        require(votes[msg.sender][id].voteTime == 0,"You can't vote for a proposal twice");// Check Can't Vote for Same Proposal Twice
+        require(block.timestamp < proposals[id].createTime + proposalLastingPeriod,"Proposal Expired");//Checks Proposal is expired or Not
         //checks spelling of true or false
         if (keccak256(bytes(vote)) == keccak256(bytes("true"))) {
             auth = true;
@@ -1405,36 +1365,24 @@ contract BSCValidatorSet is System {
             revert("Invalid Vote");
         }
 
-        require(proposals[id].createTime != 0, "Proposal not exist");
-        require(
-            votes[msg.sender][id].voteTime == 0,
-            "You can't vote for a proposal twice"
-        );
-        //Checks proposal is expired or not
-        require(
-            block.timestamp < proposals[id].createTime + proposalLastingPeriod,
-            "Proposal expired"
-        );
-        uint256 totalCoinCheck;
-        (totalCoinCheck) = calcVotePower();
         //If any validator pass the proposal then his coins will be added in votePower
-        if (auth == true) {
-            (, , , uint256 coins, , , ) = getValidatorInfo(msg.sender);
+        uint256 icoin = activeInfo.individualCoins[msg.sender]; // Get Individual Coins 
+        if (auth) {
             proposals[id].votePowerOfAgree =
                 proposals[id].votePowerOfAgree +
-                coins;
-        }
-        //If any validator pass the proposal then his coins will be added in votePower
-        if (auth == false) {
-            (, , , uint256 coins, , , ) = getValidatorInfo(msg.sender);
+                icoin;
+        }else{
+           
             proposals[id].votePowerOfDisagree =
                 proposals[id].votePowerOfDisagree +
-                coins;
+                icoin;
         }
-        //store data into the mapping votes
+
+        //Store data into the mapping votes
         votes[msg.sender][id].voteTime = block.timestamp;
         votes[msg.sender][id].voter = msg.sender;
         votes[msg.sender][id].auth = auth;
+
         emit LogVote(id, msg.sender, auth, block.timestamp);
 
         // update dst status if proposal is passed
@@ -1449,33 +1397,19 @@ contract BSCValidatorSet is System {
             // do nothing if dst already passed or rejected.
             return true;
         }
-        // Validator storage valInfo = validatorInfo[msg.sender];
-        votePower = 0;
-        votePower = calcVotePower();
-        // for (uint256 i = 0; i < highestValidators.length; i++) {
-        //     Validator memory valInfo2 = validatorInfo[highestValidators[i]];
-        //     // console.log("step ",currentValidators[i]);
-        //     if (
-        //         valInfo2.status != Status.Jailed &&
-        //         Status.NotExist != valInfo2.status &&
-        //         Status.Unstaked != valInfo2.status
-        //     ) {
-        //         // console.log("demo : ", validatorInfo[currentValidators[i]].coins ,votePower ,i);
-        //         // console.log("currentValidators : ",currentValidators[i]);
-        //         votePower =
-        //             votePower +
-        //             validatorInfo[highestValidators[i]].coins;
-        //     }
-        // }
-        // console.log(votePower);
-        // votePower = totalDXTStake - votePower;
-        // console.log(votePower);
+
+        // Total Coins Proposal ID
+        uint256 totalVotePower = activeInfo.totalVotePower;
+        
+       
         //If voting is agreed by 51% calculating votingPower then update the mapping
-        if (proposals[id].votePowerOfAgree >= (votePower / 2) + 1) {
+        if (proposals[id].votePowerOfAgree >= (totalVotePower / 2) + 1) {
             pass[proposals[id].dst] = true;
             proposals[id].resultExist = true;
             proposals[id].proposer.transfer(1 ether);
+    
             authchangevalues(id);
+        
             proposals[id].ispassed = true;
             proposals[id].access = false;
 
@@ -1483,7 +1417,7 @@ contract BSCValidatorSet is System {
             return true;
         }
         //If voting is dis-agreed by 51% calculating votingPower then update the mapping
-        if (proposals[id].votePowerOfDisagree >= (votePower / 2) + 1) {
+        if (proposals[id].votePowerOfDisagree >= (totalVotePower / 2) + 1) {
             proposals[id].resultExist = true;
             proposals[id].ispassed = false;
             proposals[id].access = false;
@@ -1492,14 +1426,23 @@ contract BSCValidatorSet is System {
         return true;
     }
 
+
+    function getActiveProposal(bytes32 _id) public view returns(bool,uint256,uint256){
+        activeProposal storage activeInfo = activeProposalMap[_id];
+        uint256 icoins = activeInfo.individualCoins[msg.sender];
+        bool isPresent = activeInfo.isEligible[msg.sender];
+        uint tvp = activeInfo.totalVotePower;
+        return(isPresent,icoins,tvp);
+    }
+
 /********************Internal Function**********************/
-function calcVotePower() private view returns(uint256) {
-       uint256 totalCoin;
-       for(uint256 i = 0; i < highestValidators.length; i++) {
-         totalCoin = totalCoin.add(validatorInfo[highestValidators[i]].coins);
-       }
-       return totalCoin;
-    }   
+// function calcVotePower() private view returns(uint256) {
+//        uint256 totalCoin;
+//        for(uint256 i = 0; i < highestValidators.length; i++) {
+//          totalCoin = totalCoin.add(validatorInfo[highestValidators[i]].coins);
+//        }
+//        return totalCoin;
+//     }   
      
 
 }
