@@ -13,7 +13,7 @@ import { urlToHttpOptions } from "url";
 import { url } from "inspector";
 import { exit } from "process";
 import { Query } from "typeorm/driver/Query";
-import { TransactionTable } from "./txTable";
+import { TransactionTableCounter } from "./txTable";
 var http = require('http');
 const app = express();
 app.use(express.json());
@@ -29,7 +29,7 @@ let start =1;
 let init=1;
 let daylastblock=0;
 let count=0;
-let ft = 1648732435;
+let ft = 1649355895;
 export default async function searchTransactionByBlock() {
 
 
@@ -77,7 +77,7 @@ console.log(count,'count');
 await getConnection()
     .createQueryBuilder()
     .insert()
-    .into(TransactionTimesEntity)
+    .into(TransactionTableCounter)
     .values([
         { totalcount: count}
      ])

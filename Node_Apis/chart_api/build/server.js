@@ -17,7 +17,6 @@ const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
 const txChart_entity_1 = require("./txChart.entity");
-const swapHistory_entity_1 = require("./swap/swapHistory.entity");
 const txTransactionCount_entity_1 = require("./txTransactionCount.entity");
 const txRouter_1 = __importDefault(require("./txRouter"));
 const txTable_1 = require("./txTable");
@@ -25,6 +24,7 @@ const cors = require('cors');
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(cors());
+require("dotenv").config();
 exports.connection = (0, typeorm_1.createConnection)({
     type: "postgres",
     host: "castor.db.elephantsql.com",
@@ -32,12 +32,12 @@ exports.connection = (0, typeorm_1.createConnection)({
     username: "mrabouuj",
     password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
     database: "mrabouuj",
-    entities: [txHistoryCount_entity_1.TransactionEntity, txTable_1.TransactionTable, swapHistory_entity_1.SwapTable, txChart_entity_1.TransactionTimesEntity, txTransactionCount_entity_1.BlockTransactionEntity],
+    entities: [txHistoryCount_entity_1.TransactionEntity, txTable_1.TransactionTableCounter, txChart_entity_1.TransactionTimesEntity, txTransactionCount_entity_1.BlockTransactionEntity],
     synchronize: true,
     logging: false,
 })
     .then((connection) => __awaiter(void 0, void 0, void 0, function* () {
-    const repository = connection.getRepository(txChart_entity_1.TransactionTimesEntity);
+    const repository = connection.getRepository(txTable_1.TransactionTableCounter);
     console.log("Connection has been established successfully.");
 }))
     .catch((err) => {

@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const web3_1 = __importDefault(require("web3"));
 const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
-const txChart_entity_1 = require("./txChart.entity");
+const txTable_1 = require("./txTable");
 var http = require('http');
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -26,7 +26,7 @@ let start = 1;
 let init = 1;
 let daylastblock = 0;
 let count = 0;
-let ft = 1648732435;
+let ft = 1649355895;
 function searchTransactionByBlock() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(ft, 'time');
@@ -62,7 +62,7 @@ function searchTransactionByBlock() {
                 yield (0, typeorm_1.getConnection)()
                     .createQueryBuilder()
                     .insert()
-                    .into(txChart_entity_1.TransactionTimesEntity)
+                    .into(txTable_1.TransactionTableCounter)
                     .values([
                     { totalcount: count }
                 ])

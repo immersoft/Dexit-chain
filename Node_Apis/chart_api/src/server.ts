@@ -4,16 +4,16 @@ import { createConnection, getRepository } from "typeorm";
 import { transactionHistoryCount } from "./txHistory";
 import { TransactionEntity } from "./txHistoryCount.entity";
 import {TransactionTimesEntity} from "./txChart.entity";
-import {SwapTable} from "./swap/swapHistory.entity";
 import {BlockTransactionEntity} from './txTransactionCount.entity'
 
 import Router from "./txRouter";
 import Web3 from "web3";
-import { TransactionTable } from "./txTable";
+import { TransactionTableCounter } from "./txTable";
 const cors=require('cors')
 const app = express();
 app.use(express.json());
 app.use(cors())
+require("dotenv").config();
 
 export const connection = createConnection({
   type: "postgres",
@@ -22,13 +22,13 @@ export const connection = createConnection({
   username: "mrabouuj",
   password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
   database: "mrabouuj",
-  entities: [TransactionEntity,TransactionTable,SwapTable,TransactionTimesEntity,BlockTransactionEntity],
+  entities: [TransactionEntity,TransactionTableCounter,TransactionTimesEntity,BlockTransactionEntity],
   synchronize: true,
   logging: false,
 })
   .then(async(connection) => {
   
-    const repository = connection.getRepository(TransactionTimesEntity);
+    const repository = connection.getRepository(TransactionTableCounter);
 
    
     console.log("Connection has been established successfully.");
@@ -40,8 +40,6 @@ export const connection = createConnection({
 app.get("/", function (req,res) {
   res.send("API running!");
 });
-
-
 
 
 app.use(Router);

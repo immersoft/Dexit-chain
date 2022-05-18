@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn,CreateDateColumn,UpdateDateColumn } from "typeorm";
 
-@Entity('times')
-export class TransactionTable {
+@Entity('graphp')
+export class TransactionTableCounter {
   @PrimaryGeneratedColumn()
   id!:number;
   
@@ -12,6 +12,5 @@ export class TransactionTable {
   @CreateDateColumn()
 created_at:Date;
     
-
 }
  

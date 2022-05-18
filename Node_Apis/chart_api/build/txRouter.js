@@ -1,23 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,16 +16,17 @@ const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
 const index1_1 = __importDefault(require("./index1"));
 const txHistoryCount_entity_1 = require("./txHistoryCount.entity");
-const txChart_entity_1 = require("./txChart.entity");
 const txTransactionCount_entity_1 = require("./txTransactionCount.entity");
-const swapHistory_entity_1 = require("./swap/swapHistory.entity");
-const Swap = __importStar(require("./swap/swap"));
-const bigInt = require("big-integer");
-const { Client } = require('pg');
+const txTable_1 = require("./txTable");
 const router = express_1.default.Router();
-const Web3Token = require('web3-token');
-// const SwapTable = require("./swap/swapHistory")
-console.log(Swap);
+const solc = require('solc');
+const fs = require('fs');
+let DirName = './src/contract/';
+let DirName2 = './build/contract/';
+var qs = require('querystring');
+var formidable = require('formidable');
+var util = require("util");
+const path = require('path');
 router.get("/validatorInfo/:address", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const txRepo = (0, typeorm_1.getRepository)(txHistoryCount_entity_1.TransactionEntity);
@@ -54,7 +36,7 @@ router.get("/validatorInfo/:address", function (req, res) {
 });
 router.get("/transactions", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const txRepo = (0, typeorm_1.getRepository)(txChart_entity_1.TransactionTimesEntity);
+        const txRepo = (0, typeorm_1.getRepository)(txTable_1.TransactionTableCounter);
         const transactions = yield txRepo.find();
         let ID = transactions.map((tx) => tx.id);
         res.json({ data: transactions });
@@ -78,7 +60,7 @@ setInterval(function () {
 router.post("/tx", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(count, "inside post");
-        const txRepo = (0, typeorm_1.getRepository)(txChart_entity_1.TransactionTimesEntity);
+        const txRepo = (0, typeorm_1.getRepository)(txTable_1.TransactionTableCounter);
         const tx = yield txRepo.create(req.body);
         const { tcount } = req.body;
         yield txRepo.insert({ totalcount: yield count });
@@ -131,82 +113,173 @@ router.post('/transactioncountupdate/:id', function (req, res) {
         }
     });
 });
-/*********************Swap Router*************************/
-router.get("/withdraw/recover/:from", function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log(req.params.from);
-        const txRepo = (0, typeorm_1.getRepository)(swapHistory_entity_1.SwapTable);
-        const transactions = yield txRepo.find({ where: { from: req.params.from } });
-        if (!transactions) {
-            return null;
-        }
-        // console.log(transactions);    
-        res.json({ transactions });
+router.post("/deploy", function (req, res) {
+    // console.log(req,"jjjj")
+    let code = '';
+    // console.log(req.rawHeaders,"raw headers output")
+    // var key1 = req.body.code
+    // function hex_to_ascii(str1:any)
+    // {
+    //  var hex  = str1.toString();
+    //  var str = '';
+    //  for (var n = 0; n < hex.length; n += 2) {
+    //    str += String.fromCharCode(parseInt(hex, 16));
+    //  }
+    //  return str;
+    // }
+    if (req.method == 'POST') {
+        var body = '';
+        req.on('data', function (data) {
+            body += data;
+        });
+        req.on('end', function () {
+            console.log(body, "body");
+            var post = qs.parse(body);
+            //   fs.writeFileSync(`${DirName}demo.sol`, post.toString(), (err:any) => {
+            //     if (err) {
+            //         throw err;
+            //     }
+            // });
+            code = post.code;
+            console.log(post, "klklklkl");
+            // console.log(post,"klklklkl")
+            // console.log(solc.compile(post.data, 1).contracts[":Lottery"])
+            // console.log(solc.compile(post.data,1))
+            // console.log(post.replace('/n', ''))
+            // use post['blah'], etc.
+        });
+    }
+    //   fs.writeFile(`${DirName}demo.sol`, "key2", (err:any) => {
+    //     if (err) {
+    //         throw err;
+    //     }
+    // });
+});
+// const fs = require('fs');
+const writeFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        fs.writeFile(`${DirName2}Demo.sol`, fields.code, (err) => {
+            if (err) {
+                throw err;
+            }
+        });
     });
 });
-router.get("/withdraw/recover", function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log(req.params.from);
-        const txRepo = (0, typeorm_1.getRepository)(swapHistory_entity_1.SwapTable);
-        const transactions = yield txRepo.find();
-        res.json({ data: transactions });
+// router.post("/writeFile",writeFile);
+router.post("/upload", function (req, res, next) {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        // `file` is the name of the <input> field of type `file`
+        console.log(files, "1st");
+        console.log(fields, "2nd");
+        console.log(fields.code, "3nd");
+        //  console.log(solc.compile(fields.code, 1).contracts[":Lottery"])
+        console.log(solc.compile(fields.code, 1));
+        const result = solc.compile(fields.code, 1).contracts;
+        // console.log(fields.code.splice(14),"4nd");
+        // console.log(typeof(result),"typeoff")
+        // console.log(solc.compile(post.data,1))
+        // if(result){
+        console.log(Object.keys(result), "object data");
+        res.writeHead(200, { 'content-type': 'text/plain' });
+        // res.write('received upload:\n\n');
+        res.end(util.inspect({ fields: result }));
+        // }
+        // res.json({data:final})
+        // res.json({ data: result });
+        // return result
+    });
+    form.on('error', function (err) {
+        console.error(err);
+    });
+    form.on('progress', function (bytesReceived, bytesExpected) {
+        var percent_complete = (bytesReceived / bytesExpected) * 100;
+        console.log(percent_complete.toFixed(2));
+    });
+    // form.on('end', function(fields:any, files:any) {
+    //     /* Temporary location of our uploaded file */
+    //     var temp_path = this.openedFiles[0].path;
+    //     /* The file name of the uploaded file */
+    //     var file_name = this.openedFiles[0].name;
+    //     /* Location where we want to copy the uploaded file */
+    //     var new_location = './src/contract/';
+    //     fs.readFile(`${DirName}demo.sol`, function(err:any, data:any) {
+    //         fs.writeFile(new_location + file_name, data, function(err:any) {
+    //             fs.unlink(temp_path, function(err:any) {
+    //                 if (err) {
+    //                     console.error(err);
+    //                     } else {
+    //                     console.log("success!");
+    //                 }
+    //             });
+    //         });
+    //     });
+    // });
+});
+router.post("/writeFile", function (req, res) {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        fs.writeFile(`${DirName2}Demo.sol`, fields.code, (err) => {
+            if (err) {
+                throw err;
+            }
+        });
+        return res.send(fields.code);
     });
 });
-router.post("/withdraw/ETH", function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = req.headers['authorization'];
-        const { address } = yield Web3Token.verify(token);
-        // console.log("printing req : ",req);
-        // console.log("printing req.body.from : ",req.body.from)
-        var key1 = req.body.from;
-        console.log("printing key1 : ", key1);
-        console.log("typeof key1 : ", typeof (key1));
-        var key2 = bigInt(req.body.amount);
-        var key3 = req.body.exc_rate;
-        var key4 = req.body.transactionHash;
-        var key5 = req.body.network;
-        console.log("key4 : ", key4);
-        if (key1.toLowerCase() == address.toLowerCase()) {
-            const result = yield Swap.claimETH(key1, key2.value, key3, key4, key5);
-            res.send(result);
+router.post("/newversion", function (req, res, next) {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        // fs.writeFile(`${DirName2}Demo.sol`,fields.code , (err:any) => {
+        //       if (err) {
+        //           throw err;
+        //       }
+        // });
+        try {
+            const bettingPath = path.resolve(__dirname, 'contract', 'Demo.sol');
+            console.log(bettingPath, "second");
+            const source = fs.readFileSync(bettingPath, 'utf-8');
+            console.log(source, "third");
+            const input = {
+                language: 'Solidity',
+                sources: {
+                    'Demo.sol': {
+                        content: source,
+                    },
+                },
+                settings: {
+                    outputSelection: {
+                        '*': {
+                            '*': ['*']
+                        }
+                    }
+                }
+            };
+            console.log(input, "output");
+            var output = JSON.parse(solc.compile(JSON.stringify(input)));
+            ;
+            console.log(output, "output");
+            const LotteryContract = output.contracts['Demo.sol'];
+            console.log(LotteryContract, "contract");
+            const result = Object.keys(LotteryContract)[0];
+            res.json({ data: LotteryContract });
+            // res.json({ data2: LotteryContract });
         }
+        catch (error) {
+            console.log(error);
+        }
+        // const result = solc.compile(fields.code,1).contracts
+        // console.log(Object.keys(result),"object data")
+        // res.writeHead(200, {'content-type': 'text/plain'});
+        // res.end(util.inspect({fields: result}));
     });
-});
-router.post("/withdraw/BSC", function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = req.headers['authorization'];
-        const { address } = yield Web3Token.verify(token);
-        var key1 = req.body.from;
-        var key2 = bigInt(req.body.amount);
-        var key3 = req.body.exc_rate;
-        var key4 = req.body.transactionHash;
-        var key5 = req.body.network;
-        console.log(key1.toLowerCase() == address.toLowerCase(), "insideeee");
-        console.log("key1 : ", key1, "\n address : ", address);
-        if (key1.toLowerCase() == address.toLowerCase()) {
-            const result = yield Swap.claimBSC(key1, key2.value, key3, key4, key5);
-            res.send(result);
-        }
+    form.on('error', function (err) {
+        console.error(err);
     });
-});
-router.post("/withdraw/DXT", function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = req.headers['authorization'];
-        const { address } = yield Web3Token.verify(token);
-        console.log("printing req.body : ", req.body);
-        var key1 = req.body.from;
-        var key2 = bigInt(req.body.amount);
-        var key3 = req.body.exc_rate;
-        var key4 = req.body.transactionHash;
-        var key5 = req.body.network;
-        var key6 = key2.toString();
-        console.log("key1 : ", key1, "\n address : ", address);
-        console.log(key1.toLowerCase() == address.toLowerCase(), "insideeee");
-        if (key1.toLowerCase() == address.toLowerCase()) {
-            const result = yield Swap.claimDXT(key1, key2.value, key3, key4, key5);
-            console.log("this is post API result : ", result);
-            res.send(result);
-        }
+    form.on('progress', function (bytesReceived, bytesExpected) {
+        var percent_complete = (bytesReceived / bytesExpected) * 100;
+        console.log(percent_complete.toFixed(2));
     });
 });
 exports.default = router;
