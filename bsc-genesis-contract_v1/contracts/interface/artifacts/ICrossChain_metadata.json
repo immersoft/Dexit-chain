@@ -1,0 +1,68 @@
+{
+	"compiler": {
+		"version": "0.6.4+commit.1dca32f3"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint8",
+						"name": "channelId",
+						"type": "uint8"
+					},
+					{
+						"internalType": "bytes",
+						"name": "msgBytes",
+						"type": "bytes"
+					},
+					{
+						"internalType": "uint256",
+						"name": "relayFee",
+						"type": "uint256"
+					}
+				],
+				"name": "sendSynPackage",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"methods": {
+				"sendSynPackage(uint8,bytes,uint256)": {
+					"details": "Send package to Binance Chain"
+				}
+			}
+		},
+		"userdoc": {
+			"methods": {}
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"DEXIT seperate/interface/ICrossChain.sol": "ICrossChain"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": true,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"DEXIT seperate/interface/ICrossChain.sol": {
+			"keccak256": "0x1a557410d9c56b0de3a368fbf8aa63c4502d2b13cb44b503042a677de032afc3",
+			"urls": [
+				"bzz-raw://6c61737fe0521be5ee967d7e789bb9f3fe825c43d42660d349fdd588f87bc764",
+				"dweb:/ipfs/QmdioCXgTbdU1FR3QQzNWHxo5qYeuj751MkMBvyNm1YRi5"
+			]
+		}
+	},
+	"version": 1
+}

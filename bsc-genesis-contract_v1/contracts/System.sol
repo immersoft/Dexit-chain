@@ -85,7 +85,7 @@ contract System {
     require(msg.sender == TOKEN_MANAGER_ADDR, "the msg sender must be tokenManager");
     _;
   }
-
+    
   // Not reliable, do not use when need strong verify
   function isContract(address addr) internal view returns (bool) {
     uint size;

@@ -3,141 +3,24 @@ pragma solidity 0.6.4;
 import "./System.sol";
 import "./lib/BytesToTypes.sol";
 import "./lib/Memory.sol";
-import "./interface/ISlashIndicator.sol";
-import "./interface/IParamSubscriber.sol";
-import "./interface/IBSCValidatorSet.sol";
 import "./lib/SafeMath.sol";
+import "./interface/ISlashIndicator.sol";
+import "./interface/IBSCValidatorSet.sol";
+import "./interface/IRewardRegister.sol";
 
 contract BSCValidatorSet is IBSCValidatorSet, System {
     using SafeMath for uint256;
 
-    uint256 public constant MISDEMEANOR_THRESHOLD = 50;
-    uint256 public constant FELONY_THRESHOLD = 150;
-    uint256 public constant EXPIRE_TIME_SECOND_GAP = 1000;
-    uint256 public constant MAX_NUM_OF_VALIDATORS = 41;
-
-    /*********************** state of the contract **************************/
-    ValidatorBSC[] public currentValidatorSetBSC;
-    uint256 public expireTimeSecondGap;
-    uint256 public totalInComing;
+    uint8 public constant MISDEMEANOR_THRESHOLD = 50;
+    uint8 public constant FELONY_THRESHOLD = 150;
     uint256 public misdemeanorThreshold;
     uint256 public felonyThreshold;
-
-    // key is the `consensusAddress` of `Validator`,
-    // value is the index of the element in `currentValidatorSetBSC`.
-    mapping(address => uint256) public currentValidatorSetMapBSC;
-
-    uint256 public constant BURN_RATIO_SCALE = 10000;
+    
+    uint256 public constant BURN_RATIO_SCALE = 100;
+    address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+    uint256 public constant INIT_BURN_RATIO = 1;
     uint256 public burnRatio;
     bool public burnRatioInitialized;
-
-    struct ValidatorBSC {
-        address consensusAddress;
-        address payable feeAddress;
-        address BBCFeeAddress;
-        uint64 votingPower;
-        // only in state
-        bool jailed;
-        uint256 incoming;
-    }
-
-    /*********************** cross chain package **************************/
-    struct IbcValidatorSetPackage {
-        uint8 packageType;
-        ValidatorBSC[] validatorSet;
-    }
-
-    /*********************** modifiers **************************/
-    modifier noEmptyDeposit() {
-        require(msg.value > 0, "deposit value is zero");
-        _;
-    }
-    modifier zeroAddress() {
-        _zeroAddress();
-        _;
-    }
-    modifier onlyValidator() {
-        _onlyValidator();
-        _;
-    }
-
-    /*********************** init **************************/
-   function init() external onlyNotInit {
-        expireTimeSecondGap = EXPIRE_TIME_SECOND_GAP;
-        minimumStakeAmount = minimum_Stake_Amount;
-        MaxValidators = Max_Validators;
-        alreadyInit = true;
-        misdemeanorThreshold = MISDEMEANOR_THRESHOLD;
-        felonyThreshold = FELONY_THRESHOLD;
-        proposalLastingPeriod = 3 days;  //3 days
-        Validator storage valInfo = validatorInfo[0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475];
-        valInfo.validator = 0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475;
-        valInfo.status = Status.NotExist;
-    }
-
-    /*********************** External Functions **************************/
-     //function deposit(address valAddr) public payable {
-   function deposit(address valAddr)
-        external
-        payable
-        onlyCoinbase
-        onlyInit
-        noEmptyDeposit
-    {
-        uint256 value = msg.value;
-        Validator storage valInfo = validatorInfo[valAddr];
-
-        require(valInfo.status != Status.Jailed); // Check for Not Exist Or Jailed
-        require(valInfo.status != Status.Unstaked);
-
-        if(valInfo.amount == 0){
-           
-            valInfo.income.add(value);
-            valInfo.TotalIncome.add(value);
-            return;
-        }
-        uint256 percentageToTransfer = valInfo.amount.mul(100).div(valInfo.coins);
-     
-        uint256 rewardAmount = value.mul(percentageToTransfer).div(100);
-      
-        valInfo.income = valInfo.income + rewardAmount; // Reseting income of validator
-
-        valInfo.TotalIncome = valInfo.TotalIncome.add(rewardAmount);
-
-        uint256 remainingDelegatorRewardAmount = value.sub(rewardAmount); // Remaining delgators reward amount;
-  
-        uint256 totalCoinsByDelegators = valInfo.coins.sub(valInfo.amount);
-   
-        distributeRewardToDelegators(
-            remainingDelegatorRewardAmount,
-            valAddr,
-            totalCoinsByDelegators
-        );
-    }
-
-    function getValidators() external view returns (address[] memory) {
-        return highestValidators;
-    }
-
-    /***********************Staking***************************/
-    enum Status {
-        NotExist,
-        Created,
-        Staked,
-        Unstaked,
-        Jailed
-    }
-
-    // Validator Struct
-    struct Validator {
-        address validator;
-        Status status;
-        uint256 amount; // self amount
-        uint256 coins; //  self + delegators
-        uint256 income; // self income
-        uint256 TotalIncome; // total income
-        address[] delegators;
-    }
 
     //Delegator Struct
     struct Delegator {
@@ -161,61 +44,137 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
     uint256 public totalDXTStake; //  To DXT Stake Amount
 
-    /*************************Punish Params***********************/
     struct PunishRecord {
         uint256 missedBlockCounter;
         uint256 index;
         uint256 jailedTime;
         bool isPunished;
     }
-
     mapping(address => PunishRecord) punishRecord;
-
     address[] public punishValidator;
 
     /**********Constant**********/
     uint256 public constant minimum_Stake_Amount = 10000 ether; // Minimum Stake DXT
     uint256 public constant Max_Validators = 5; // Total Max Validator(5)
-    uint64 public constant StakingLockPeriod = 151200; // Stake Locking Period(7 days)
-    uint64 public constant unjailingPeriod = 2 days;  //2 days
-    uint64 public constant RewardClaimingPeriod = 21600;   //24 hrs 21600
+    uint64 public constant StakingLockPeriod = 25; // Stake Locking Period(7 days) //151200 blocks
+    uint64 public constant unjailingPeriod = 5 minutes; //2 days
+    uint64 public constant RewardClaimingPeriod = 25; //24 hrs 21600
 
-    /***************state of the contract******************/
     uint256 public minimumStakeAmount;
     uint256 public MaxValidators;
 
     /**********Events**********/
-   event StakeValidator(address indexed validator, uint256 amount);
-    event StakeDelegator(
-        address indexed delegator,
-        address indexed validator,
-        uint256 amount
-    );
+    event StakeValidator(address indexed validator, uint256 amount);
+    event StakeDelegator(address indexed delegator, address indexed validator, uint256 amount);
     event RemoveFromHighestValidators(address indexed validator);
     event RemoveFromCurrentValidatorsList(address indexed validator);
     event UnstakeValidator(address indexed validator);
-    event UnstakeDelegator(
-        address indexed validator,
-        address indexed delegator
-    );
-    event WithdrawValidatorStaking(
-        address indexed validator,
-        uint256 indexed amount
-    );
-    event WithdrawDelegatorStaking(
-        address indexed delegator,
-        address indexed validator,
-        uint256 indexed amount
-    );
-    event DelegatorClaimReward(
-        address indexed delegator,
-        address indexed validator,
-        uint256 amount
-    );
+    event UnstakeDelegator(address indexed validator, address indexed delegator);
+    event WithdrawValidatorStaking(address indexed validator, uint256 indexed amount);
+    event WithdrawDelegatorStaking(address indexed delegator, address indexed validator, uint256 indexed amount);
+    event DelegatorClaimReward(address indexed delegator, address indexed validator, uint256 amount);
     event ValidatorClaimReward(address indexed validator, uint256 amount);
     event PunishValidator(address indexed validator);
     event RemoveFromPunishValidator(address indexed validator);
 
+
+    /*********************** modifiers **************************/
+    modifier noEmptyDeposit() {
+        require(msg.value > 0, "deposit value is zero");
+        _;
+    }
+    modifier zeroAddress() {
+        _zeroAddress();
+        _;
+    }
+    modifier onlyValidator(){
+        address addr = msg.sender;
+        this._onlyValidator(addr);
+        _;
+    }
+    function _zeroAddress() internal view {
+        require(msg.sender != address(0), "Zero Address");
+    }
+    function _onlyValidator(address addr) external override view{
+        require(this.isActiveValidator(addr), "Validator only");
+    }
+
+    /*********************** init **************************/
+    function init() external onlyNotInit {
+        burnRatio = INIT_BURN_RATIO;
+        burnRatioInitialized = true;
+        minimumStakeAmount = minimum_Stake_Amount;
+        MaxValidators = Max_Validators;
+        alreadyInit = true;
+        misdemeanorThreshold = MISDEMEANOR_THRESHOLD;
+        felonyThreshold = FELONY_THRESHOLD;
+        // proposalLastingPeriod = 3 days; //3 days
+        Validator storage valInfo = validatorInfo[
+            0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475
+        ];
+        valInfo.validator = 0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475;
+        valInfo.status = IBSCValidatorSet.Status.NotExist;
+    }
+
+    /*********************** External Functions **************************/
+    function deposit(address valAddr, address[] calldata _contractArray)
+        external
+        payable
+        onlyCoinbase
+        onlyInit
+        noEmptyDeposit
+    {
+        uint256 value = msg.value;
+        uint256 curBurnRatio;
+        
+        if (burnRatioInitialized) {
+            curBurnRatio = burnRatio;
+        }
+        if (value > 0 && curBurnRatio > 0) {
+            uint256 toBurn = value.mul(curBurnRatio).div(BURN_RATIO_SCALE);
+        if (toBurn > 0) {
+                address(uint160(BURN_ADDRESS)).transfer(toBurn);
+                value = value.sub(toBurn);
+            }
+        }
+
+        if ((IRewardRegister(CROSS_CHAIN_CONTRACT_ADDR).checkEligible(_contractArray)).length > 0)
+        {
+            uint256 rewardOwners = value.mul(45).div(90);
+            if ((IRewardRegister(CROSS_CHAIN_CONTRACT_ADDR).distributeRewardToOwners(rewardOwners)))
+            value = value.sub(rewardOwners);
+        }
+        Validator storage valInfo = validatorInfo[valAddr];
+
+        require(valInfo.status != IBSCValidatorSet.Status.Jailed); // Check for Not Exist Or Jailed
+        require(valInfo.status != IBSCValidatorSet.Status.Unstaked);
+
+        if (valInfo.amount == 0) {
+            valInfo.income.add(value);
+            valInfo.TotalIncome.add(value);
+            return;
+        }
+        uint256 percentageToTransfer = valInfo.amount.mul(100).div(valInfo.coins);
+
+        uint256 rewardAmount = value.mul(percentageToTransfer).div(100);
+
+        valInfo.income = valInfo.income + rewardAmount; // Reseting income of validator
+
+        valInfo.TotalIncome = valInfo.TotalIncome.add(rewardAmount);
+
+        uint256 remainingDelegatorRewardAmount = value.sub(rewardAmount); // Remaining delgators reward amount;
+
+        uint256 totalCoinsByDelegators = valInfo.coins.sub(valInfo.amount);
+
+        distributeRewardToDelegators(
+            remainingDelegatorRewardAmount,
+            valAddr,
+            totalCoinsByDelegators
+        );
+    }
+  
+    /***********************Staking***************************/
+ 
 
     // Function for staking validators
     function stakeValidator() external payable zeroAddress returns (bool) {
@@ -250,19 +209,20 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         }
 
         if (
-            highestValidators.length < MaxValidators && !isTopValidator(staker)
+            highestValidators.length < MaxValidators && !this.isTopValidator(staker)
         ) {
             highestValidators.push(staker); // push into highestValidator if there is space
-        } else if (
+         } 
+        else if (
             highestValidators.length >= MaxValidators &&
-            !isTopValidator(staker) &&
-            valInfo.status != Status.Jailed
+            !this.isTopValidator(staker) &&
+            valInfo.status != IBSCValidatorSet.Status.Jailed
         ) {
             // Find The Lowest Coins Address & Index in HighestValidators List
             uint256 lowCoin;
             uint256 lowIdx;
             address lowAddress;
-            (lowCoin, lowIdx, lowAddress) = lowestCoinsInHighestValidator();
+            (lowCoin, lowIdx, lowAddress) = this.lowestCoinsInHighestValidator();
 
             if (valInfo.coins > lowCoin) {
                 highestValidators[lowIdx] = staker;
@@ -270,10 +230,10 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         }
 
         // Change the Status to Staked
-        if (valInfo.status != Status.Staked) {
-            valInfo.status = Status.Staked;
+        if (valInfo.status != IBSCValidatorSet.Status.Staked) {
+            valInfo.status =  IBSCValidatorSet.Status.Staked;
         }
-        if (!isActiveValidator(staker)) {
+        if (!this.isActiveValidator(staker)) {
             currentValidators.push(staker);
         }
 
@@ -285,7 +245,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highCoin,
             highIdx,
             addValAddress
-        ) = highestCoinsInCurrentValidatorsNotInTopValidator();
+        ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
 
         if (
             highestValidators.length < MaxValidators &&
@@ -294,8 +254,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highestValidators.push(addValAddress);
         }
 
-        emit StakeValidator(staker, stakeamount);
         totalDXTStake = totalDXTStake.add(stakeamount);
+        emit StakeValidator(staker, stakeamount);
         return true;
     }
 
@@ -314,10 +274,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         Delegator storage stakeInfo = stakingInfo[staker][validator];
 
         require(stakeamount > 0, "Can't stake 0 DXT");
-        require(isActiveValidator(validator), "Validator Not Exist");
-        require(Status.Jailed != valInfo.status, "Validator Jailed");
-        require(valInfo.status != Status.NotExist, "This Validator Not Exist");
-        require(valInfo.status != Status.Unstaked, "validator is unstaked");
+        require(this.isActiveValidator(validator), "Validator Not Exist");
+        require(Status.Staked == valInfo.status, "Validator Not Staked");
 
         if (stakeamount <= 0) {
             return false;
@@ -326,7 +284,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         if (valInfo.status == Status.Staked && stakeInfo.amount == 0) {
             stakeInfo.delegatorAddress = staker; // update in Delegator Staking Struct
             stakeInfo.index = valInfo.delegators.length; // update the index of delegator struct for  delegators array in validator
-            //   console.log("Delegator index", stakeInfo.index);
             valInfo.delegators.push(staker);
         }
 
@@ -335,30 +292,26 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
         if (
             highestValidators.length < MaxValidators &&
-            !isTopValidator(validator)
+            !this.isTopValidator(validator)
         ) {
             highestValidators.push(validator); // push into highestValidator if there is space
         } else if (
             highestValidators.length >= MaxValidators &&
-            !isTopValidator(validator)
+            !this.isTopValidator(validator)
         ) {
             // Find The Lowest Coins Address & Index in HighestValidators List
             uint256 lowCoin;
             uint256 lowIdx;
             address lowAddress;
-            (lowCoin, lowIdx, lowAddress) = lowestCoinsInHighestValidator();
+            (lowCoin, lowIdx, lowAddress) = this.lowestCoinsInHighestValidator();
 
             if (valInfo.coins > lowCoin) {
-                if (!isTopValidator(validator)) {
+                if (!this.isTopValidator(validator)) {
                     highestValidators[lowIdx] = validator;
                 }
             }
         }
 
-        if (valInfo.status != Status.Staked) {
-            valInfo.status = Status.Staked;
-        }
-        //votePower = calcVotePower();
         emit StakeDelegator(staker, validator, stakeamount);
         totalDXTStake = totalDXTStake.add(stakeamount);
         return true;
@@ -374,20 +327,20 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         uint256 unstakeamount = valInfo.amount; // self amount validator
 
         // Check for the unstakeBlock status
-        require(valInfo.status != Status.Jailed, "Validator is Jailed");
+        require(valInfo.status == Status.Staked, "Validator Should Staked");
         require(
             stakingInfo[staker][staker].unstakeblock == 0,
             "Already in Unstaking Status"
         );
         require(unstakeamount > 0, "Don't have any stake");
         require(
-            highestValidators.length != 3 && isActiveValidator(staker),
+            highestValidators.length != 3 && this.isActiveValidator(staker),
             "Can't Unstake, Validator List Empty"
         );
 
         stakeInfo.unstakeblock = block.number; // Set Block No When Validator Unstake
 
-        removeFromHighestValidatorList(staker); // Remove From The Highest
+        this.removeFromHighestValidatorList(staker); // Remove From The Highest
 
         valInfo.status = Status.Unstaked;
         // Get Highest Validator From Current List
@@ -399,7 +352,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highCoin,
             highIdx,
             addValAddress
-        ) = highestCoinsInCurrentValidatorsNotInTopValidator();
+        ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
 
         if (
             highestValidators.length < MaxValidators &&
@@ -408,9 +361,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highestValidators.push(addValAddress);
         }
 
-        //  Update in Struct Proposal
-
-        //votePower = calcVotePower();
         emit UnstakeValidator(staker);
         return true;
     }
@@ -431,10 +381,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
         stakeInfo.unstakeblock = block.number; // Update The Unstake Block for Deligator
 
-        emit UnstakeDelegator(
-            validator,
-            delegator
-        );
+        emit UnstakeDelegator(validator, delegator);
         return true;
     }
 
@@ -489,7 +436,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         uint256 lowestCoin;
         uint256 lowIdx;
         address lowValidator;
-        (lowestCoin, lowIdx, lowValidator) = lowestCoinsInHighestValidator();
+        (lowestCoin, lowIdx, lowValidator) = this.lowestCoinsInHighestValidator();
 
         // Find Highest Coins in Current Validator List
         uint256 highCoins;
@@ -499,7 +446,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highCoins,
             highIndex,
             highValidator
-        ) = highestCoinsInCurrentValidatorsNotInTopValidator();
+        ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
 
         if (highCoins > lowestCoin) {
             highestValidators[lowIdx] = highValidator;
@@ -558,7 +505,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         uint256 lowestCoin;
         uint256 lowIdx;
         address lowValidator;
-        (lowestCoin, lowIdx, lowValidator) = lowestCoinsInHighestValidator();
+        (lowestCoin, lowIdx, lowValidator) = this.lowestCoinsInHighestValidator();
 
         // Find Highest Coins in Current Validator List
         uint256 highCoins;
@@ -568,7 +515,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highCoins,
             highIndex,
             highValidator
-        ) = highestCoinsInCurrentValidatorsNotInTopValidator();
+        ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
 
         if (highCoins > lowestCoin) {
             highestValidators[lowIdx] = highValidator;
@@ -582,11 +529,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         staker.transfer(amount);
         //votePower = calcVotePower();
 
-        emit WithdrawDelegatorStaking(
-            staker,
-            validator,
-            amount
-        );
+        emit WithdrawDelegatorStaking(staker, validator, amount);
         totalDXTStake = totalDXTStake.sub(amount);
         return true;
     }
@@ -635,7 +578,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         //require(valInfo.status != Status.Jailed, "Validator is Jailed"); // Check for Not Exist Or Jailed
         require(stakeInfo.income > 0, "No incomes yet.");
         uint256 staking = stakeInfo.income;
-        
+
         if (stakeInfo.income <= 0) {
             return false; // return if income is zero
         }
@@ -651,11 +594,15 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             stakeInfo.income = 0;
         }
 
-        emit DelegatorClaimReward(
-            delegator,
-            validator,
-            staking
-        );
+        emit DelegatorClaimReward(delegator, validator, staking);
+        return true;
+    }
+
+    //function transferRewardOwner(address payable owner) external returns (bool){
+    function claimOwnerReward() external returns (bool){
+        address payable owner = msg.sender;
+        uint256 reward = IRewardRegister(CROSS_CHAIN_CONTRACT_ADDR).transferRewardOwner(owner);
+        owner.transfer(reward);
         return true;
     }
 
@@ -689,11 +636,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
     /**********************Slashing**********************/
 
-    //  function slash(address validator) public {
-    //      punish(validator);
-    //  }
-    function punish(address validator) external override {  //external override
-        //Get The Validator Info to Change Status
+    function punish(address validator) external override {
         Validator storage valInfo = validatorInfo[validator];
         // Get Punish Record of the Validator
         PunishRecord storage punishInfo = punishRecord[validator];
@@ -708,13 +651,12 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         // Increment the Block Counter
         punishInfo.missedBlockCounter = punishInfo.missedBlockCounter.add(1);
 
-        // If Cross Punish Threshold Change Status To Jail
         if (punishInfo.missedBlockCounter % felonyThreshold == 0) {
             //  Change the Status to Jailed
             valInfo.status = Status.Jailed;
             //   votePower = totalDXTStake - validatorInfo[validator].coins;
 
-            removeFromHighestValidatorList(validator);
+            this.removeFromHighestValidatorList(validator);
 
             uint256 highCoin;
             uint256 highIdx;
@@ -723,7 +665,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
                 highCoin,
                 highIdx,
                 addValAddress
-            ) = highestCoinsInCurrentValidatorsNotInTopValidator();
+            ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
 
             if (
                 highestValidators.length < MaxValidators &&
@@ -764,8 +706,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
         uint256 endTime = punishInfo.jailedTime + unjailingPeriod; // Get The End Time
 
-        require(block.timestamp >= endTime, "Time not Expired Yet To Unjailed");
-        require(msg.value == 1 ether, "1 DXT Needed To UnJailed"); // Need to Submit Only 1 DXT To Unjailed
+        require(block.timestamp >= endTime, "WaitToUnjail");
+        require(msg.value == 1 ether, "Pay 1DXT"); // Need to Submit Only 1 DXT To Unjailed
 
         // Change Status To Staked
         valInfo.status = Status.Staked;
@@ -783,13 +725,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
                 highCoin,
                 highIdx,
                 addValAddress
-            ) = highestCoinsInCurrentValidatorsNotInTopValidator();
+            ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
 
             //Get The Lowest from Highest
             uint256 lowCoin;
             uint256 lowIdx;
             address lowAddress;
-            (lowCoin, lowIdx, lowAddress) = lowestCoinsInHighestValidator();
+            (lowCoin, lowIdx, lowAddress) = this.lowestCoinsInHighestValidator();
 
             if (highCoin > lowCoin) {
                 highestValidators[lowIdx] = addValAddress;
@@ -818,18 +760,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
     /********************Internal Functions******************/
 
-    function isActiveValidator(address who) private view returns (bool) {
+    function isActiveValidator(address who) external override view returns (bool) {
         for (uint256 k = 0; k < currentValidators.length; k++) {
             if (who == currentValidators[k]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function isTopValidator(address who) private view returns (bool) {
-        for (uint256 i = 0; i < highestValidators.length; i++) {
-            if (who == highestValidators[i]) {
                 return true;
             }
         }
@@ -850,33 +783,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         return false;
     }
 
-    function getValidatorInfo(address val)
-        public
-        view
-        returns (
-            address,
-            Status,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            address[] memory
-        )
-    {
-        Validator memory v = validatorInfo[val];
 
-        return (
-            v.validator,
-            v.status,
-            v.amount,
-            v.coins,
-            v.income,
-            v.TotalIncome,
-            v.delegators
-        );
-    }
-
-    function removeFromHighestValidatorList(address val) private {
+    function removeFromHighestValidatorList(address val) external override {
         uint256 n = highestValidators.length;
         for (uint256 k = 0; k < n && n > 1; k++) {
             if (val == highestValidators[k]) {
@@ -918,30 +826,10 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         }
     }
 
-    function getStakingInfo(address staker, address val)
-        public
-        view
-        returns (
-            address,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
-    {
-        return (
-            stakingInfo[staker][val].delegatorAddress,
-            stakingInfo[staker][val].amount,
-            stakingInfo[staker][val].unstakeblock,
-            stakingInfo[staker][val].index,
-            stakingInfo[staker][val].income,
-            stakingInfo[staker][val].totalIncome
-        );
-    }
-
+    
     function lowestCoinsInHighestValidator()
-        private
+        external
+        override
         view
         returns (
             uint256,
@@ -965,7 +853,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
     }
 
     function highestCoinsInCurrentValidatorsNotInTopValidator()
-        private
+        external override
         view
         returns (
             uint256,
@@ -980,9 +868,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         for (uint256 k = 0; k < currentValidators.length; k++) {
             if (
                 validatorInfo[currentValidators[k]].coins > highCoins &&
-                !isTopValidator(currentValidators[k]) &&
-                validatorInfo[currentValidators[k]].status == Status.Staked &&
-                validatorInfo[currentValidators[k]].status != Status.Jailed
+                !this.isTopValidator(currentValidators[k]) &&
+                validatorInfo[currentValidators[k]].status == Status.Staked
             ) {
                 highCoins = validatorInfo[currentValidators[k]].coins;
                 highIndex = k;
@@ -992,17 +879,78 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         return (highCoins, highIndex, highestValidatorAddress);
     }
 
-    /***** Modifiers Internal Funtions*********/
-    function _zeroAddress() internal view {
-        require(msg.sender != address(0), "Zero Address");
+    function isTopValidator(address who) external override view returns (bool) {
+        for (uint256 i = 0; i < highestValidators.length; i++) {
+            if (who == highestValidators[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    function _onlyValidator() internal view {
-        require(isActiveValidator(msg.sender), "Validator only");
+  /**************getter methods*******************************/
+    function getminimumStakeAmount() external override view returns (uint256) {
+        return minimumStakeAmount;
     }
 
-    /*******Getter*******/
-    function getCurrentValidators() public view returns (address[] memory) {
+    function getMaxValidators() external override view returns (uint256) {
+        return MaxValidators;
+    }
+
+    function getValidators() external override view returns (address[] memory) {
+        return highestValidators;
+    }
+    
+    function getValidatorInfo(address val)
+        external
+        override
+        view
+        returns (
+            address,
+            Status,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            address[] memory
+        )
+    {
+        Validator memory v = validatorInfo[val];
+
+        return (
+            v.validator,
+            v.status,
+            v.amount,
+            v.coins,
+            v.income,
+            v.TotalIncome,
+            v.delegators
+        );
+    }
+
+    function getStakingInfo(address staker, address val)
+        public
+        view
+        returns (
+            address,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        )
+    {
+        return (
+            stakingInfo[staker][val].delegatorAddress,
+            stakingInfo[staker][val].amount,
+            stakingInfo[staker][val].unstakeblock,
+            stakingInfo[staker][val].index,
+            stakingInfo[staker][val].income,
+            stakingInfo[staker][val].totalIncome
+        );
+    }
+
+    function getCurrentValidators() external override view returns (address[] memory) {
         return currentValidators;
     }
 
@@ -1034,415 +982,23 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
     function getContractBalance() public view returns (uint256) {
         return address(this).balance;
-    }
-
-    /****************Voting Functionality********************/
-    uint256 public votePower;
-    uint256 public proposalLastingPeriod;
-    mapping(address => bool) public pass;
-
-    struct ProposalInfo {
-        // who propose this proposal
-        address payable proposer;
-        // propose who to be a validator
-        address dst;
-        // optional detail info of proposal
-        string details;
-        // time create proposal
-        uint256 createTime;
-        // propose string
-        string variable_name;
-        // propose value
-        uint256 variable_value;
-        //access of voting
-        bool access;
-        //Vote Power
-        uint256 votePowerOfAgree;
-        uint256 votePowerOfDisagree;
-        // number agree this proposal
-        uint16 agree;
-        // number reject this proposal
-        uint16 reject;
-        // is passed
-        bool ispassed;
-        // means you can get proposal of current vote.
-        bool resultExist;
-    }
-
-    struct VoteInfo {
-        address voter;
-        uint256 voteTime;
-        bool auth;
-    }
-
-    struct activeProposal{
-        mapping(address => bool) isEligible;
-        mapping(address => uint256) individualCoins;
-        uint256 totalVotePower;
-    }
-    mapping(bytes32 => activeProposal) public activeProposalMap;
-
-    mapping(bytes32 => ProposalInfo) public proposals;
-    mapping(address => mapping(bytes32 => VoteInfo)) public votes;
-    mapping(address => bytes32[]) public userProposals;
-
-    bytes32[] ProposalsArray;
-
-    event LogCreateProposal(
-        bytes32 indexed id,
-        address indexed proposer,
-        address indexed dst,
-        uint256 time
-    );
-    event LogVote(
-        bytes32 indexed id,
-        address indexed voter,
-        bool auth,
-        uint256 time
-    );
-    event LogPassProposal(
-        bytes32 indexed id,
-        address indexed dst,
-        uint256 time
-    );
-    event LogRejectProposal(
-        bytes32 indexed id,
-        address indexed dst,
-        uint256 time
-    );
-    event LogSetUnpassed(address indexed val, uint256 time);
-
-    function chcekProposal() public view returns (bytes32[] memory) {
-        return ProposalsArray;
     } 
 
-    function authchangevalues(bytes32 id) public {
-        if (
-            keccak256(bytes(proposals[id].variable_name)) ==
-            keccak256(bytes("minimumStakeAmount"))
-        ) {
-            minimumStakeAmount = proposals[id].variable_value;
-            address lowValidator;
-            for (uint256 i = 0; i < highestValidators.length; i++) {
-                (, , lowValidator) = lowestCoinsInHighestValidator();
-                if (highestValidators.length <= 2) {
-                    break;
-                } else if (
-                    validatorInfo[lowValidator].coins < minimumStakeAmount
-                ) {
-                    removeFromHighestValidatorList(lowValidator);
-                } else {
-                    break;
-                }
-            }
-
-            if (highestValidators.length < MaxValidators) {
-                uint256 validatorToAdd = MaxValidators - highestValidators.length;
-                for (uint256 i = 0; i < validatorToAdd; i++) {
-                    (
-                        ,
-                        ,
-                        address highestValidatorAddress
-                    ) = highestCoinsInCurrentValidatorsNotInTopValidator();
-                    if (
-                        validatorInfo[highestValidatorAddress].coins >=
-                        minimumStakeAmount &&
-                        highestValidatorAddress != address(0)
-                    )
-                     
-                    {
-                        highestValidators.push(highestValidatorAddress);
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
-        if (
-            keccak256(bytes(proposals[id].variable_name)) ==
-            keccak256(bytes("MaxValidators"))
-        ) {
-            // require(proposals[id].variable_value >= 2,"MaxValidators can't be less then 2");
-
-            //removing the validators from highvalidator who donot qualify now
-            if (proposals[id].variable_value < MaxValidators) {
-                uint256 validatorToRemove = MaxValidators -
-                    proposals[id].variable_value;
-                for (uint256 i = 0; i < validatorToRemove; i++) {
-                    (
-                        ,
-                        ,
-                        address lowValidator
-                    ) = lowestCoinsInHighestValidator();
-                    removeFromHighestValidatorList(lowValidator);
-                }
-            }
-
-            MaxValidators = proposals[id].variable_value;
-            if (highestValidators.length < MaxValidators) {
-                uint256 validatorToAdd = MaxValidators -
-                    highestValidators.length;
-                for (uint256 i = 0; i < validatorToAdd; i++) {
-                    (
-                        ,
-                        ,
-                        address highestValidatorAddress
-                    ) = highestCoinsInCurrentValidatorsNotInTopValidator();
-                    if (highestValidatorAddress != address(0)) {
-                        highestValidators.push(highestValidatorAddress);
-                    }
-                }
-            }
-        }
-        pass[msg.sender] = false;
-        //votePower = calcVotePower();
+    function setMaxValidators(uint256 setValue) external override onlyGov{
+        MaxValidators = setValue;
     }
 
-    function createProposal(
-        string calldata details,
-        string calldata vari_name,
-        uint256 value
-    ) external payable onlyValidator returns (bool) {
-        //address storage val = msg.sender;
-        Validator storage valInfo = validatorInfo[msg.sender];
-        require(valInfo.status == Status.Staked,"Only Active Validator"); // Only Active Validator
-        address dst = msg.sender;
-        //Compare 2 string
-        //Validator can only Made these two proposals.onlyValidator
-        require(
-            keccak256(bytes(vari_name)) == keccak256(bytes("MaxValidators")) ||
-                keccak256(bytes(vari_name)) ==
-                keccak256(bytes("minimumStakeAmount")),
-            "Max Validator & MinimumStakeAmount Proposal Only"
-        );
-        //Validator Must Pay 1 DXT for creating proposal
-        require(msg.value == 1 ether, "Must pay 1 DXT");
-        // console.log("Calling now User Proposal");
-        bytes32[] memory UserProposal = userProposal();
-
-        //Restrictions for create proposal for minimum stake amount
-        if (
-            keccak256(bytes(vari_name)) ==
-            keccak256(bytes("minimumStakeAmount"))
-        ) {
-            //Validator can't made proposal for 1 or less than 1 DXT
-            require(value >= 1, "minimumStakeAmount can't be less then 1");
-            //Checks that validator can only create proposal after 7 days once they creat proposal
-            for (uint256 i = 0; i < UserProposal.length; i++) {
-                // console.log("AT Line 1270");
-                if (
-                    keccak256(
-                        bytes(proposals[UserProposal[i]].variable_name)
-                    ) ==
-                    keccak256(bytes("minimumStakeAmount")) &&
-                    (block.timestamp <
-                        proposals[UserProposal[i]].createTime +
-                            proposalLastingPeriod)
-                ) {
-                    // console.log("Inside If 1280");
-                    bool isexist = false;
-                    require(isexist == true, "proposal created before");
-                }
-            }
-
-            value = value * 1 ether; //Convert the value wei into eather
-            //Fetch highestAmount of activevalidator
-            uint256 highcoin = validatorInfo[highestValidators[0]].coins;
-            for (uint256 i = 1; i < highestValidators.length; i++) {
-                if (validatorInfo[highestValidators[i]].coins > highcoin) {
-                    highcoin = validatorInfo[highestValidators[i]].coins;
-                }
-            }
-            //Validator can't creat proposal that proposal amount > highCoin
-            require(value <= highcoin, "set less than highcoin");
-        }
-
-        if (keccak256(bytes(vari_name)) == keccak256(bytes("MaxValidators"))) {
-            for (uint256 i = 0; i < UserProposal.length; i++) {
-                // console.log("At Line 1300");
-                if (
-                    keccak256(
-                        bytes(proposals[UserProposal[i]].variable_name)
-                    ) ==
-                    keccak256(bytes("MaxValidators")) &&
-                    (block.timestamp <
-                        proposals[UserProposal[i]].createTime +
-                            proposalLastingPeriod)
-                ) {
-                    // console.log("At Line 1310");
-                    bool isexist = false;
-                    require(isexist == true, "proposal created before");
-                }
-            }
-
-            if (value < 3 || value > currentValidators.length || value > 51)
-                revert("Invalid Value");
-        }
-        // generate proposal id
-        bytes32 id = keccak256(
-            abi.encodePacked(msg.sender, dst, details, block.timestamp)
-        );
-        bytes32 pID = id;
-        bytes32 uID = id;
-        //Details can't be more than 100 words
-        require(bytes(details).length <= 100, "Details too long");
-      
-        activeProposal storage activeInfo = activeProposalMap[id];
-        uint256 updateCoins = 0;  
-        for (uint256 i = 0; i < highestValidators.length; i++) {   
-            address currentaddr = highestValidators[i];
-            uint256 coins = validatorInfo[currentaddr].coins;
-            activeInfo.isEligible[currentaddr] = true; //  Set IsEligible
-            activeInfo.individualCoins[currentaddr] = coins; // Update individualCoins Map
-            // updTotalCoins = updTotalCoins.add(validatorInfo[currentaddr].coins);
-           updateCoins =  updateCoins.add(coins);
-        }
-        activeInfo.totalVotePower = updateCoins;
-        //console.log("Updated Coins:",updateCoins);
-
-        //Set into the mapping
-        ProposalInfo memory proposal;
-        proposal.proposer = msg.sender;
-        proposal.dst = dst;
-        proposal.details = details;
-        proposal.createTime = block.timestamp;
-        proposal.variable_name = vari_name;
-        proposal.variable_value = value;
-        proposal.access = true;
-        proposal.votePowerOfAgree = 0;
-        proposal.votePowerOfDisagree = 0;
-        userProposals[proposal.proposer].push(uID);
-        proposals[id] = proposal;
-        ProposalsArray.push(pID);
-        
-        votePower = activeInfo.totalVotePower;
-        emit LogCreateProposal(id, msg.sender, dst, block.timestamp);
-        return true;
-    }
-     
-    //Will return current values of minimumStakeAmount & MaxValidators
-    function currentValue(string memory vari_name)
-        public
-        view
-        returns (uint256)
-    {
-        if (
-            keccak256(bytes(vari_name)) ==
-            keccak256(bytes("minimumStakeAmount"))
-        ) {
-            return (minimumStakeAmount);
-        }
-        if (keccak256(bytes(vari_name)) == keccak256(bytes("MaxValidators"))) {
-            return (MaxValidators);
-        }
+    function setminimumStakeAmount(uint256 setValue) external override onlyGov{
+        minimumStakeAmount = setValue;
     }
 
-    //List of proposal validators
-    function userProposal() public view returns (bytes32[] memory) {    
-        return userProposals[msg.sender];
+    function getStatus(address val) external override view returns (Status){
+        Validator memory v = validatorInfo[val];
+        return (v.status);
     }
 
-    //All Current Highest  Validators will vote to that proposal
-    function voteProposal(bytes32 id, string calldata vote)
-        external
-        returns (bool)
-    {
-        
-       bool auth;
-        activeProposal storage activeInfo = activeProposalMap[id];
-        bool isEligible = activeInfo.isEligible[msg.sender];
-        require(isEligible == true,"Not Eligible");// Check Present in Eligible List 
-        require(proposals[id].access == true, "Voting completed for this ID");//Check if Proposal is Comleted or Not for this id
-        require(proposals[id].createTime != 0, "Proposal not exist"); // Check for Proposal Exist
-        require(votes[msg.sender][id].voteTime == 0,"You can't vote for a proposal twice");// Check Can't Vote for Same Proposal Twice
-        require(block.timestamp < proposals[id].createTime + proposalLastingPeriod,"Proposal Expired");//Checks Proposal is expired or Not
-        //checks spelling of true or false
-        if (keccak256(bytes(vote)) == keccak256(bytes("true"))) {
-            auth = true;
-        } else if ((keccak256(bytes(vote)) == keccak256(bytes("false")))) {
-            auth = false;
-        } else {
-            revert("Invalid Vote");
-        }
-
-        //If any validator pass the proposal then his coins will be added in votePower
-        uint256 icoin = activeInfo.individualCoins[msg.sender]; // Get Individual Coins 
-        if (auth) {
-            proposals[id].votePowerOfAgree =
-                proposals[id].votePowerOfAgree +
-                icoin;
-        }else{
-           
-            proposals[id].votePowerOfDisagree =
-                proposals[id].votePowerOfDisagree +
-                icoin;
-        }
-
-        //Store data into the mapping votes
-        votes[msg.sender][id].voteTime = block.timestamp;
-        votes[msg.sender][id].voter = msg.sender;
-        votes[msg.sender][id].auth = auth;
-
-        emit LogVote(id, msg.sender, auth, block.timestamp);
-
-        // update dst status if proposal is passed
-        //counte number of validator agreed and disagree to that proposal
-        if (auth) {
-            proposals[id].agree += 1;
-        } else {
-            proposals[id].reject += 1;
-        }
-        //
-        if (pass[proposals[id].dst] || proposals[id].resultExist) {
-            // do nothing if dst already passed or rejected.
-            return true;
-        }
-
-        // Total Coins Proposal ID
-        uint256 totalVotePower = activeInfo.totalVotePower;
-        
-       
-        //If voting is agreed by 51% calculating votingPower then update the mapping
-        if (proposals[id].votePowerOfAgree >= (totalVotePower / 2) + 1) {
-            pass[proposals[id].dst] = true;
-            proposals[id].resultExist = true;
-            proposals[id].proposer.transfer(1 ether);
-    
-            authchangevalues(id);
-        
-            proposals[id].ispassed = true;
-            proposals[id].access = false;
-
-            emit LogPassProposal(id, proposals[id].dst, block.timestamp);
-            return true;
-        }
-        //If voting is dis-agreed by 51% calculating votingPower then update the mapping
-        if (proposals[id].votePowerOfDisagree >= (totalVotePower / 2) + 1) {
-            proposals[id].resultExist = true;
-            proposals[id].ispassed = false;
-            proposals[id].access = false;
-            emit LogRejectProposal(id, proposals[id].dst, block.timestamp);
-        }
-        return true;
+    function getCoins(address val) external override view returns (uint256){
+        Validator memory v = validatorInfo[val];
+        return (v.coins);
     }
-
-
-    function getActiveProposal(bytes32 _id) public view returns(bool,uint256,uint256){
-        activeProposal storage activeInfo = activeProposalMap[_id];
-        uint256 icoins = activeInfo.individualCoins[msg.sender];
-        bool isPresent = activeInfo.isEligible[msg.sender];
-        uint tvp = activeInfo.totalVotePower;
-        return(isPresent,icoins,tvp);
-    }
-
-/********************Internal Function**********************/
-// function calcVotePower() private view returns(uint256) {
-//        uint256 totalCoin;
-//        for(uint256 i = 0; i < highestValidators.length; i++) {
-//          totalCoin = totalCoin.add(validatorInfo[highestValidators[i]].coins);
-//        }
-//        return totalCoin;
-//     }   
-     
-
 }
