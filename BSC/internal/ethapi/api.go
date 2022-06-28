@@ -1774,9 +1774,15 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceiptsByBlockNumber(ctx conte
 	if err != nil {
 		return nil, err
 	}
+	if receipts == nil {
+		return nil, fmt.Errorf("block %d receipts not found", blockNumber)
+	}
 	block, err := s.b.BlockByHash(ctx, blockHash)
 	if err != nil {
 		return nil, err
+	}
+	if block == nil {
+		return nil, fmt.Errorf("block %d not found", blockNumber)
 	}
 	txs := block.Transactions()
 	if len(txs) != len(receipts) {
@@ -2221,8 +2227,6 @@ func (s *PublicTransactionPoolAPI) SignTransaction(ctx context.Context, args Sen
 		return nil, err
 	}
 	tx, err := s.sign(args.From, args.toTransaction())
-	fmt.Println("tx")
-	fmt.Println(tx)
 	if err != nil {
 		return nil, err
 	}

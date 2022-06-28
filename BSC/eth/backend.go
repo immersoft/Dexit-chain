@@ -200,7 +200,8 @@ func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
 		}
 	)
 	bcOps := make([]core.BlockChainOption, 0)
-	if config.DiffSync {
+	// TODO diffsync performance is not as expected, disable it when pipecommit is enabled for now
+	if config.DiffSync && !config.PipeCommit {
 		bcOps = append(bcOps, core.EnableLightProcessor)
 	}
 	if config.PipeCommit {
@@ -464,7 +465,6 @@ func (s *Ethereum) SetEtherbase(etherbase common.Address) {
 // is already running, this method adjust the number of threads allowed to use
 // and updates the minimum price required by the transaction pool.
 func (s *Ethereum) StartMining(threads int) error {
-	fmt.Println("inside StartMining() in backend.go")
 	// Update the thread count within the consensus engine
 	type threaded interface {
 		SetThreads(threads int)

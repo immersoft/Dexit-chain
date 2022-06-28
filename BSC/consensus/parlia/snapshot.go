@@ -21,7 +21,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math/big"
 	"sort"
 
@@ -143,15 +142,10 @@ func (s *Snapshot) isMajorityFork(forkHash string) bool {
 }
 
 func (s *Snapshot) apply(headers []*types.Header, chain consensus.ChainHeaderReader, parents []*types.Header, chainId *big.Int) (*Snapshot, error) {
-	fmt.Println("Inside apply() in snapshot.go")
 	// Allow passing in no headers for cleaner code
-	fmt.Println("headers")
-	fmt.Println(headers)
 	if len(headers) == 0 {
-		fmt.Println("Inside apply() inside 1st 'if' in snapshot.go")
 		return s, nil
 	}
-	fmt.Println("Inside apply() after 1st 'if' in snapshot.go")
 	// Sanity check that the headers can be applied
 	for i := 0; i < len(headers)-1; i++ {
 		if headers[i+1].Number.Uint64() != headers[i].Number.Uint64()+1 {
@@ -161,80 +155,52 @@ func (s *Snapshot) apply(headers []*types.Header, chain consensus.ChainHeaderRea
 			return nil, errBlockHashInconsistent
 		}
 	}
-	fmt.Println("Inside apply() after 1st 'for' in snapshot.go")
 	if headers[0].Number.Uint64() != s.Number+1 {
 		return nil, errOutOfRangeChain
 	}
-	fmt.Println("Inside apply() after 2nd 'if' in snapshot.go")
 	if !bytes.Equal(headers[0].ParentHash.Bytes(), s.Hash.Bytes()) {
 		return nil, errBlockHashInconsistent
 	}
-	fmt.Println("Inside apply() after 3rd 'if' in snapshot.go")
 	// Iterate through the headers and create a new snapshot
 	snap := s.copy()
-	fmt.Println("snap")
-	fmt.Println(snap)
 
 	for _, header := range headers {
 		number := header.Number.Uint64()
-		fmt.Println("number")
-		fmt.Println(number)
-		limit1 := uint64(len(snap.Validators)/2 + 1)
-		fmt.Println("limit1")
-		fmt.Println(limit1)
 		// Delete the oldest validator from the recent list to allow it signing again
-		if number >= limit1 {
-
-			delete(snap.Recents, number-limit1)
+		if limit := uint64(len(snap.Validators)/2 + 1); number >= limit {
+			delete(snap.Recents, number-limit)
 		}
-		limit2 := uint64(len(snap.Validators))
-		fmt.Println("limit2")
-		fmt.Println(limit2)
-		if limit2 := uint64(len(snap.Validators)); number >= limit2 {
-			delete(snap.RecentForkHashes, number-limit2)
+		if limit := uint64(len(snap.Validators)); number >= limit {
+			delete(snap.RecentForkHashes, number-limit)
 		}
 		// Resolve the authorization key and check against signers
 		validator, err := ecrecover(header, s.sigCache, chainId)
-		fmt.Println("validator")
-		fmt.Println(validator)
 		if err != nil {
 			return nil, err
 		}
 		if _, ok := snap.Validators[validator]; !ok {
-			fmt.Println("errUnauthorizedValidator in apply()")
 			return nil, errUnauthorizedValidator
 		}
 		for _, recent := range snap.Recents {
-			fmt.Println("recent")
-			fmt.Println(recent)
 			if recent == validator {
 				return nil, errRecentlySigned
 			}
 		}
 		snap.Recents[number] = validator
 		// change validator set
-		fmt.Println("Checking epoch")
 		if number > 0 && number%s.config.Epoch == uint64(len(snap.Validators)/2) {
 			checkpointHeader := FindAncientHeader(header, uint64(len(snap.Validators)/2), chain, parents)
-			fmt.Println("checkpointHeader")
-			fmt.Println(checkpointHeader)
 			if checkpointHeader == nil {
 				return nil, consensus.ErrUnknownAncestor
 			}
 
 			validatorBytes := checkpointHeader.Extra[extraVanity : len(checkpointHeader.Extra)-extraSeal]
-			fmt.Println("validatorBytes")
-			fmt.Println(validatorBytes)
 			// get validators from headers and use that for new validator set
 			newValArr, err := ParseValidators(validatorBytes)
-			fmt.Println("newValArr")
-			fmt.Println(newValArr)
 			if err != nil {
 				return nil, err
 			}
 			newVals := make(map[common.Address]struct{}, len(newValArr))
-			fmt.Println("newVals")
-			fmt.Println(newVals)
 			for _, val := range newValArr {
 				newVals[val] = struct{}{}
 			}
@@ -253,19 +219,11 @@ func (s *Snapshot) apply(headers []*types.Header, chain consensus.ChainHeaderRea
 				}
 			}
 			snap.Validators = newVals
-			fmt.Println("snap.Validators")
-			fmt.Println(snap.Validators)
 		}
 		snap.RecentForkHashes[number] = hex.EncodeToString(header.Extra[extraVanity-nextForkHashSize : extraVanity])
-		fmt.Println("snap.RecentForkHashes")
-		fmt.Println(snap.RecentForkHashes)
 	}
 	snap.Number += uint64(len(headers))
-	fmt.Println("snap.Number")
-	fmt.Println(snap.Number)
 	snap.Hash = headers[len(headers)-1].Hash()
-	fmt.Println("snap.Hash")
-	fmt.Println(snap.Hash)
 	return snap, nil
 }
 

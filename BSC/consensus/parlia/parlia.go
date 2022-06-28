@@ -154,7 +154,6 @@ func isToSystemContract(to common.Address) bool {
 
 // ecrecover extracts the Ethereum account address from a signed header.
 func ecrecover(header *types.Header, sigCache *lru.ARCCache, chainId *big.Int) (common.Address, error) {
-	fmt.Println("Inside ecrecover() in parlia.go")
 	// If the signature's already cached, return that
 	hash := header.Hash()
 	if address, known := sigCache.Get(hash); known {
@@ -186,7 +185,6 @@ func ecrecover(header *types.Header, sigCache *lru.ARCCache, chainId *big.Int) (
 // panics. This is done to avoid accidentally using both forms (signature present
 // or not), which could be abused to produce different hashes for the same header.
 func ParliaRLP(header *types.Header, chainId *big.Int) []byte {
-	fmt.Println("Inside ParliaRLP() in parlia.go")
 	b := new(bytes.Buffer)
 	encodeSigHeader(b, header, chainId)
 	return b.Bytes()
@@ -225,7 +223,6 @@ func New(
 	ethAPI *ethapi.PublicBlockChainAPI,
 	genesisHash common.Hash,
 ) *Parlia {
-	fmt.Println("Inside New() in parlia.go")
 	// get parlia config
 	parliaConfig := chainConfig.Parlia
 
@@ -268,7 +265,6 @@ func New(
 }
 
 func (p *Parlia) IsSystemTransaction(tx *types.Transaction, header *types.Header) (bool, error) {
-	fmt.Println("Inside IsSystemTransaction() in parlia.go")
 	// deploy a contract
 	if tx.To() == nil {
 		return false, nil
@@ -284,7 +280,6 @@ func (p *Parlia) IsSystemTransaction(tx *types.Transaction, header *types.Header
 }
 
 func (p *Parlia) IsSystemContract(to *common.Address) bool {
-	fmt.Println("Inside IsSystemContract() in parlia.go")
 	if to == nil {
 		return false
 	}
@@ -293,13 +288,11 @@ func (p *Parlia) IsSystemContract(to *common.Address) bool {
 
 // Author implements consensus.Engine, returning the SystemAddress
 func (p *Parlia) Author(header *types.Header) (common.Address, error) {
-	fmt.Println("Inside Author() in parlia.go")
 	return header.Coinbase, nil
 }
 
 // VerifyHeader checks whether a header conforms to the consensus rules.
 func (p *Parlia) VerifyHeader(chain consensus.ChainHeaderReader, header *types.Header, seal bool) error {
-	fmt.Println("Inside VerifyHeader() in parlia.go")
 	return p.verifyHeader(chain, header, nil)
 }
 
@@ -307,7 +300,6 @@ func (p *Parlia) VerifyHeader(chain consensus.ChainHeaderReader, header *types.H
 // method returns a quit channel to abort the operations and a results channel to
 // retrieve the async verifications (the order is that of the input slice).
 func (p *Parlia) VerifyHeaders(chain consensus.ChainHeaderReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error) {
-	fmt.Println("Inside VerfyHeaders() in parlia.go")
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 
@@ -330,7 +322,6 @@ func (p *Parlia) VerifyHeaders(chain consensus.ChainHeaderReader, headers []*typ
 // looking those up from the database. This is useful for concurrently verifying
 // a batch of new headers.
 func (p *Parlia) verifyHeader(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
-	fmt.Println("Inside verifyheader() in parlia.go")
 	if header.Number == nil {
 		return errUnknownBlock
 	}
@@ -387,7 +378,6 @@ func (p *Parlia) verifyHeader(chain consensus.ChainHeaderReader, header *types.H
 // in a batch of parents (ascending order) to avoid looking those up from the
 // database. This is useful for concurrently verifying a batch of new headers.
 func (p *Parlia) verifyCascadingFields(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
-	fmt.Println("Inside verifyCascadingFields() in parlia.go")
 	// The genesis block is the always valid dead-end
 	number := header.Number.Uint64()
 	if number == 0 {
@@ -442,7 +432,6 @@ func (p *Parlia) verifyCascadingFields(chain consensus.ChainHeaderReader, header
 
 // snapshot retrieves the authorization snapshot at a given point in time.
 func (p *Parlia) snapshot(chain consensus.ChainHeaderReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
-	fmt.Println("Inside snapshot in parlia.go")
 	// Search for a snapshot in memory or on disk for checkpoints
 	var (
 		headers []*types.Header
@@ -450,19 +439,15 @@ func (p *Parlia) snapshot(chain consensus.ChainHeaderReader, number uint64, hash
 	)
 
 	for snap == nil {
-		fmt.Println("Inside snapshot in for snap == nil")
 		// If an in-memory snapshot was found, use that
 		if s, ok := p.recentSnaps.Get(hash); ok {
-			fmt.Println("Inside snapshot in for snap == nil | if1 |")
 			snap = s.(*Snapshot)
 			break
 		}
 
 		// If an on-disk checkpoint snapshot can be found, use that
 		if number%checkpointInterval == 0 {
-			fmt.Println("Inside snapshot in for snap == nil | if2 ")
 			if s, err := loadSnapshot(p.config, p.signatures, p.db, hash, p.ethAPI); err == nil {
-				fmt.Println("Inside snapshot in for snap == nil | if21 ")
 				log.Trace("Loaded snapshot from disk", "number", number, "hash", hash)
 				snap = s
 				break
@@ -471,27 +456,20 @@ func (p *Parlia) snapshot(chain consensus.ChainHeaderReader, number uint64, hash
 
 		// If we're at the genesis, snapshot the initial state.
 		if number == 0 {
-			fmt.Println("Inside snapshot in for snap == nil | if3 ")
 			checkpoint := chain.GetHeaderByNumber(number)
 			if checkpoint != nil {
-				fmt.Println("Inside snapshot in for snap == nil | if31 ")
 				// get checkpoint data
 				hash := checkpoint.Hash()
 
 				validatorBytes := checkpoint.Extra[extraVanity : len(checkpoint.Extra)-extraSeal]
 				// get validators from headers
-				fmt.Println("// get validators from headers, calling ParseValidators")
 				validators, err := ParseValidators(validatorBytes)
-				fmt.Println("validators")
-				fmt.Println(validators)
 				if err != nil {
 					return nil, err
 				}
 
 				// new snap shot
 				snap = newSnapshot(p.config, p.signatures, number, hash, validators, p.ethAPI)
-				fmt.Println("validators")
-				fmt.Println(validators)
 				if err := snap.store(p.db); err != nil {
 					return nil, err
 				}
@@ -531,10 +509,7 @@ func (p *Parlia) snapshot(chain consensus.ChainHeaderReader, number uint64, hash
 	}
 
 	snap, err := snap.apply(headers, chain, parents, p.chainConfig.ChainID)
-	fmt.Println("snap: in snapshot() parlia.go")
-	fmt.Println(snap)
 	if err != nil {
-		fmt.Println("Inside if err != nil {")
 		return nil, err
 	}
 	p.recentSnaps.Add(snap.Hash, snap)
@@ -552,7 +527,6 @@ func (p *Parlia) snapshot(chain consensus.ChainHeaderReader, number uint64, hash
 // VerifyUncles implements consensus.Engine, always returning an error for any
 // uncles as this consensus mechanism doesn't permit uncles.
 func (p *Parlia) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
-	fmt.Println("Inside VerifyUncles() in parlia.go")
 	if len(block.Uncles()) > 0 {
 		return errors.New("uncles not allowed")
 	}
@@ -562,7 +536,6 @@ func (p *Parlia) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 // VerifySeal implements consensus.Engine, checking whether the signature contained
 // in the header satisfies the consensus protocol requirements.
 func (p *Parlia) VerifySeal(chain consensus.ChainReader, header *types.Header) error {
-	fmt.Println("Inside VerifySeal() in parlia.go")
 	return p.verifySeal(chain, header, nil)
 }
 
@@ -571,7 +544,6 @@ func (p *Parlia) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
 func (p *Parlia) verifySeal(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
-	fmt.Println("Inside verfiySeal() in parlia.go")
 	// Verifying the genesis block is not supported
 	number := header.Number.Uint64()
 	if number == 0 {
@@ -594,7 +566,6 @@ func (p *Parlia) verifySeal(chain consensus.ChainHeaderReader, header *types.Hea
 	}
 
 	if _, ok := snap.Validators[signer]; !ok {
-		fmt.Println("errUnauthorizedValidator in verifySeal()")
 		return errUnauthorizedValidator
 	}
 
@@ -624,22 +595,17 @@ func (p *Parlia) verifySeal(chain consensus.ChainHeaderReader, header *types.Hea
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
 func (p *Parlia) Prepare(chain consensus.ChainHeaderReader, header *types.Header) error {
-	fmt.Println("Inside Prepare() in parlia.go")
 	header.Coinbase = p.val
 	header.Nonce = types.BlockNonce{}
 
 	number := header.Number.Uint64()
-	fmt.Println("Calling snapshot in Prepare()")
 	snap, err := p.snapshot(chain, number-1, header.ParentHash, nil)
 	if err != nil {
 		return err
 	}
-	fmt.Println("snap: ")
-	fmt.Println(snap)
-	fmt.Println("After snapshot(); in prepare")
+
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, p.val)
-	fmt.Println("header.Difficulty = CalcDifficulty(snap, p.val)")
 
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity-nextForkHashSize {
@@ -650,9 +616,7 @@ func (p *Parlia) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 	header.Extra = append(header.Extra, nextForkHash[:]...)
 
 	if number%p.config.Epoch == 0 {
-		newValidators, err := p.getCurrentValidators(header.ParentHash)
-		fmt.Println("newValidators, err := p.getCurrentValidators(header.ParentHash)")
-		fmt.Println(newValidators)
+		newValidators, err := p.getCurrentValidators(header.ParentHash, new(big.Int).Sub(header.Number, common.Big1))
 		if err != nil {
 			return err
 		}
@@ -660,9 +624,6 @@ func (p *Parlia) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 		sort.Sort(validatorsAscending(newValidators))
 		for _, validator := range newValidators {
 			header.Extra = append(header.Extra, validator.Bytes()...)
-			fmt.Println("for _, validator := range newValidators ")
-			fmt.Println("validator:")
-			fmt.Println(validator)
 		}
 	}
 
@@ -688,7 +649,6 @@ func (p *Parlia) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 // rewards given.
 func (p *Parlia) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs *[]*types.Transaction,
 	uncles []*types.Header, receipts *[]*types.Receipt, systemTxs *[]*types.Transaction, usedGas *uint64) error {
-	fmt.Println("Inside Finalize in parlia.go")
 	// warn if not in majority fork
 	number := header.Number.Uint64()
 	snap, err := p.snapshot(chain, number-1, header.ParentHash, nil)
@@ -702,7 +662,7 @@ func (p *Parlia) Finalize(chain consensus.ChainHeaderReader, header *types.Heade
 	// If the block is a epoch end block, verify the validator list
 	// The verification can only be done when the state is ready, it can't be done in VerifyHeader.
 	if header.Number.Uint64()%p.config.Epoch == 0 {
-		newValidators, err := p.getCurrentValidators(header.ParentHash)
+		newValidators, err := p.getCurrentValidators(header.ParentHash, new(big.Int).Sub(header.Number, common.Big1))
 		if err != nil {
 			return err
 		}
@@ -759,7 +719,6 @@ func (p *Parlia) Finalize(chain consensus.ChainHeaderReader, header *types.Heade
 // nor block rewards given, and returns the final block.
 func (p *Parlia) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB,
 	txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, []*types.Receipt, error) {
-	fmt.Println("Inside FinalizeandAssemble() in parlia.go")
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
 	cx := chainContext{Chain: chain, parlia: p}
 	if txs == nil {
@@ -797,8 +756,6 @@ func (p *Parlia) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 		}
 	}
 	err := p.distributeIncoming(p.val, state, header, cx, &txs, &receipts, nil, &header.GasUsed, true)
-	fmt.Println("err when calling distributeIncoming")
-	fmt.Println(err)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -828,7 +785,6 @@ func (p *Parlia) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 // Authorize injects a private key into the consensus engine to mint new blocks
 // with.
 func (p *Parlia) Authorize(val common.Address, signFn SignerFn, signTxFn SignerTxFn) {
-	fmt.Println("inside Authorize() in parlia.go")
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -838,7 +794,6 @@ func (p *Parlia) Authorize(val common.Address, signFn SignerFn, signTxFn SignerT
 }
 
 func (p *Parlia) Delay(chain consensus.ChainReader, header *types.Header) *time.Duration {
-	fmt.Println("Inside Delay() in parlia.go")
 	number := header.Number.Uint64()
 	snap, err := p.snapshot(chain, number-1, header.ParentHash, nil)
 	if err != nil {
@@ -856,7 +811,6 @@ func (p *Parlia) Delay(chain consensus.ChainReader, header *types.Header) *time.
 // Seal implements consensus.Engine, attempting to create a sealed block using
 // the local signing credentials.
 func (p *Parlia) Seal(chain consensus.ChainHeaderReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
-	fmt.Println("Inside Seal() in parlia.go")
 	header := block.Header()
 
 	// Sealing the genesis block is not supported
@@ -873,36 +827,21 @@ func (p *Parlia) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 	p.lock.RLock()
 	val, signFn := p.val, p.signFn
 	p.lock.RUnlock()
-	fmt.Println("val")
-	fmt.Println(val)
-	fmt.Println("signFn")
-	fmt.Println(signFn)
 
 	snap, err := p.snapshot(chain, number-1, header.ParentHash, nil)
 	if err != nil {
 		return err
 	}
-	fmt.Println("snap.Validators")
-	fmt.Println(snap.Validators)
+
 	// Bail out if we're unauthorized to sign a block
-	//Temporary test
-	var auth bool
 	if _, authorized := snap.Validators[val]; !authorized {
-		auth = authorized
-		fmt.Println(auth)
-		fmt.Println("errUnauthorizedValidator in Seal()")
 		return errUnauthorizedValidator
 	}
-	fmt.Println("authorized")
-	fmt.Println(auth)
+
 	// If we're amongst the recent signers, wait for the next block
-
-	//Commented below lines temporarily by Ashutosh on 24 Feb 2022
-
 	for seen, recent := range snap.Recents {
 		if recent == val {
 			// Signer is among recents, only wait if the current block doesn't shift it out
-
 			if limit := uint64(len(snap.Validators)/2 + 1); number < limit || seen > number-limit {
 				log.Info("Signed recently, must wait for others")
 				return nil
@@ -952,7 +891,6 @@ func (p *Parlia) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 }
 
 func (p *Parlia) shouldWaitForCurrentBlockProcess(chain consensus.ChainHeaderReader, header *types.Header, snap *Snapshot) bool {
-	fmt.Println("Inside shouldWaitForCurrentBlockProcess() in parlia.go")
 	if header.Difficulty.Cmp(diffInTurn) == 0 {
 		return false
 	}
@@ -969,7 +907,6 @@ func (p *Parlia) shouldWaitForCurrentBlockProcess(chain consensus.ChainHeaderRea
 }
 
 func (p *Parlia) EnoughDistance(chain consensus.ChainReader, header *types.Header) bool {
-	fmt.Println("Inside EnoughDistance() in parlia.go")
 	snap, err := p.snapshot(chain, header.Number.Uint64()-1, header.ParentHash, nil)
 	if err != nil {
 		return true
@@ -978,7 +915,6 @@ func (p *Parlia) EnoughDistance(chain consensus.ChainReader, header *types.Heade
 }
 
 func (p *Parlia) AllowLightProcess(chain consensus.ChainReader, currentHeader *types.Header) bool {
-	fmt.Println("Inside AllowLightProcess() in parlia.go")
 	snap, err := p.snapshot(chain, currentHeader.Number.Uint64()-1, currentHeader.ParentHash, nil)
 	if err != nil {
 		return true
@@ -990,12 +926,10 @@ func (p *Parlia) AllowLightProcess(chain consensus.ChainReader, currentHeader *t
 }
 
 func (p *Parlia) IsLocalBlock(header *types.Header) bool {
-	fmt.Println("Inside isLocalBlock() in parlia.go")
 	return p.val == header.Coinbase
 }
 
 func (p *Parlia) SignRecently(chain consensus.ChainReader, parent *types.Header) (bool, error) {
-	fmt.Println("Inside SignRecently() in parlia.go")
 	snap, err := p.snapshot(chain, parent.Number.Uint64(), parent.ParentHash, nil)
 	if err != nil {
 		return true, err
@@ -1003,7 +937,6 @@ func (p *Parlia) SignRecently(chain consensus.ChainReader, parent *types.Header)
 
 	// Bail out if we're unauthorized to sign a block
 	if _, authorized := snap.Validators[p.val]; !authorized {
-		fmt.Println("errUnauthorizedValidator in SignRecently()")
 		return true, errUnauthorizedValidator
 	}
 
@@ -1024,7 +957,6 @@ func (p *Parlia) SignRecently(chain consensus.ChainReader, parent *types.Header)
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
 func (p *Parlia) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {
-	fmt.Println("Inside (p *Parlia)CalcDifficulty() in parlia.go")
 	snap, err := p.snapshot(chain, parent.Number.Uint64(), parent.Hash(), nil)
 	if err != nil {
 		return nil
@@ -1036,7 +968,6 @@ func (p *Parlia) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, 
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
 func CalcDifficulty(snap *Snapshot, signer common.Address) *big.Int {
-	fmt.Println("Inside CalcDifficulty() in parlia.go")
 	if snap.inturn(signer) {
 		return new(big.Int).Set(diffInTurn)
 	}
@@ -1045,13 +976,11 @@ func CalcDifficulty(snap *Snapshot, signer common.Address) *big.Int {
 
 // SealHash returns the hash of a block prior to it being sealed.
 func (p *Parlia) SealHash(header *types.Header) common.Hash {
-	fmt.Println("Inside SealHash() in parlia.go")
 	return SealHash(header, p.chainConfig.ChainID)
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to query snapshot.
 func (p *Parlia) APIs(chain consensus.ChainHeaderReader) []rpc.API {
-	fmt.Println("Inside APIs() in parlia.go")
 	return []rpc.API{{
 		Namespace: "parlia",
 		Version:   "1.0",
@@ -1062,15 +991,13 @@ func (p *Parlia) APIs(chain consensus.ChainHeaderReader) []rpc.API {
 
 // Close implements consensus.Engine. It's a noop for parlia as there are no background threads.
 func (p *Parlia) Close() error {
-	fmt.Println("Inside Close() in parlia.go")
 	return nil
 }
 
 // ==========================  interaction with contract/account =========
 
 // getCurrentValidators get current validators
-func (p *Parlia) getCurrentValidators(blockHash common.Hash) ([]common.Address, error) {
-	fmt.Println("Inside getCurrentValidators in parlia.go")
+func (p *Parlia) getCurrentValidators(blockHash common.Hash, blockNumber *big.Int) ([]common.Address, error) {
 	// block
 	blockNr := rpc.BlockNumberOrHashWithHash(blockHash, false)
 
@@ -1087,17 +1014,13 @@ func (p *Parlia) getCurrentValidators(blockHash common.Hash) ([]common.Address, 
 	}
 	// call
 	msgData := (hexutil.Bytes)(data)
-	fmt.Println(msgData)
 	toAddress := common.HexToAddress(systemcontracts.ValidatorContract)
-	fmt.Println(toAddress)
 	gas := (hexutil.Uint64)(uint64(math.MaxUint64 / 2))
-	fmt.Println(gas)
 	result, err := p.ethAPI.Call(ctx, ethapi.CallArgs{
 		Gas:  &gas,
 		To:   &toAddress,
 		Data: &msgData,
 	}, blockNr, nil)
-	fmt.Println(result)
 	if err != nil {
 		return nil, err
 	}
@@ -1115,20 +1038,22 @@ func (p *Parlia) getCurrentValidators(blockHash common.Hash) ([]common.Address, 
 	for i, a := range *ret0 {
 		valz[i] = a
 	}
-	fmt.Println(valz)
 	return valz, nil
 }
 
 // slash spoiled validators
 func (p *Parlia) distributeIncoming(val common.Address, state *state.StateDB, header *types.Header, chain core.ChainContext,
 	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool) error {
-	fmt.Println("Inside distributeIncoming() in parlia.go")
+		var (
+			contAddr []common.Address
+		)
 	coinbase := header.Coinbase
-	fmt.Println("coinbase:")
-	fmt.Println(coinbase)
 	balance := state.GetBalance(consensus.SystemAddress)
-	fmt.Println("Total balance")
-	fmt.Println(balance)
+	for _, tx := range *txs {
+		if len(tx.Data()) > 0 && tx.To() != nil {
+			contAddr = append(contAddr, *tx.To())
+		}
+	}
 	if balance.Cmp(common.Big0) <= 0 {
 		return nil
 	}
@@ -1136,8 +1061,6 @@ func (p *Parlia) distributeIncoming(val common.Address, state *state.StateDB, he
 	state.AddBalance(coinbase, balance)
 
 	doDistributeSysReward := state.GetBalance(common.HexToAddress(systemcontracts.SystemRewardContract)).Cmp(maxSystemBalance) < 0
-	fmt.Println("doDistributeSysReward")
-	fmt.Println(doDistributeSysReward)
 	if doDistributeSysReward {
 		var rewards = new(big.Int)
 		rewards = rewards.Rsh(balance, systemRewardPercent)
@@ -1149,19 +1072,14 @@ func (p *Parlia) distributeIncoming(val common.Address, state *state.StateDB, he
 			log.Trace("distribute to system reward pool", "block hash", header.Hash(), "amount", rewards)
 			balance = balance.Sub(balance, rewards)
 		}
-		fmt.Println("rewards")
-		fmt.Println(rewards)
-		fmt.Println("New Balance")
-		fmt.Println(balance)
 	}
 	log.Trace("distribute to validator contract", "block hash", header.Hash(), "amount", balance)
-	return p.distributeToValidator(balance, val, state, header, chain, txs, receipts, receivedTxs, usedGas, mining)
+	return p.distributeToValidator(balance, val, state, header, chain, txs, receipts, receivedTxs, usedGas, mining, contAddr)
 }
 
 // slash spoiled validators
 func (p *Parlia) slash(spoiledVal common.Address, state *state.StateDB, header *types.Header, chain core.ChainContext,
 	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool) error {
-	fmt.Println("Inside slash() in parlia.go")
 	// method
 	method := "slash"
 
@@ -1182,7 +1100,6 @@ func (p *Parlia) slash(spoiledVal common.Address, state *state.StateDB, header *
 // init contract
 func (p *Parlia) initContract(state *state.StateDB, header *types.Header, chain core.ChainContext,
 	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool) error {
-	fmt.Println("Inside initContract() in parlia.go")
 	// method
 	method := "init"
 	// contracts
@@ -1215,7 +1132,6 @@ func (p *Parlia) initContract(state *state.StateDB, header *types.Header, chain 
 
 func (p *Parlia) distributeToSystem(amount *big.Int, state *state.StateDB, header *types.Header, chain core.ChainContext,
 	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool) error {
-	fmt.Println("Inside distributeToSystem() in parlia.go")
 	// get system message
 	msg := p.getSystemMessage(header.Coinbase, common.HexToAddress(systemcontracts.SystemRewardContract), nil, amount)
 	// apply message
@@ -1225,33 +1141,27 @@ func (p *Parlia) distributeToSystem(amount *big.Int, state *state.StateDB, heade
 // slash spoiled validators
 func (p *Parlia) distributeToValidator(amount *big.Int, validator common.Address,
 	state *state.StateDB, header *types.Header, chain core.ChainContext,
-	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool) error {
-	fmt.Println("Inside distributeToValidator() in parlia.go")
+	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool, contAddr []common.Address) error {
 	// method
 	method := "deposit"
 
 	// get packed data
 	data, err := p.validatorSetABI.Pack(method,
 		validator,
+		contAddr,
 	)
-	fmt.Println("data:")
-	fmt.Println(data)
-
 	if err != nil {
 		log.Error("Unable to pack tx for deposit", "error", err)
 		return err
 	}
 	// get system message
 	msg := p.getSystemMessage(header.Coinbase, common.HexToAddress(systemcontracts.ValidatorContract), data, amount)
-	fmt.Println("msg := p.getSystemMessage(header.Coinbase, common.HexToAddress(systemcontracts.ValidatorContract), data, amount)")
-	fmt.Println(msg)
 	// apply message
 	return p.applyTransaction(msg, state, header, chain, txs, receipts, receivedTxs, usedGas, mining)
 }
 
 // get system message
 func (p *Parlia) getSystemMessage(from, toAddress common.Address, data []byte, value *big.Int) callmsg {
-	fmt.Println("Inside getSystemMessage() in parlia.go")
 	return callmsg{
 		ethereum.CallMsg{
 			From:     from,
@@ -1272,7 +1182,6 @@ func (p *Parlia) applyTransaction(
 	txs *[]*types.Transaction, receipts *[]*types.Receipt,
 	receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool,
 ) (err error) {
-	fmt.Println("Inside applyTransaction() in parlia.go")
 	nonce := state.GetNonce(msg.From())
 	expectedTx := types.NewTransaction(nonce, *msg.To(), msg.Value(), msg.Gas(), msg.GasPrice(), msg.Data())
 	expectedHash := p.signer.Hash(expectedTx)
@@ -1315,32 +1224,15 @@ func (p *Parlia) applyTransaction(
 	}
 	*usedGas += gasUsed
 	receipt := types.NewReceipt(root, false, *usedGas)
-	fmt.Println("receipt := types.NewReceipt(root, false, *usedGas)")
-	fmt.Println(receipt)
 	receipt.TxHash = expectedTx.Hash()
-	fmt.Println("receipt.TxHash = expectedTx.Hash()")
-	fmt.Println(receipt.TxHash)
 	receipt.GasUsed = gasUsed
-	fmt.Println("receipt.GasUsed = gasUsed")
-	fmt.Println(receipt.GasUsed)
 
 	// Set the receipt logs and create a bloom for filtering
 	receipt.Logs = state.GetLogs(expectedTx.Hash())
-
-	fmt.Println("receipt.Logs = state.GetLogs(expectedTx.Hash())")
-	fmt.Println(receipt.Logs)
 	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
-	fmt.Println("receipt.Bloom = types.CreateBloom(types.Receipts{receipt})")
-	fmt.Println(receipt.Bloom)
 	receipt.BlockHash = state.BlockHash()
-	fmt.Println("receipt.BlockHash = state.BlockHash()")
-	fmt.Println(receipt.BlockHash)
 	receipt.BlockNumber = header.Number
-	fmt.Println("receipt.BlockNumber = header.Number")
-	fmt.Println(receipt.BlockNumber)
 	receipt.TransactionIndex = uint(state.TxIndex())
-	fmt.Println("receipt.TransactionIndex = uint(state.TxIndex())")
-	fmt.Println(receipt.TransactionIndex)
 	*receipts = append(*receipts, receipt)
 	state.SetNonce(msg.From(), nonce+1)
 	return nil
@@ -1349,7 +1241,6 @@ func (p *Parlia) applyTransaction(
 // ===========================     utility function        ==========================
 // SealHash returns the hash of a block prior to it being sealed.
 func SealHash(header *types.Header, chainId *big.Int) (hash common.Hash) {
-	fmt.Println("Inside SealHash() in parlia.go")
 	hasher := sha3.NewLegacyKeccak256()
 	encodeSigHeader(hasher, header, chainId)
 	hasher.Sum(hash[:0])
@@ -1357,7 +1248,6 @@ func SealHash(header *types.Header, chainId *big.Int) (hash common.Hash) {
 }
 
 func encodeSigHeader(w io.Writer, header *types.Header, chainId *big.Int) {
-	fmt.Println("Inside EncodeSigHeader() in parlia.go")
 	err := rlp.Encode(w, []interface{}{
 		chainId,
 		header.ParentHash,
@@ -1382,7 +1272,6 @@ func encodeSigHeader(w io.Writer, header *types.Header, chainId *big.Int) {
 }
 
 func backOffTime(snap *Snapshot, val common.Address) uint64 {
-	fmt.Println("Inside backOffTime() in parlia.go")
 	if snap.inturn(val) {
 		return 0
 	} else {
@@ -1413,12 +1302,10 @@ type chainContext struct {
 }
 
 func (c chainContext) Engine() consensus.Engine {
-	fmt.Println("Inside Engine() in parlia.go")
 	return c.parlia
 }
 
 func (c chainContext) GetHeader(hash common.Hash, number uint64) *types.Header {
-	fmt.Println("Inside GetHeader() in parlia.go")
 	return c.Chain.GetHeader(hash, number)
 }
 
@@ -1427,38 +1314,14 @@ type callmsg struct {
 	ethereum.CallMsg
 }
 
-func (m callmsg) From() common.Address {
-	fmt.Println("Inside From() in parlia.go")
-	return m.CallMsg.From
-}
-func (m callmsg) Nonce() uint64 {
-	fmt.Println("Inside Nonce() in parlia.go")
-	return 0
-}
-func (m callmsg) CheckNonce() bool {
-	fmt.Println("Inside CheckNonce() in parlia.go")
-	return false
-}
-func (m callmsg) To() *common.Address {
-	fmt.Println("Inside To() in parlia.go")
-	return m.CallMsg.To
-}
-func (m callmsg) GasPrice() *big.Int {
-	fmt.Println("Inside GasPrice() in parlia.go")
-	return m.CallMsg.GasPrice
-}
-func (m callmsg) Gas() uint64 {
-	fmt.Println("Inside Gas() in parlia.go")
-	return m.CallMsg.Gas
-}
-func (m callmsg) Value() *big.Int {
-	fmt.Println("Inside Value() in parlia.go")
-	return m.CallMsg.Value
-}
-func (m callmsg) Data() []byte {
-	fmt.Println("Inside Data() in parlia.go")
-	return m.CallMsg.Data
-}
+func (m callmsg) From() common.Address { return m.CallMsg.From }
+func (m callmsg) Nonce() uint64        { return 0 }
+func (m callmsg) CheckNonce() bool     { return false }
+func (m callmsg) To() *common.Address  { return m.CallMsg.To }
+func (m callmsg) GasPrice() *big.Int   { return m.CallMsg.GasPrice }
+func (m callmsg) Gas() uint64          { return m.CallMsg.Gas }
+func (m callmsg) Value() *big.Int      { return m.CallMsg.Value }
+func (m callmsg) Data() []byte         { return m.CallMsg.Data }
 
 // apply message
 func applyMessage(
@@ -1468,7 +1331,6 @@ func applyMessage(
 	chainConfig *params.ChainConfig,
 	chainContext core.ChainContext,
 ) (uint64, error) {
-	fmt.Println("Inside applyMessage() in parlia.go")
 	// Create a new context to be used in the EVM environment
 	context := core.NewEVMBlockContext(header, chainContext, nil)
 	// Create a new environment which holds all relevant information
