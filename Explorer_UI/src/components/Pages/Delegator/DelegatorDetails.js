@@ -48,7 +48,7 @@ const DelegatorDetails = () => {
     const [openUnStack, setOpenUnStack] = React.useState(false);
 
     let customList=[]
-    console.log(Connection,"data")
+    // console.log(Connection,"data")
 
     const getAccounts = async () => {
       try {
@@ -59,6 +59,7 @@ const DelegatorDetails = () => {
       }    
     };
 
+   const accountAddress=()=>{
     try {
       window.ethereum.on("accountsChanged", function () {
         getAccounts();
@@ -66,9 +67,12 @@ const DelegatorDetails = () => {
     } catch (error) {
       console.log(error)
     }
+   } 
+   
    
     
     useEffect(()=>{
+      accountAddress()
       getDelegatorList()
       getAccounts();
       getDelegatorBalance()
@@ -104,8 +108,7 @@ const DelegatorDetails = () => {
           for(let i=0;i<list.length;i++){
             let dataget=await Connection.getDelegatorsDetails(list[i].validatorAddress,list[i].ID.toString())
             // console.log(dataget,"list[i]")
-    
-            // console.log(dataget,"datagetaaaa")
+            // console.log(dataget,"dataget")
             // let totalVotingPower=(dataget.toString()/contract.toString())*100
             let customObject={
                 id:list[i].ID.toString(),
@@ -119,7 +122,7 @@ const DelegatorDetails = () => {
             if(check==undefined){
               customList.push(customObject)
             }
-            // console.log(check,"check")
+            // console.log(check,"console for check")
             }
          }
          getAllDelegatorList(customList)
@@ -134,10 +137,10 @@ const DelegatorDetails = () => {
 
     const unStackAmount=async(data)=>{
         setAllDelegatorData(data)
-        console.log(data.amount)
+        // console.log(data.amount)
         setOpenUnStack(true)
         // let stakerAmountData2 = bigInt(4 * 10 ** 18);
-        // console.log(data.validatorAddress,"data.validatorAddress")
+        // console.log(data.validatorAddress,"validatorAddress")
         // let result = await Connection.unStakeValidators("0xb710C0779AFe841c6dF6e254877A11f1beEe302D",stakerAmountData2.value,1);
         // console.log(result,"result")
         // let delegateUnstack=await Connection.unStakeValidators(account,)
@@ -153,12 +156,12 @@ const DelegatorDetails = () => {
             else if(parseInt(inputAmount)<=allDelegatorData.amount){
               try {
                 let stakerAmountData2 = bigInt(inputAmount * 10 ** 18);
-                console.log(stakerAmountData2.value,"stakerAmountData2")
+                // console.log(stakerAmountData2.value,"stakerAmountData2")
                 let result = await Connection.unStakeValidators(allDelegatorData.validatorAddress,stakerAmountData2.value,allDelegatorData.id);
-                console.log(result)
+                // console.log(result)
                 setInputAmout(0)
                 setOpenUnStack(false)
-                console.log("call unstack functin")
+                // console.log("call unstack functin")
               } catch (error) {
                 console.log(error)
               }
@@ -167,13 +170,13 @@ const DelegatorDetails = () => {
         }
         // let stakerAmountData2 = bigInt(stakerAmount2 * 10 ** 18);
         // let result = await Connection.unStake(1,stakerAmountData2.value);
-        // console.log(result)
+        // console.log(result,"result of the given data is ")
         // setOpenUnStack(false)
     }
 
   return (
     <>
-<div className='unstack_modal'>
+        <div className='unstack_modal'>
                 <Modal
                     open={openUnStack}
                     onClose={handleCloseUnStack}

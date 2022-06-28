@@ -17,10 +17,10 @@ import "./transactions.css";
 export default function Transactions() {
   const navigate = useNavigate();
   const web3 = new Web3();
-  // web3.setProvider("http://192.168.1.41:8545");
-  web3.setProvider("https://testnet.dexit.network");
+  // web3.setProvider("https://datafeed.dexit.network");
+  // web3.setProvider("https://testnet.dexit.network");
 
-  // web3.setProvider("http://datafeed.dexit.network");
+  web3.setProvider("https://datafeed.dexit.network") ;    
 
   const [dd, setdd] = useState([]);
   const[dummyData,setDummyData]=useState([])
@@ -76,7 +76,7 @@ export default function Transactions() {
       }
       setDummyData([...dummyData, ...demo]);
       // setdd([...dd, ...bc]);
-      console.log(demo,"demo")
+      // console.log(demo,"demo")
     } catch (error) {
       console.log(error);
     }
@@ -86,7 +86,7 @@ export default function Transactions() {
   //   try {
   //     let ab = [];
   //     let tr = await web3.eth.getBlock(searchBlock);
-  //     console.log("trrr", tr.transactions);
+  //     console.log("transactions list", tr.transactions);
   //     for (let i = 0; i < tr.transactions.length; i++) {
   //       let getTrans = await web3.eth.getTransaction(tr.transactions[i]);
   //       console.log("transaction", getTrans);
@@ -104,9 +104,9 @@ export default function Transactions() {
   //     let ab = [];
   //     console.log(searchBlock);
   //     let tr = await web3.eth.getTransaction(searchBlock);
-  //     console.log("transaction details are", tr);
-  //     ab.push(tr);
-  //     setdd(ab);
+  //     console.log("transaction details", tr);
+  //     ab.push(tr);   
+  //     setdd(ab)
   //   } catch (error) {
   //     console.log(error);
   //   }
@@ -139,7 +139,7 @@ export default function Transactions() {
 
   return (
     <>
-      {console.log("Transactions length", dd.length)}
+      {/* {console.log("Transactions length", dd.length)} */}
       <div className="transaction_body">
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 300 }} aria-label="simple table">

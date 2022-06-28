@@ -9,6 +9,7 @@ import ArchiveIcon from "@mui/icons-material/Archive";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -53,7 +54,8 @@ const StyledMenu = styled((props) => (
   },
 }));
 
-export default function Blockchains() {
+export default function RegisterContract() {
+  const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -62,6 +64,17 @@ export default function Blockchains() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleRegisterContract = () => {
+    navigate("/register-contract");
+    handleClose()
+  };
+
+  const handleClaimReward = () =>{
+    navigate("/claim-contract-reward")
+    handleClose()
+  }
+
 
   return (
     <div>
@@ -76,7 +89,7 @@ export default function Blockchains() {
         endIcon={<KeyboardArrowDownIcon />}
         sx={{border:"none",color:"#7A93B4"}}
       >
-      <span style={{textTransform:"none"}}>Blockchains</span>
+      <span style={{textTransform:"none"}}> Contract</span>
       </Button>
       <StyledMenu
         id="demo-customized-menu"
@@ -87,30 +100,17 @@ export default function Blockchains() {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClose} disableRipple>
-          Top Accounts
+        <MenuItem onClick={handleRegisterContract} disableRipple>
+          Register Contract
         </MenuItem>
-        <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleClose} disableRipple>
-          View Txns
+
+        <MenuItem onClick={handleClaimReward} disableRipple>
+          Claim Reward
         </MenuItem>
-        <MenuItem onClick={handleClose} disableRipple>
-          View Pending Txns
-        </MenuItem>
-        <MenuItem onClick={handleClose} disableRipple>
-          View Contract Internal Txns
-        </MenuItem>
-        <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleClose} disableRipple>
-          View Blocks
-        </MenuItem>
-        <MenuItem onClick={handleClose} disableRipple>
-          Forked Blocks (Reorgs)
-        </MenuItem>
-        <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleClose} disableRipple>
-          Verified Contracts
-        </MenuItem>
+
+        {/* <MenuItem onClick={handleDelegatorsList} disableRipple>
+          Delegators List
+        </MenuItem> */}
       </StyledMenu>
     </div>
   );

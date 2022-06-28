@@ -11,6 +11,8 @@ import Web3 from "web3";
 import Web3Eth from 'web3-eth'
 import { BrowserView, MobileView, isBrowser, isMobile } from 'react-device-detect';
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import { ToastContainer, toast } from "react-toastify";
+
 
 
 const StyledMenu = styled((props) => (
@@ -102,7 +104,7 @@ export default function Connect() {
     }
   }
   const connectWalletHandler = () => {
-      console.log("called")
+      // console.log("called")
     // if (window.ethereum && window.ethereum.isMetaMask) {
     //   console.log("MetaMask Here!");
 
@@ -121,9 +123,9 @@ export default function Connect() {
     //   setErrorMessage("Please install MetaMask browser extension to interact");
     // }
     
+    try{
     if (window.ethereum) {
       console.log("called22")
-
         window.ethereum
           .request({ method: "eth_requestAccounts" })
           .then(handleAccountsChanged)
@@ -137,6 +139,14 @@ export default function Connect() {
             }
           });
       }
+      else{
+        toast.error("Please install MetaMask browser extension");
+      }
+    }
+    catch(err){
+      console.log(err)
+    }
+      
   };
 
 
@@ -199,7 +209,8 @@ export default function Connect() {
                 symbol: "DXT",
                 decimals: 18,
               },
-              rpcUrls: ["https://testnet.dexit.network"],
+              // rpcUrls: ["https://testnet.dexit.network"],
+              rpcUrls: ["https://datafeed.dexit.network"],
             //   blockExplorerUrls: ["https://testnet.dexit.network"],
             },
           ];
@@ -274,12 +285,15 @@ export default function Connect() {
 // },[])
 
   const getAccounts = async () => {
-    try {
+    if(typeof window.ethereum !== "undefined"){
+      try {
         let account = await window.ethereum.selectedAddress;
         setWalletAddress(account);
     } catch (error) {
         console.log(error);
     }
+    }
+
 };
 
 
@@ -298,6 +312,8 @@ const mobileMetamask=async ()=>{
 
   return (
     <div>
+      <ToastContainer />
+
       {/* <BrowserView> */}
       {walletAddress !=null ? 
       <Button

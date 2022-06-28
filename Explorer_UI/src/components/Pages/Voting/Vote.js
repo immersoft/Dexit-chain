@@ -12,6 +12,8 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
+import VotingContract from "../../../AllContract/Voting";
+
 import React, { useState, useEffect } from "react";
 import Proposal from "../../../Contract";
 import bigInt from "big-integer";
@@ -108,25 +110,21 @@ const Vote = (props) => {
     console.log(error);
   }
 
-  
-
   const copyHash = (val) => {
     console.log("side");
     navigator.clipboard.writeText(val);
     setOpenAlert(true);
   };
 
-
-  
   const submitProposal = async () => {
     setShowLoader(true);
     setshowWarning("");
-    if (submitProposalIconColor===null || !proposalId) {
+    if (submitProposalIconColor === null || !proposalId) {
       setShowLoader(false);
       return toast.warning("Please select Like or Unlike & Proposal id.");
     }
     try {
-      let submit = await Proposal.voteProposal(
+      let submit = await VotingContract.voteProposal(
         proposalId,
         submitProposalIconColor.toString()
       );
@@ -136,17 +134,15 @@ const Vote = (props) => {
         setShowLoader(false);
 
         proposalVotedetails();
-        toast.success("Voting success.")
+        toast.success("Voting success.");
       }
-    } 
-    catch (error) {
+    } catch (error) {
       setShowLoader(false);
-      if(error.code ===4001){
-        toast.error(error.message)
+      if (error.code === 4001) {
+        toast.error(error.message);
       }
-      if(error.data.message){
-        toast.error(error.data.message)
-
+      if (error.data.message) {
+        toast.error(error.data.message);
       }
     }
   };
@@ -158,7 +154,7 @@ const Vote = (props) => {
     <>
       {/* <ToastContainer /> */}
 
-      <Card sx={{ mt: 3, boxShadow: 3, pb: 1,backgroundColor:'#F8FAFD' }}>
+      <Card sx={{ mt: 3, boxShadow: 3, pb: 1, backgroundColor: "#F8FAFD" }}>
         <Box sx={{ flexGrow: 1 }}>
           <Typography
             variant="h5"
@@ -184,28 +180,24 @@ const Vote = (props) => {
               value={proposalId}
             />
 
-        <ContentCopyIcon
-           style={{
-            cursor: "pointer",
-            }}
-            onClick={() => copyHash(proposalId)}
-         />
+            <ContentCopyIcon
+              style={{
+                cursor: "pointer",
+              }}
+              onClick={() => copyHash(proposalId)}
+            />
 
-      {openAlert ? (
-            <Snackbar
-             open={openAlert}
-             autoHideDuration={2000}
-             onClose={() => setOpenAlert(false)}
-            >
-            <Alert
-             onClose={() => setOpenAlert(false)}
-             severity="info"
-             >
-            Hash Copied
-            </Alert>
-          </Snackbar>
-         ) : null
-         }
+            {openAlert ? (
+              <Snackbar
+                open={openAlert}
+                autoHideDuration={2000}
+                onClose={() => setOpenAlert(false)}
+              >
+                <Alert onClose={() => setOpenAlert(false)} severity="info">
+                  Hash Copied
+                </Alert>
+              </Snackbar>
+            ) : null}
           </div>
           <div
             style={{ display: "flex", justifyContent: "center", padding: "2%" }}

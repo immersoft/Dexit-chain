@@ -98,13 +98,13 @@ TablePaginationActions.propTypes = {
 
 export default function AllTransactions() {
   const navigate = useNavigate();
-  // const web3 = new Web3(new Web3.providers.HttpProvider('http://192.168.1.41:8545'));
+  // const web3 = new Web3(new Web3.providers.HttpProvider('https://datafeed.dexit.network'));
 
   const web3 = new Web3();
-  // web3.setProvider("http://192.168.1.41:8545");
-  web3.setProvider("https://testnet.dexit.network");  
+  // web3.setProvider("https://datafeed.dexit.network");
+  // web3.setProvider("https://testnet.dexit.network");  
 
-  // web3.setProvider("http://datafeed.dexit.network");
+  web3.setProvider("https://datafeed.dexit.network");
 
 
   const [page, setPage] = React.useState(0);
@@ -171,14 +171,14 @@ export default function AllTransactions() {
             let getTransactionDetails = await web3.eth.getTransactionReceipt(
               getBlockDetails.transactions[k]
             );
-            console.log(getTransactionDetails)
+            // console.log(getTransactionDetails)
             demo.push(getTransactionDetails);
           }
         }
       }
       setDummyData([...dummyData, ...demo]);
       // setdd([...dd, ...bc]);
-      console.log(demo,"demo")
+      // console.log(demo,"demo")
     } catch (error) {
       console.log(error);
     }
@@ -274,7 +274,7 @@ export default function AllTransactions() {
 
     <Header3 />
 
-      {/* {console.log("Transactions length", dd.length)} */}
+      {/* {console.log("Transaction length", dd.length)} */}
       <div className="container-fluid">
         {/* <h1>Transaction Details</h1> */}
 
@@ -312,7 +312,6 @@ export default function AllTransactions() {
               <TableRow style={{background:"whitesmoke"}}>
                 <TableCell align="left">Transaction Hash</TableCell>
                 <TableCell align="left">Block</TableCell>
-                {/* <TableCell align="left">Age</TableCell> */}
                 <TableCell align="left">From</TableCell>
                 <TableCell align="center"></TableCell>
                 <TableCell align="left">To</TableCell>

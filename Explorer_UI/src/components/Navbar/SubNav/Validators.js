@@ -104,13 +104,14 @@ export default function Validators() {
         open={open}
         onClose={handleClose}
       >
+        <MenuItem onClick={handleValidatorInfo} disableRipple>
+          Active Validators Leaderboard
+        </MenuItem>
         <MenuItem onClick={handleRoute} disableRipple>
           Validators Leaderboard
         </MenuItem>
 
-        <MenuItem onClick={handleValidatorInfo} disableRipple>
-          Active Validators Leaderboard
-        </MenuItem>
+
 
         {/* <MenuItem onClick={handleDelegatorsList} disableRipple>
           Delegators List

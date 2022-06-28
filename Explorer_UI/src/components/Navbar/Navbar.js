@@ -20,6 +20,8 @@ import metaMaskLogo from "../../Image/metamask.svg";
 import Web3 from "web3";
 import Voting from "./SubNav/Voting";
 import Connect from "./SubNav/Connect";
+import Contract from './SubNav/Contract'
+
 export default function Navbar() {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -267,7 +269,17 @@ export default function Navbar() {
 
           </IconButton>
         </MenuItem>
+        <MenuItem>
+          <IconButton
+            size="large"
+            aria-label="show 17 new notifications"
+            color="inherit"
+            // onClick={() => handleRoute()}
+          >
+           <Contract />
 
+          </IconButton>
+        </MenuItem>
         <MenuItem>
           <IconButton
             size="large"
@@ -472,6 +484,10 @@ export default function Navbar() {
             <Box sx={{ml:1}}>
                 <Voting/>
             </Box>
+            <Box sx={{ml:1}}>
+                <Contract/>
+            </Box>
+
 
             {/* <Box
               size="large"

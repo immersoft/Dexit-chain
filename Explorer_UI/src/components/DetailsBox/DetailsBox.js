@@ -21,11 +21,11 @@ const DetailsBox = () => {
   const[getVotingPower,setTotalVotingPower]=useState(0)
 
   const web3 = new Web3();
-  // web3.setProvider("http://192.168.1.41:8545");
-  web3.setProvider("https://testnet.dexit.network");  
+  // web3.setProvider("https://datafeed.dexit.network");
+  // web3.setProvider("https://testnet.dexit.network");  
   // web3.setProvider(window.ethereum);  
 
-  // web3.setProvider("http://datafeed.dexit.network");
+  web3.setProvider("https://datafeed.dexit.network");
 
 
   const getLatestBlockNumber = async () => {
@@ -111,7 +111,7 @@ const DetailsBox = () => {
 
   const id = setInterval(() => {
     getTransactionCounts();
-  }, 60000 * 2);
+  }, 60000 * 5);
 
   const blockTransactionCount = async (result) => {
     try {
@@ -155,7 +155,7 @@ const validatorsCount=()=>{
   fetch("https://final-dxt.herokuapp.com/getHighestValidators", requestOptions)
     .then(response => response.text())
     .then(result =>{ 
-      // console.log(JSON.parse(result))
+      // console.log(JSON.parse(result),"api result get")
       setHighestValidatorCounts(JSON.parse(result))
     })
     .catch(error => console.log('error', error));
@@ -171,7 +171,7 @@ const totalVotingPower=()=>{
   fetch("https://final-dxt.herokuapp.com/getvotingpower", requestOptions)
     .then(response => response.text())
     .then(result => {
-      // console.log(result)
+      // console.log(result,"result")
       setTotalVotingPower(JSON.parse(result))
     })
     .catch(error => console.log('error', error));
@@ -186,6 +186,7 @@ const totalVotingPower=()=>{
 
   return (
     <>
+      {/* {console.log(getVotingPower.data,"voting power info")} */}
       {getApiDat ? (
         <Grid container>
           <Grid

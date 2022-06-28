@@ -118,13 +118,13 @@ const columns = [
 
 export default function Blocks() {
   const web3 = new Web3();
-  // const web3 = new Web3(new Web3.providers.HttpProvider('http://192.168.1.41:8545'));
+  // const web3 = new Web3(new Web3.providers.HttpProvider('https://datafeed.dexit.network'));
 
-  web3.setProvider("https://testnet.dexit.network");  
-  // web3.setProvider("http://192.168.1.41:8545");  
-  // web3.setProvider("http://datafeed.dexit.network");
+  // web3.setProvider("https://testnet.dexit.network");  
+  // web3.setProvider("https://datafeed.dexit.network");  
+  web3.setProvider("https://datafeed.dexit.network");
 
-  // const provider = new ethers.providers.Web3Provider("http://192.168.1.41:8545")
+  // const provider = new ethers.providers.Web3Provider("https://datafeed.dexit.network")
   const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(15);
@@ -165,7 +165,7 @@ export default function Blocks() {
 
     try {
       let currentBlock = await web3.eth.getBlockNumber();
-      for (let j = currentBlock - 15; j < currentBlock; j++) {
+      for (let j = currentBlock - 16; j < currentBlock; j++) {
         let getBlockDetails = await web3.eth.getBlock(j);
         bc.push(getBlockDetails);
       }

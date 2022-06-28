@@ -148,7 +148,8 @@ console.log(account,"account")
             // code block
             console.log ("insite ETH");
             // attaching token to axios authorization header
-            axios.post('http://localhost:5000/withdraw/ETH',  data , {
+            axios.post('https://swapping-api.herokuapp.com/withdraw/ETH',  data , {
+            // axios.post('http://localhost:5000/withdraw/ETH',  data , {
               headers: {
                 'Authorization': token,
               }
@@ -156,7 +157,8 @@ console.log(account,"account")
           break;
           case 'BNB':
             // code block
-            axios.post('http://localhost:5000/withdraw/BSC', data, {
+            // axios.post('http://localhost:5000/withdraw/BSC', data, {
+            axios.post('https://swapping-api.herokuapp.com/withdraw/BSC', data, {
               headers: {
                 'Authorization': token,
               }
@@ -164,7 +166,8 @@ console.log(account,"account")
           break;
           case 'DXT':
             // code block
-            axios.post('http://localhost:5000/withdraw/DXT', data, {
+            // axios.post('http://localhost:5000/withdraw/DXT', data, {
+            axios.post('https://swapping-api.herokuapp.com/withdraw/DXT', data, {
               headers: {
                 'Authorization': token,
               }

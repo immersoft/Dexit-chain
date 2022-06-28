@@ -151,34 +151,36 @@ import {
         getAbc()
     },[])
 
-
+     
     async function getAbc(){
-        let web3= new Web3(window.ethereum);
+        let web3= new Web3(window.ethereum);      
         let ch=await web3.eth.getAccounts();
-        console.log("web3",ch )
+        // console.log("web3",ch )
         setAccount(ch[0])         
     }
 
     const getPastHistory=()=>{
-    //   getAccounts();
-        console.log("calledpast")
+    //   getAccounts();    
+        // console.log("calledpast")
         if(account){
             var requestOptions = {
                 method: 'GET',
                 redirect: 'follow'
               };
               
-              console.log(currentAccount,"current")
-              console.log(account,"account")
+            //   console.log(currentAccount,"current")
+            //   console.log(account,"account")
+            // fetch(`https://final-dxt.herokuapp.com/withdraw/recover/${account.toLowerCase()}`, requestOptions)
     
-              fetch(`http://localhost:5000/withdraw/recover/${account.toLowerCase()}`, requestOptions)
+              // fetch(`http://localhost:5000/withdraw/recover/${account.toLowerCase()}`, requestOptions)
+              fetch(`https://swapping-api.herokuapp.com/withdraw/recover/${account.toLowerCase()}`, requestOptions)
                 .then(response => response.text())
                 .then(result => {console.log(JSON.parse(result),"lllll")
                     setSortedData(JSON.parse(result))
                 })
                 .catch(error => console.log('error', error));
         }
-       
+           
     }
 
     const withdrawApi= async (item)=>{
@@ -190,7 +192,7 @@ import {
             "transactionHash": item.transactionHash,
             "network":item.network
           };
-        //   console.log("printing data : ",data);
+        //   console.log("printing data:",data);
           const web3 = new Web3(window.ethereum);
           await window.ethereum.enable();
           const address = (await web3.eth.getAccounts())[0];
@@ -200,7 +202,8 @@ import {
               // code block
               console.log ("insite ETH");
               // attaching token to axios authorization header
-              axios.post('http://localhost:5000/withdraw/ETH',  data , {
+              // axios.post('http://localhost:5000/withdraw/ETH',  data , {
+              axios.post('https://swapping-api.herokuapp.com/withdraw/ETH',  data , {
                 headers: {
                   'Authorization': token,
                 }
@@ -208,7 +211,8 @@ import {
             break;
             case 'BNB':
               // code block
-              axios.post('http://localhost:5000/withdraw/BSC', data, {
+              // axios.post('http://localhost:5000/withdraw/BSC', data, {
+              axios.post('https://swapping-api.herokuapp.com/withdraw/BSC', data, {
                 headers: {
                   'Authorization': token,
                 }
@@ -216,7 +220,8 @@ import {
             break;
             case 'DXT':
               // code block
-              axios.post('http://localhost:5000/withdraw/DXT', data, {
+              // axios.post('http://localhost:5000/withdraw/DXT', data, {
+              axios.post('https://swapping-api.herokuapp.com/withdraw/DXT', data, {
                 headers: {
                   'Authorization': token,
                 }
@@ -232,7 +237,7 @@ import {
         getPastHistory()
     },[account])
 
-    console.log(swapCalled,"swapCalled")
+    // console.log(swapCalled,"swapCalled")
 
     const copyHash = (val) => {
       console.log("side");
@@ -258,7 +263,7 @@ import {
     };
 
     console.log(sortedData,"sortedData")
-  
+//   
     return (
       <>
       <Grid container display={"flex"} justifyContent="center" sx={{p:2}}>

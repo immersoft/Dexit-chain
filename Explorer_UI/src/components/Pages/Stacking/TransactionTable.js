@@ -249,6 +249,7 @@ const shortenAccountId = (fullStr) => {
                                   style={{ top: 57, minWidth: 20 }}
                               >
                                 Rank
+                                
                               </TableCell>
 
                               <TableCell

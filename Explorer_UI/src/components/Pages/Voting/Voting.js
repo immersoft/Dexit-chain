@@ -36,6 +36,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { ToastContainer, toast } from "react-toastify";
 import Backdrop from '@mui/material/Backdrop';
 import './Voting.css'
+import VotingContract from '../../../AllContract/Voting'
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -159,7 +160,7 @@ const Voting = () => {
       // let valuenum = bigInt(updateValue * 10 ** 18);
       let ethe = bigInt(1 * 10 ** 18);
       console.log("create proposal", updateValue);
-      let proposalCreate = await Proposal.createProposal(
+      let proposalCreate = await VotingContract.createProposal(
         details,
         variableName,
         updateValue,
@@ -188,13 +189,13 @@ const Voting = () => {
 
   const checkProposal = async () => {
     try {
-      let checkPropsal = await Proposal.chcekProposal();
-      // console.log(checkPropsal, "checkPropsal");
+      let checkPropsal = await VotingContract.chcekProposal();
+      console.log(checkPropsal, "checkPropsal");
       setproposalList(checkPropsal);
-      // console.log("getproposaldetailssss", checkPropsal[0]);
+      console.log("getproposaldetailssss", checkPropsal[0]);
       let ab = [];
       for (let j = 0; j < checkPropsal.length; j++) {
-        let proposalsss = await Proposal.proposals(checkPropsal[j]);
+        let proposalsss = await VotingContract.proposals(checkPropsal[j]);
         // console.log("getetetetetet", proposalsss);
         // getProposalDetails(proposalList[0]);
         let newObj={
