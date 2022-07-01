@@ -1,9 +1,8 @@
 pragma solidity 0.6.4;
-pragma experimental ABIEncoderV2;
 
 interface IBSCValidatorSet {
 
-  enum Status{
+  enum Status{  
         NotExist,
         Created,
         Staked,
@@ -24,7 +23,7 @@ interface IBSCValidatorSet {
 
 
   function punish(address validator) external;
-  //function transferRewardOwner(address payable owner, uint256 reward) external returns(bool);
+  
   function lowestCoinsInHighestValidator() external view returns ( uint256, uint256, address );
   
   function highestCoinsInCurrentValidatorsNotInTopValidator() external view returns (uint256, uint256, address);
@@ -51,8 +50,5 @@ interface IBSCValidatorSet {
 
   function getCurrentValidators() external view returns (address[] memory);
 
-  function setMaxValidators(uint256) external;
-
-  function setminimumStakeAmount(uint256) external;
-
+  function updateVotingValues(string calldata variable_name, uint256 variable_value) external;
 }

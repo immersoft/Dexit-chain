@@ -7,6 +7,7 @@ import "./lib/SafeMath.sol";
 import "./interface/ISlashIndicator.sol";
 import "./interface/IBSCValidatorSet.sol";
 import "./interface/IRewardRegister.sol";
+// import "hardhat/console.sol";
 
 contract BSCValidatorSet is IBSCValidatorSet, System {
     using SafeMath for uint256;
@@ -41,6 +42,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
     address[] public currentValidators; // All Validators
     address[] public highestValidators; // Only Top 21
+    address[] public elegibleDel;
+
+    
 
     uint256 public totalDXTStake; //  To DXT Stake Amount
 
@@ -56,12 +60,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
     /**********Constant**********/
     uint256 public constant minimum_Stake_Amount = 10000 ether; // Minimum Stake DXT
     uint256 public constant Max_Validators = 5; // Total Max Validator(5)
-    uint64 public constant StakingLockPeriod = 25; // Stake Locking Period(7 days) //151200 blocks
-    uint64 public constant unjailingPeriod = 5 minutes; //2 days
-    uint64 public constant RewardClaimingPeriod = 25; //24 hrs 21600
+    uint64 public constant StakingLockPeriod = 151200; // Stake Locking Period(7 days) //151200 blocks
+    uint64 public constant unjailingPeriod = 2 days; //2 days
+    uint64 public constant RewardClaimingPeriod = 21600; //24 hrs 21600
 
     uint256 public minimumStakeAmount;
     uint256 public MaxValidators;
+    uint256 public PreMaxValidators;
 
     /**********Events**********/
     event StakeValidator(address indexed validator, uint256 amount);
@@ -107,16 +112,11 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         MaxValidators = Max_Validators;
         alreadyInit = true;
         misdemeanorThreshold = MISDEMEANOR_THRESHOLD;
-        felonyThreshold = FELONY_THRESHOLD;
-        // proposalLastingPeriod = 3 days; //3 days
-        Validator storage valInfo = validatorInfo[
-            0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475
-        ];
-        valInfo.validator = 0x95eEcd42Ec27db6ea66c45c21289dA4D9092f475;
-        valInfo.status = IBSCValidatorSet.Status.NotExist;
+        felonyThreshold = FELONY_THRESHOLD;        
     }
 
     /*********************** External Functions **************************/
+     //function deposit(address valAddr) public payable {
     function deposit(address valAddr, address[] calldata _contractArray)
         external
         payable
@@ -124,8 +124,12 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         onlyInit
         noEmptyDeposit
     {
+
+        Validator storage valInfo = validatorInfo[valAddr];
+        
         uint256 value = msg.value;
         uint256 curBurnRatio;
+        uint256 UpdatedCoins = valInfo.coins;
         
         if (burnRatioInitialized) {
             curBurnRatio = burnRatio;
@@ -138,39 +142,60 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             }
         }
 
+        if(valInfo.validator == address(0x0) && highestValidators.length == 0){
+            valInfo.validator = valAddr;
+            valInfo.status = IBSCValidatorSet.Status.NotExist;
+            valInfo.income = valInfo.income.add(value);
+            valInfo.TotalIncome = valInfo.TotalIncome.add(value);
+            return;
+        }
+
         if ((IRewardRegister(CROSS_CHAIN_CONTRACT_ADDR).checkEligible(_contractArray)).length > 0)
         {
-            uint256 rewardOwners = value.mul(45).div(90);
+            uint256 rewardOwners = value.mul(45).div(99);
             if ((IRewardRegister(CROSS_CHAIN_CONTRACT_ADDR).distributeRewardToOwners(rewardOwners)))
             value = value.sub(rewardOwners);
-        }
-        Validator storage valInfo = validatorInfo[valAddr];
+        }        
 
         require(valInfo.status != IBSCValidatorSet.Status.Jailed); // Check for Not Exist Or Jailed
         require(valInfo.status != IBSCValidatorSet.Status.Unstaked);
 
-        if (valInfo.amount == 0) {
-            valInfo.income.add(value);
-            valInfo.TotalIncome.add(value);
-            return;
-        }
-        uint256 percentageToTransfer = valInfo.amount.mul(100).div(valInfo.coins);
+         delete elegibleDel;
+         for (uint256 j = 0; j < valInfo.delegators.length; j++) {
+            address curr = valInfo.delegators[j];
+            Delegator storage stakeInfo = stakingInfo[curr][valAddr];
+            uint256 delAmt = stakeInfo.amount;
+        
+            if(stakeInfo.unstakeblock == 0) {     
+                elegibleDel.push(curr);
+            } 
+            else {
+              UpdatedCoins = UpdatedCoins.sub(delAmt);
+            }
+             
+         } 
+
+        uint256 percentageToTransfer = valInfo.amount.mul(100).div(UpdatedCoins);
 
         uint256 rewardAmount = value.mul(percentageToTransfer).div(100);
 
-        valInfo.income = valInfo.income + rewardAmount; // Reseting income of validator
+        valInfo.income = valInfo.income.add(rewardAmount); // Reseting income of validator
 
         valInfo.TotalIncome = valInfo.TotalIncome.add(rewardAmount);
 
         uint256 remainingDelegatorRewardAmount = value.sub(rewardAmount); // Remaining delgators reward amount;
 
-        uint256 totalCoinsByDelegators = valInfo.coins.sub(valInfo.amount);
+        uint256 totalCoinsByDelegators = UpdatedCoins.sub(valInfo.amount);
 
         distributeRewardToDelegators(
             remainingDelegatorRewardAmount,
             valAddr,
             totalCoinsByDelegators
         );
+    }
+
+    function getElibelDel() public view returns(address[] memory) {
+        return elegibleDel;
     }
   
     /***********************Staking***************************/
@@ -180,7 +205,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
     function stakeValidator() external payable zeroAddress returns (bool) {
         address staker = msg.sender; // validator address
         uint256 stakeamount = msg.value;
-
         //Struct Validator & Delegator
         Validator storage valInfo = validatorInfo[staker];
         Delegator storage stakeInfo = stakingInfo[staker][staker];
@@ -249,7 +273,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
         if (
             highestValidators.length < MaxValidators &&
-            addValAddress != address(0)
+            addValAddress != address(0) && highCoin >= minimumStakeAmount
         ) {
             highestValidators.push(addValAddress);
         }
@@ -286,6 +310,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             stakeInfo.index = valInfo.delegators.length; // update the index of delegator struct for  delegators array in validator
             valInfo.delegators.push(staker);
         }
+        if(stakeInfo.amount > 0) {
+           stakeInfo.unstakeblock = 0;
+        }
 
         valInfo.coins = valInfo.coins.add(stakeamount);
         stakeInfo.amount = stakeInfo.amount.add(stakeamount); // update in Validator Coins(Total)
@@ -294,6 +321,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highestValidators.length < MaxValidators &&
             !this.isTopValidator(validator)
         ) {
+            //console.log("this is push 337 : ",MaxValidators, minimumStakeAmount);
             highestValidators.push(validator); // push into highestValidator if there is space
         } else if (
             highestValidators.length >= MaxValidators &&
@@ -334,7 +362,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         );
         require(unstakeamount > 0, "Don't have any stake");
         require(
-            highestValidators.length != 3 && this.isActiveValidator(staker),
+            highestValidators.length > 3 && this.isActiveValidator(staker),
             "Can't Unstake, Validator List Empty"
         );
 
@@ -358,6 +386,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highestValidators.length < MaxValidators &&
             addValAddress != address(0)
         ) {
+            //console.log("this is push 402 : ",MaxValidators, minimumStakeAmount);
             highestValidators.push(addValAddress);
         }
 
@@ -372,7 +401,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         returns (bool)
     {
         address delegator = msg.sender; //get Delegator Address
-
+       
         Delegator storage stakeInfo = stakingInfo[delegator][validator]; // Struct Delegator
         uint256 unstakeamount = stakeInfo.amount; // get the staking info
 
@@ -380,10 +409,12 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         require(unstakeamount > 0, "don't have any stake");
 
         stakeInfo.unstakeblock = block.number; // Update The Unstake Block for Deligator
+    
 
         emit UnstakeDelegator(validator, delegator);
         return true;
     }
+
 
     //Function to WithdrawValidator staking after unstakeValidator
     function withdrawValidatorStaking(uint256 amount)
@@ -410,11 +441,11 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         valInfo.amount = valInfo.amount.sub(amount); // update the amount
         valInfo.coins = valInfo.coins.sub(amount); // Update Coins
 
-        if (updateBalance >= minimum_Stake_Amount) {
+        if (updateBalance >= minimumStakeAmount) {
             valInfo.status = Status.Staked; //  Change Status to Staked
         }
 
-        if (updateBalance < minimum_Stake_Amount) {
+        if (updateBalance < minimumStakeAmount) {
             if (updateBalance == 0) {
                 if (valInfo.income > 0) {
                     this.claimValidatorReward(); // Claim Validator Rewards If any
@@ -455,6 +486,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
             highValidator != address(0) &&
             validatorInfo[highValidator].status != Status.Jailed
         ) {
+            //console.log("this is push 502 : ",MaxValidators, minimumStakeAmount);
             highestValidators.push(highValidator);
         }
         //votePower = calcVotePower();
@@ -615,23 +647,25 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
 
         if (valInfo.delegators.length <= 0) return;
 
-        for (uint256 j = 0; j < valInfo.delegators.length; j++) {
-            address curr = valInfo.delegators[j];
-            Delegator storage stakeInfo = stakingInfo[curr][validator];
+        for (uint256 j = 0; j < elegibleDel.length; j++) {
 
+            address currentAddr = elegibleDel[j];
+            Delegator storage stakeInfo = stakingInfo[currentAddr][validator];
             uint256 stakeamount = stakeInfo.amount;
+          
             uint256 percentageToTransfer = stakeamount.mul(100).div(totalCoins);
-            // console.log("Deleg % to transfer", percentageToTransfer);
+            
             uint256 rewardDelegatorAmount = rewardAmount
                 .mul(percentageToTransfer)
                 .div(100);
-            // console.log("Reward Delega Amount", rewardDelegatorAmount);
 
             stakeInfo.income = stakeInfo.income.add(rewardDelegatorAmount); // Reseting income of delegator
             stakeInfo.totalIncome = stakeInfo.totalIncome.add(
                 rewardDelegatorAmount
             );
+            
         }
+
     }
 
     /**********************Slashing**********************/
@@ -672,6 +706,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
                 addValAddress != address(0) &&
                 validatorInfo[addValAddress].status != Status.Jailed
             ) {
+                //console.log("this is push 722 : ",MaxValidators, minimumStakeAmount);
                 highestValidators.push(addValAddress);
             }
             uint256 rest = highestValidators.length;
@@ -715,6 +750,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         if (
             highestValidators.length < MaxValidators && requester != address(0)
         ) {
+            //console.log("this is push 766 : ",MaxValidators, minimumStakeAmount);
             highestValidators.push(requester);
         } else {
             // Get The Highest from Current
@@ -838,8 +874,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         )
     {
         uint256 lowestCoin = validatorInfo[highestValidators[0]].coins; //first validator coins
-        uint256 lowIndex;
-        address lowValidator;
+        uint256 lowIndex = 0;
+        address lowValidator = highestValidators[0];
 
         for (uint256 j = 1; j < highestValidators.length; j++) {
             if (validatorInfo[highestValidators[j]].coins < lowestCoin) {
@@ -984,12 +1020,86 @@ contract BSCValidatorSet is IBSCValidatorSet, System {
         return address(this).balance;
     } 
 
-    function setMaxValidators(uint256 setValue) external override onlyGov{
-        MaxValidators = setValue;
-    }
+    function updateVotingValues(string calldata variable_name, uint256 variable_value) external override onlyGov{
+        // require(resultExist == false,"proposal Expired");
+        if (
+            keccak256(bytes(variable_name)) ==
+            keccak256(bytes("minimumStakeAmount"))
+        ) {
+            minimumStakeAmount = variable_value;
+            address lowValidator;
+            while(true){
+                (, , lowValidator) = this.lowestCoinsInHighestValidator();
+                    (uint256 coins) = this.getCoins(lowValidator);
+                if (highestValidators.length <= 3) {
+                    break;
+                } else if (
+                    coins < minimumStakeAmount
+                ) {
+                    this.removeFromHighestValidatorList(lowValidator);
+                } else {
+                    break;
+                }
+            }
+            if (highestValidators.length < MaxValidators) {
+                uint256 validatorToAdd = MaxValidators -
+                    highestValidators.length;
 
-    function setminimumStakeAmount(uint256 setValue) external override onlyGov{
-        minimumStakeAmount = setValue;
+                for (uint256 i = 0; i < validatorToAdd; i++) {
+                    (
+                        ,
+                        ,
+                        address highestValidatorAddress
+                    ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
+                    (uint256 coins) = this.getCoins(highestValidatorAddress);
+                    if (
+                        coins >=
+                        minimumStakeAmount &&
+                        highestValidatorAddress != address(0)
+                    ) {
+                        highestValidators.push(highestValidatorAddress);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        if (
+            keccak256(bytes(variable_name)) ==
+            keccak256(bytes("MaxValidators"))
+        ) {
+            PreMaxValidators = MaxValidators;
+            //removing the validators from highvalidator who donot qualify now
+            if (variable_value < PreMaxValidators) {
+
+                uint256 validatorToRemove = MaxValidators -
+                    variable_value;
+                for (uint256 i = 0; i < validatorToRemove; i++) {
+                    (
+                        ,
+                        ,
+                        address lowValidator
+                    ) = this.lowestCoinsInHighestValidator();
+                    this.removeFromHighestValidatorList(lowValidator);
+                }
+            }
+
+            MaxValidators = variable_value;
+            if (highestValidators.length < MaxValidators) {
+                uint256 validatorToAdd = MaxValidators -
+                    highestValidators.length;
+                for (uint256 i = 0; i < validatorToAdd; i++) {
+                    (
+                        ,
+                        ,
+                        address highestValidatorAddress
+                    ) = this.highestCoinsInCurrentValidatorsNotInTopValidator();
+                    if (highestValidatorAddress != address(0)) {
+                        highestValidators.push(highestValidatorAddress);
+                    }
+                }
+            }
+        }
     }
 
     function getStatus(address val) external override view returns (Status){

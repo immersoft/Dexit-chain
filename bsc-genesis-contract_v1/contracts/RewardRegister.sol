@@ -8,7 +8,6 @@ import "./interface/IBSCValidatorSet.sol";
 import "./lib/SafeMath.sol";
 
 contract RewardRegister is System, IRewardRegister{
-
     using SafeMath for uint256;
 
     /**************************rewardRegister***********************/
@@ -34,15 +33,10 @@ contract RewardRegister is System, IRewardRegister{
             rewardAddresses[contractAddr] == address(0),
             "Already registered"
         );
-        //require(rewardAddr != address(0x0), "rewardAddr not be empty");
         require(isContract(contractAddr), "contractAddr isn't contract");
         rewardAddresses[contractAddr] = rewardAddr;
         rewardAmountOwner[rewardAddr] = 0;
         return true;
-    }
-
-    function getEligibleOwners() external view returns(address[] memory){
-        return eligibleOwners;
     }
 
     function checkEligible(address[] calldata contractAddr)
