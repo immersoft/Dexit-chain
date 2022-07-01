@@ -67,7 +67,7 @@ var (
 	diffInTurn = big.NewInt(2)            // Block difficulty for in-turn signatures
 	diffNoTurn = big.NewInt(1)            // Block difficulty for out-of-turn signatures
 	// 100 native token
-	maxSystemBalance = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
+	//maxSystemBalance = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
 
 	systemContracts = map[common.Address]bool{
 		common.HexToAddress(systemcontracts.ValidatorContract):          true,
@@ -1044,9 +1044,9 @@ func (p *Parlia) getCurrentValidators(blockHash common.Hash, blockNumber *big.In
 // slash spoiled validators
 func (p *Parlia) distributeIncoming(val common.Address, state *state.StateDB, header *types.Header, chain core.ChainContext,
 	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool) error {
-		var (
-			contAddr []common.Address
-		)
+	var (
+		contAddr []common.Address
+	)
 	coinbase := header.Coinbase
 	balance := state.GetBalance(consensus.SystemAddress)
 	for _, tx := range *txs {
@@ -1059,8 +1059,9 @@ func (p *Parlia) distributeIncoming(val common.Address, state *state.StateDB, he
 	}
 	state.SetBalance(consensus.SystemAddress, big.NewInt(0))
 	state.AddBalance(coinbase, balance)
-
-	doDistributeSysReward := state.GetBalance(common.HexToAddress(systemcontracts.SystemRewardContract)).Cmp(maxSystemBalance) < 0
+	//Setting doDistributeSysReward = false to not to distribute 1/16 of reward to system address
+	//doDistributeSysReward := state.GetBalance(common.HexToAddress(systemcontracts.SystemRewardContract)).Cmp(maxSystemBalance) < 0
+	doDistributeSysReward := false
 	if doDistributeSysReward {
 		var rewards = new(big.Int)
 		rewards = rewards.Rsh(balance, systemRewardPercent)
