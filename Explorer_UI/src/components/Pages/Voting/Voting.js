@@ -28,7 +28,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { useTheme } from "@mui/material/styles";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import React, { useState, useEffect } from "react";
-import Proposal from "../../../Contract";
+import Proposal from "../../../Proposal";
 import bigInt from "big-integer";
 import { styled } from "@mui/material/styles";
 import Vote from "./Vote";
@@ -220,8 +220,8 @@ const Voting = () => {
       handleOpen()
       setsenIdToVoteComp(id);
       let proposalsss = await Proposal.proposals(id);
-      // console.log(proposalsss, "proposalsss");
       setProposalData(proposalsss);
+      console.log(proposalData.votePowerOfAgree.toBigInt(), "proposalsss");
     } catch (error) {
       console.log(error);
     }

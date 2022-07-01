@@ -203,7 +203,7 @@ export default function Navbar() {
           </IconButton>
         </MenuItem>
 
-        <MenuItem>
+        {/* <MenuItem>
           <IconButton
             size="small"
             aria-label="show 4 new mails"
@@ -214,7 +214,7 @@ export default function Navbar() {
               Swap
             </span>
           </IconButton>
-        </MenuItem>
+        </MenuItem> */}
 
         <MenuItem>
           <IconButton
@@ -444,7 +444,7 @@ export default function Navbar() {
               </span>
             </Button>
 
-            <Button
+            {/* <Button
               id="demo-customized-button"
               onClick={() => handleSwap()}
               disableElevation
@@ -459,7 +459,7 @@ export default function Navbar() {
               >
                 Swap
               </span>
-            </Button>
+            </Button> */}
 
             <Button
               id="demo-customized-button"

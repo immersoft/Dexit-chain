@@ -15,7 +15,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import VotingContract from "../../../AllContract/Voting";
 
 import React, { useState, useEffect } from "react";
-import Proposal from "../../../Contract";
+import Proposal from "../../../Proposal";
 import bigInt from "big-integer";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";

@@ -50,14 +50,23 @@ const ContractClaimReward = () => {
     getAccounts();
     getAbc();
   }, []);
+  useEffect(() => {
+    getClaimBalance();
+    return () => {};
+  }, [account]);
+
   const getClaimBalance = async () => {
+    console.log("accc", rewardRegisterContract);
+    console.log("accc", account);
     try {
       let balance = await rewardRegisterContract.rewardAmountOwner(account);
       console.log("bal", balance.toString());
       let formatToEther = web3.utils.fromWei(balance.toString());
       console.log("balance", formatToEther);
       setClaimBalance(formatToEther);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   async function getAbc() {
@@ -72,22 +81,27 @@ const ContractClaimReward = () => {
   }
 
   const handleRegisterContract = async () => {
-    console.log("handleRegisterContract");
+    console.log("handleRegisterContract", BscContract);
 
     try {
       let callMethod = await BscContract.claimOwnerReward();
       console.log("callmethod", callMethod);
-      let waitForTransaction = callMethod.wait();
+      let waitForTransaction = await callMethod.wait();
       if (waitForTransaction) {
         console.log("transaction done", waitForTransaction);
         toast.success("Transaction Done");
+        getClaimBalance();
       }
       console.log("check metjhod");
     } catch (error) {
-      if (error.data.message) {
-        toast.error(error.data.message);
-      } else {
-        toast.error("Execution reverted");
+      try {
+        if (error.data) {
+          toast.error(error.data.message);
+        } else {
+          toast.error("Execution reverted");
+        }
+      } catch (error) {
+        console.log("error", error);
       }
     }
     // registerContract(account);

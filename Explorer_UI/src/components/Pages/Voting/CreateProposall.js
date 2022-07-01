@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import React, { useState, useEffect } from "react";
-import Proposal from "../../../Contract";
+import Proposal from "../../../Proposal";
+import Contract from "../../../Contract";
 import bigInt from "big-integer";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -32,12 +33,15 @@ export default function CreateProposall() {
       target: { value },
     } = event;
     if (event.target.value) {
-      let value = await Proposal.currentValue(event.target.value);
+      // let value = await Proposal.currentValue(event.target.value);
       if (event.target.value === "MaxValidators") {
-        setcurrentValueOfselectedVar(value.toString());
+        let MaxVal = await Contract.MaxValidators();
+        console.log("this is MaxValidators : ",MaxVal);
+        setcurrentValueOfselectedVar(MaxVal.toString());
       }
       if (event.target.value === "minimumStakeAmount") {
-        let convrtTostring = value.toString();
+        let minAmount = await Contract.minimumStakeAmount();
+        let convrtTostring = minAmount.toString();
         let remove18 = convrtTostring.slice(0, -18);
         setcurrentValueOfselectedVar(remove18);
       }
