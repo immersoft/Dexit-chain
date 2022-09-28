@@ -37,6 +37,7 @@ import loader from "../../../Image/graphics-07.gif";
 import { toast, ToastContainer } from "react-toastify";
 import InfoIcon from '@mui/icons-material/Info';
 import fromExponential from 'from-exponential';
+import { ethers } from "ethers";
 
 
 const columns = [
@@ -143,11 +144,13 @@ const DelegatorUnstak = () => {
     }
 
     const handleDelegateWithdrawMaxAmount = () => {
-        setWithdrawAmount(delegateBalance / 1000000000000000000)
+        // setWithdrawAmount(delegateBalance / 1000000000000000000)
+        setWithdrawAmount(ethers.utils.formatEther(delegateBalance))
     }
 
     const handleWithdrawMaxAmount = () => {
-        setWithdrawAmount(popupBalance / 1000000000000000000)
+        // setWithdrawAmount(popupBalance / 1000000000000000000)
+        setWithdrawAmount(ethers.utils.formatEther(popupBalance))
     }
 
     const handleWithdrawModalClose = () => {
@@ -300,8 +303,8 @@ const DelegatorUnstak = () => {
         try {
             handleWithdrawModalClose()
             setLoading(true);
-            let ethe = bigInt(withdrawAmount * 10 ** 18)
-            let result = await Connection.withdrawValidatorStaking(ethe.value);
+            let ethe = ethers.utils.parseEther(withdrawAmount)
+            let result = await Connection.withdrawValidatorStaking(ethe.toString());
             let abc = await result.wait();
             if (abc) {
                 setLoading(false);
@@ -353,10 +356,10 @@ const DelegatorUnstak = () => {
         try {
             handleDelegateWithdrawModalClose()
             setLoading(true);
-            let amountWithdraw = bigInt(withdrawAmount * 10 ** 18);
-            console.log(amountWithdraw.value, "amountWithdraw")
+            let amountWithdraw = ethers.utils.parseEther(withdrawAmount)
+            console.log(amountWithdraw.toString(), "amountWithdraw")
             let delegateWithdrwal = await Connection.withdrawDelegatorStaking(
-                ValidatorAddForDel, amountWithdraw.value
+                ValidatorAddForDel, amountWithdraw.toString()
             );
             let abc = await delegateWithdrwal.wait();
             if (abc) {
@@ -428,8 +431,8 @@ const DelegatorUnstak = () => {
         try {
             handleModalClose()
             setLoading(true)
-            let ethe = bigInt(1 * 10 ** 18)
-            let unjailing = await Connection.unJailed({ value: ethe.value })
+            let ethe = ethers.utils.parseEther('1')
+            let unjailing = await Connection.unJailed({ value: ethe.toString() })
             console.log(unjailing, "unjailing")
             let abc = await unjailing.wait();
             if (abc) {
@@ -747,11 +750,12 @@ const DelegatorUnstak = () => {
                                                                                          </TableCell> */}
 
                                                                                          <TableCell>
-                                                                                             {item ? item.amount / 1000000000000000000 : "-"}
+                                                                                             {/* {item ? item.amount / 1000000000000000000 : "-"} */}
+                                                                                             {item ? ethers.utils.formatEther(item.amount) : "-"}
                                                                                          </TableCell>
 
                                                                                          <TableCell>
-                                                                                             {item ? item.totalAmount / 1000000000000000000 : "-"}
+                                                                                             {item ? ethers.utils.formatEther(item.totalAmount) : "-"}
                                                                                          </TableCell>
 
                                                                                         <TableCell>
@@ -785,11 +789,11 @@ const DelegatorUnstak = () => {
                                                                                         </TableCell>
                                                                                         
                                                                                          <TableCell>
-                                                                                             {item ? fromExponential(item.income/1000000000000000000) : "-"}
+                                                                                             {item ? ethers.utils.formatEther(item.income) : "-"}
                                                                                          </TableCell>
 
                                                                                          <TableCell>
-                                                                                             {item ? fromExponential(item.totalIncome/1000000000000000000) : "-"}
+                                                                                             {item ? ethers.utils.formatEther(item.totalIncome) : "-"}
                                                                                          </TableCell>
 
                                                                                        

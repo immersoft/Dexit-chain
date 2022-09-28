@@ -5,6 +5,7 @@ import Connection from '../../../Contract'
 import bigInt from 'big-integer'
 import loader from '../../../Image/graphics-07.gif'
 import { toast, ToastContainer } from "react-toastify";
+import { ethers } from 'ethers'
 
 const ValidatorInfo = () => {
     const location = useLocation()
@@ -79,9 +80,9 @@ const ValidatorInfo = () => {
         try {
             setLoading(true)
 
-            let stakerAmountData = bigInt(price * 10 ** 18);
-            console.log(stakerAmountData.value)
-            let deligate=await Connection.stakeDelegator(details.address,{ value:stakerAmountData.value })
+            let stakerAmountData = ethers.utils.parseEther(price)
+            console.log(stakerAmountData.toString())
+            let deligate=await Connection.stakeDelegator(details.address,{ value:stakerAmountData.toString() })
             console.log(deligate,"deligate")
             let abc = await deligate.wait();
             if (abc) {
@@ -164,7 +165,7 @@ const ValidatorInfo = () => {
                     id="outlined-uncontrolled"
                     label="Total Amount"
                     defaultValue="foo"
-                    value={getDetails ? getDetails.amount/1000000000000000000:"-"}
+                    value={getDetails ? ethers.utils.formatEther(getDetails.amount):"-"}
                     InputProps={{
                         readOnly: true,
                       }}

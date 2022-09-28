@@ -204,6 +204,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, genesis *Genesis, override
 	}
 	// Get the existing chain configuration.
 	newcfg := genesis.configOrDefault(stored)
+	fmt.Println(stored)
 	if overrideBerlin != nil {
 		newcfg.BerlinBlock = overrideBerlin
 	}
@@ -221,7 +222,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, genesis *Genesis, override
 	// if we just continued here.
 	// The full node of two BSC testnets may run without genesis file after been inited.
 	if genesis == nil && stored != params.MainnetGenesisHash &&
-		stored != params.ChapelGenesisHash && stored != params.RialtoGenesisHash && stored != params.BSCGenesisHash {
+		stored != params.ChapelGenesisHash && stored != params.RialtoGenesisHash && stored != params.BSCGenesisHash && stored != params.DexitTestNetHash {
 		return storedcfg, stored, nil
 	}
 	// Check config compatibility and write the config. Compatibility errors
@@ -258,6 +259,8 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 		return params.RialtoChainConfig
 	case ghash == params.YoloV3GenesisHash:
 		return params.YoloV3ChainConfig
+	case ghash == params.DexitTestNetHash:
+		return params.DexitChainTestNetConfig
 	default:
 		return params.AllEthashProtocolChanges
 	}

@@ -10,6 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import { Card, Typography,Box, Button } from "@mui/material";
 import CircularProgress from '@mui/material/CircularProgress'
 import ForwardIcon from '@mui/icons-material/Forward';
+import { ethers } from 'ethers';
 
 const columns = [
     { id: "delegator", label: "Delegator Address", minWidth: 20 },
@@ -70,7 +71,7 @@ const DelegatorTable = () => {
       try {
         let balance=await Connection.delegatorStakeBalance(account,"0x93D6cf0dD91634e3880f1fD45549f899f73d0044")
         let balance2=await Connection.getDelegatorsDetails("0x93D6cf0dD91634e3880f1fD45549f899f73d0044",1)
-        console.log(balance2,"balance")
+        // console.log(balance2,"balance")
       } catch (error) {
         console.log(error)
       }
@@ -79,6 +80,7 @@ const DelegatorTable = () => {
 
 
     const handleValidatorListDetails= async(list)=>{
+      console.log("testtttt")
       try {
         if(list){
           console.log(list,"listsss data")
@@ -176,7 +178,7 @@ const DelegatorTable = () => {
                             </TableCell>
 
                             <TableCell>
-                            {item.amount/1000000000000000000}
+                            {ethers.utils.formatEther(item.amount)}
                             </TableCell>
 
                           

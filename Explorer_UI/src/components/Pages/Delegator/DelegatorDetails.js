@@ -12,6 +12,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import ForwardIcon from '@mui/icons-material/Forward';
 import moment from 'moment'
 import bigInt from 'big-integer';
+import { ethers } from 'ethers';
 
 const columns = [
     { id: "id", label: "ID", minWidth: 20 },
@@ -114,7 +115,7 @@ const DelegatorDetails = () => {
                 id:list[i].ID.toString(),
                 delegatorAddress:list[i].delegatorAddress,
                 validatorAddress:list[i].validatorAddress,
-                amount:dataget.stakeAmount.toString()/1000000000000000000,
+                amount:ethers.utils.formatEther(dataget.stakeAmount),
                 startTime:dataget.startTime.toString(),
                 endTime:dataget.endTime.toString(),
             }
@@ -155,9 +156,9 @@ const DelegatorDetails = () => {
             }
             else if(parseInt(inputAmount)<=allDelegatorData.amount){
               try {
-                let stakerAmountData2 = bigInt(inputAmount * 10 ** 18);
+                let stakerAmountData2 = ethers.utils.parseEther(inputAmount);
                 // console.log(stakerAmountData2.value,"stakerAmountData2")
-                let result = await Connection.unStakeValidators(allDelegatorData.validatorAddress,stakerAmountData2.value,allDelegatorData.id);
+                let result = await Connection.unStakeValidators(allDelegatorData.validatorAddress,stakerAmountData2.toString(),allDelegatorData.id);
                 // console.log(result)
                 setInputAmout(0)
                 setOpenUnStack(false)

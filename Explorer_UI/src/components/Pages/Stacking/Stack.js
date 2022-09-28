@@ -18,6 +18,8 @@ import { ToastContainer, toast } from "react-toastify";
 import Connection from "../../../Contract";
 import bigInt from "big-integer";
 import CloseIcon from "@mui/icons-material/Close";
+import { ethers } from "ethers";
+import Web3 from "web3";
 
 const style = {
   position: "absolute",
@@ -46,8 +48,7 @@ const Stack = () => {
   let [account, setAccount] = useState("");
   const [startLoading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const[website,setWebSite]=useState('')
-
+  const [website, setWebSite] = useState("");
 
   const getAccounts = async () => {
     try {
@@ -59,7 +60,6 @@ const Stack = () => {
     }
   };
 
-
   try {
     window.ethereum.on("accountsChanged", function () {
       getAccounts();
@@ -69,7 +69,7 @@ const Stack = () => {
   }
 
   useEffect(() => {
-      // console.log("eeeeffect")
+    // console.log("eeeeffect")
     getAccounts();
     //   totalBalance()
   }, [account]);
@@ -114,7 +114,13 @@ const Stack = () => {
   // }
 
   const handleStakeSubmit = async () => {
-    if (stakerAmount < 10 || !stakerAmount || validatorName =='' || validatorDescription=='' || website=='') {
+    if (
+      stakerAmount < 100 ||
+      !stakerAmount ||
+      validatorName == "" ||
+      validatorDescription == "" ||
+      website == ""
+    ) {
       setstakeamountWarning(true);
       // buttons
       //   alert("Stake amount should be Greater than 10000");
@@ -122,17 +128,19 @@ const Stack = () => {
       setOpen(true);
       //   setStakerAmount(0);
       return null;
-    } else if (stakerAmount >= 10) {
+    } else if (stakerAmount >= 100) {
       setshowloadingBtn(true);
 
       setstakeamountWarning(false);
 
       try {
         setLoading(true);
-        let stakerAmountData = bigInt(stakerAmount * 10 ** 18);
-        console.log(stakerAmountData.value, "stakerAmount");
+let stakeAmount =ethers.utils.parseEther(stakerAmount)
+      console.log("stakeAmount",stakeAmount.toString())  
+      // let stakerAmountData = bigInt(stakerAmount * 10 ** 18);
+        // console.log(stakerAmountData.value, "stakerAmount");
         let result = await Connection.stakeValidator({
-          value: stakerAmountData.value,
+          value: stakeAmount.toString(),
         });
         setOpenStack(false);
         console.log(result, "results");
@@ -141,11 +149,11 @@ const Stack = () => {
           console.log(abc, "abc");
           setLoading(false);
           setOpenStack(false);
-          postValidatorDetails()
-          setStakerAmount()
-          setValidatorName('')
-          setValidatorDescription('')
-          setWebSite('')
+          postValidatorDetails();
+          setStakerAmount();
+          setValidatorName("");
+          setValidatorDescription("");
+          setWebSite("");
           toast.success("Transaction successfull");
         }
       } catch (error) {
@@ -171,9 +179,9 @@ const Stack = () => {
     const charsToShow = strLen - sepLen;
     const frontChars = Math.ceil(charsToShow / 2);
     const backChars = Math.floor(charsToShow / 2);
-// console.log("return  ",fullStr?.substr(0, frontChars) +
-// separator +
-// fullStr?.substr(fullStr?.length - backChars))
+    // console.log("return  ",fullStr?.substr(0, frontChars) +
+    // separator +
+    // fullStr?.substr(fullStr?.length - backChars))
     return (
       fullStr?.substr(0, frontChars) +
       separator +
@@ -181,30 +189,29 @@ const Stack = () => {
     );
   };
 
-  const postValidatorDetails=()=>{
+  const postValidatorDetails = () => {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-    
+
     var raw = JSON.stringify({
-      "Name": validatorName,
-      "Address": account,
-      "Description": validatorDescription,
-      "Website": website
+      Name: validatorName,
+      Address: account,
+      Description: validatorDescription,
+      Website: website,
     });
-    
+
     var requestOptions = {
-      method: 'POST',
+      method: "POST",
       headers: myHeaders,
       body: raw,
-      redirect: 'follow'
+      redirect: "follow",
     };
-    
-    fetch("https://final-explorer.herokuapp.com/validatorInfo", requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
-      .catch(error => console.log('error', error));
-  }
 
+    fetch("https://final-explorer.herokuapp.com/validatorInfo", requestOptions)
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.log("error", error));
+  };
 
   return (
     <>
@@ -219,14 +226,13 @@ const Stack = () => {
               Staking
             </Typography>
             <div className="text_input">
-                {/* {console.log("accccccccc---",account)} */}
+              {/* {console.log("accccccccc---",account)} */}
               <TextField
                 id="outlined-basic"
                 label="Staker Address"
                 variant="outlined"
                 sx={{ mt: 1 }}
                 defaultValue={account ? shortenAccountId(account) : "loading"}
-
                 value={account ? shortenAccountId(account) : "loading"}
                 InputProps={{
                   readOnly: true,
@@ -240,7 +246,10 @@ const Stack = () => {
                 sx={{ mt: 1 }}
                 value={stakerAmount}
                 error={stakeamountWarning}
-                onChange={(e) => setStakerAmount(e.target.value)}
+                onChange={(e) => {
+                  setStakerAmount(e.target.value);
+                  console.log("checkkkkk", e.target.value);
+                }}
                 helperText="Minimum Stake Amount 10000"
               />
               <TextField
@@ -261,7 +270,6 @@ const Stack = () => {
                 sx={{ mt: 1 }}
                 value={validatorDescription}
                 error={stakeamountWarning}
-
                 onChange={(e) => setValidatorDescription(e.target.value)}
               />
               <TextField
@@ -272,8 +280,7 @@ const Stack = () => {
                 sx={{ mt: 1 }}
                 value={website}
                 error={stakeamountWarning}
-
-                onChange={(e)=>setWebSite(e.target.value)}
+                onChange={(e) => setWebSite(e.target.value)}
               />
             </div>
 
@@ -284,7 +291,7 @@ const Stack = () => {
                     paddingLeft: "3.2rem",
                     paddingRight: "3.2rem",
                     border: "1px solid #0000ff !important",
-                    mt:1
+                    mt: 1,
                   }}
                   color="error"
                   loading

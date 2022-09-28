@@ -36,6 +36,10 @@ var (
 	ChapelGenesisHash = common.HexToHash("0x6d3c66c5357ec91d5c43af47e234a939b22557cbb552dc45bebbceeed90fbe34")
 	RialtoGenesisHash = common.HexToHash("0xee835a629f9cf5510b48b6ba41d69e0ff7d6ef10f977166ef939db41f59f5501")
 	YoloV3GenesisHash = common.HexToHash("0xf1f2876e8500c77afcc03228757b39477eceffccf645b734967fe3c7e16967b7")
+
+	DexitTestNetHash = common.HexToHash("0xae43d0117c39bae6ae00177395f7a24a46d0e025a43961ac30b85a6e43222860")
+	//0xae43d0117c39bae6ae00177395f7a24a46d0e025a43961ac30b85a6e43222860 908
+	//0xae43d0117c39bae6ae00177395f7a24a46d0e025a43961ac30b85a6e43222860 907
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
@@ -288,6 +292,31 @@ var (
 		},
 	}
 
+	DexitChainTestNetConfig = &ChainConfig{
+		ChainID:             big.NewInt(908),
+		HomesteadBlock:      big.NewInt(0),
+		EIP150Block:         big.NewInt(0),
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
+		ByzantiumBlock:      big.NewInt(0),
+		ConstantinopleBlock: big.NewInt(0),
+		PetersburgBlock:     big.NewInt(0),
+		IstanbulBlock:       big.NewInt(0),
+		MuirGlacierBlock:    big.NewInt(350),
+		RamanujanBlock:      big.NewInt(350),
+		NielsBlock:          big.NewInt(350),
+		MirrorSyncBlock:     big.NewInt(350),
+		BrunoBlock:          big.NewInt(350),
+		BerlinBlock:         big.NewInt(350),
+		EulerBlock:          big.NewInt(350),
+		ClassicBlock:        big.NewInt(350),
+
+		Parlia: &ParliaConfig{
+			Period: 3,
+			Epoch:  50,
+		},
+	}
+
 	RialtoChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(1417),
 		HomesteadBlock:      big.NewInt(0),
@@ -345,16 +374,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil, nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil, nil}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil, nil}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil, nil}
 
 	TestRules = TestChainConfig.Rules(new(big.Int))
 )
@@ -443,7 +472,7 @@ type ChainConfig struct {
 	MirrorSyncBlock *big.Int `json:"mirrorSyncBlock,omitempty" toml:",omitempty"` // mirrorSyncBlock switch block (nil = no fork, 0 = already activated)
 	BrunoBlock      *big.Int `json:"brunoBlock,omitempty" toml:",omitempty"`      // brunoBlock switch block (nil = no fork, 0 = already activated)
 	EulerBlock      *big.Int `json:"eulerBlock,omitempty" toml:",omitempty"`      // eulerBlock switch block (nil = no fork, 0 = already activated)
-
+	ClassicBlock    *big.Int `json:"classicBlock,omitempty" toml:",omitempty"`
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty" toml:",omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty" toml:",omitempty"`
@@ -493,7 +522,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Petersburg: %v Istanbul: %v, Muir Glacier: %v, Ramanujan: %v, Niels: %v, MirrorSync: %v, Bruno: %v, Berlin: %v, YOLO v3: %v, Euler: %v, Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Petersburg: %v Istanbul: %v, Muir Glacier: %v, Ramanujan: %v, Niels: %v, MirrorSync: %v, Bruno: %v, Berlin: %v, YOLO v3: %v, Euler: %v, Classic: %v, Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -513,6 +542,7 @@ func (c *ChainConfig) String() string {
 		c.BerlinBlock,
 		c.YoloV3Block,
 		c.EulerBlock,
+		c.ClassicBlock,
 		engine,
 	)
 }
@@ -602,6 +632,15 @@ func (c *ChainConfig) IsOnEuler(num *big.Int) bool {
 	return configNumEqual(c.EulerBlock, num)
 }
 
+func (c *ChainConfig) IsClassic(num *big.Int) bool {
+	return isForked(c.ClassicBlock, num)
+}
+
+// IsOnEuler returns whether num is equal to the euler fork block
+func (c *ChainConfig) IsOnClassic(num *big.Int) bool {
+	return configNumEqual(c.ClassicBlock, num)
+}
+
 // IsMuirGlacier returns whether num is either equal to the Muir Glacier (EIP-2384) fork block or greater.
 func (c *ChainConfig) IsMuirGlacier(num *big.Int) bool {
 	return isForked(c.MuirGlacierBlock, num)
@@ -664,8 +703,8 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 	for _, cur := range []fork{
 		{name: "mirrorSyncBlock", block: c.MirrorSyncBlock},
 		{name: "brunoBlock", block: c.BrunoBlock},
-		{name: "eulerBlock", block: c.EulerBlock},
 		{name: "berlinBlock", block: c.BerlinBlock},
+		{name: "classicBlock", block: c.ClassicBlock},
 	} {
 		if lastFork.name != "" {
 			// Next one must be higher number
@@ -749,6 +788,9 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	}
 	if isForkIncompatible(c.EulerBlock, newcfg.EulerBlock, head) {
 		return newCompatError("euler fork block", c.EulerBlock, newcfg.EulerBlock)
+	}
+	if isForkIncompatible(c.ClassicBlock, newcfg.ClassicBlock, head) {
+		return newCompatError("ClassicBlock fork block", c.ClassicBlock, newcfg.ClassicBlock)
 	}
 	return nil
 }

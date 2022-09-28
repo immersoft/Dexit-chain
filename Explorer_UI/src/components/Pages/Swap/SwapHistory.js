@@ -307,7 +307,7 @@ import {
                         </TableCell>
                       
                         <TableCell>
-                            {item.amount/1000000000000000000}
+                            {ethers.utils.formatEther(item.amount)}
                         </TableCell>
 
                         <TableCell>

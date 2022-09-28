@@ -22,6 +22,7 @@ import { styled } from "@mui/material/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import LoadingButton from "@mui/lab/LoadingButton";
+import { ethers } from "ethers";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -33,6 +34,8 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const Vote = (props) => {
   let { data } = props;
+  console.log("propss in voting section ",props)
+
   const [openAlert, setOpenAlert] = React.useState(false);
 
   const [stakerAmount, setStakerAmount] = useState("");
@@ -47,6 +50,7 @@ const Vote = (props) => {
   const [submitProposalIconColor, setsubmitProposalIconColor] = useState(null);
   const [showLoader, setShowLoader] = useState(false);
   const [showWarning, setshowWarning] = useState("");
+  const [handleRegister,setHandleRegister]=useState(props.data2?props.data2:false)
 
   useEffect(() => {
     minimumStakeValue();
@@ -78,7 +82,7 @@ const Vote = (props) => {
     try {
       let initialValue = await Proposal.minimumStakeAmount();
       // console.log(initialValue, "initialValue");
-      setupdateValue(initialValue / 1000000000000000000);
+      setupdateValue(ethers.utils.formatEther(initialValue));
     } catch (error) {
       console.log(error);
     }
@@ -149,10 +153,30 @@ const Vote = (props) => {
   const proposalVotedetails = async () => {
     let proposalVotedetails = await Proposal.proposals(proposalId);
   };
+  const handleRegisterFunction =async()=>{
+    setShowLoader(true)
+    try {
+      console.log("proposal id ",proposalId)
+      let register =await VotingContract.startVoteProposal(proposalId);
+      let waitForTx=await register.wait();
+      if(waitForTx){
+        toast.success("Applied successfully!")
+        setShowLoader(false)
+      
+      }      
+    } catch (error) {
+      setShowLoader(false);
+     
+      if (error.data.message) {
+        toast.error(error.data.message);
+      }
+    }
+
+  }
 
   return (
     <>
-      {/* <ToastContainer /> */}
+      <ToastContainer />
 
       <Card sx={{ mt: 3, boxShadow: 3, pb: 1, backgroundColor: "#F8FAFD" }}>
         <Box sx={{ flexGrow: 1 }}>
@@ -162,7 +186,8 @@ const Vote = (props) => {
             pb={2}
             sx={{ textAlign: "center", fontWeight: "500" }}
           >
-            Voting
+            {handleRegister ?"Apply for Voting":'Voting'}
+            
           </Typography>
           <div
             style={{
@@ -199,6 +224,8 @@ const Vote = (props) => {
               </Snackbar>
             ) : null}
           </div>
+
+          {handleRegister ?"":
           <div
             style={{ display: "flex", justifyContent: "center", padding: "2%" }}
           >
@@ -219,7 +246,7 @@ const Vote = (props) => {
                 }}
               />
             </div>
-          </div>
+          </div>}
           <div style={{ textAlign: "center" }}>
             {/* {showWarning ===
             "execution reverted: You can't vote for a proposal twice" ? (
@@ -238,7 +265,7 @@ const Vote = (props) => {
             )} */}
             {showLoader === true ? (
               <LoadingButton
-                sx={{ paddingLeft: "1.3rem", paddingRight: "1.3rem" }}
+                sx={{ paddingLeft: "1.3rem", paddingRight: "1.3rem",marginTop:'12px' }}
                 color="primary"
                 loading
                 variant="outlined"
@@ -246,9 +273,19 @@ const Vote = (props) => {
                 Submit
               </LoadingButton>
             ) : (
-              <Button variant="outlined" onClick={() => submitProposal()}>
+
+              <>
+{handleRegister ?
+
+<Button variant="outlined" sx={{marginTop:'12px'}} onClick={() => handleRegisterFunction()}>
+Apply
+</Button>
+
+:
+              <Button variant="outlined" sx={{marginTop:'12px'}} onClick={() => submitProposal()}>
                 Submit
-              </Button>
+              </Button>}
+            </>
             )}
           </div>
         </Box>

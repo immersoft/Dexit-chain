@@ -11,6 +11,7 @@ import { Card, Typography, Button, CircularProgress } from "@mui/material";
 import { Box } from "@mui/system";
 import Connection from "../../../Contract";
 import { useNavigate } from "react-router-dom";
+import { ethers } from "ethers";
 
 const columns = [
   { id: "address", label: "Address", minWidth: 50 },
@@ -144,7 +145,7 @@ const DepositeTable = () => {
                       return (
                         <>
                         {/* {console.log(item,"item")} */}
-                          {item.amount / 1000000000000000000 !== 0 ? (
+                          {ethers.utils.formatEther(item.amount) !== 0 ? (
                             <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
@@ -158,11 +159,11 @@ const DepositeTable = () => {
                               </TableCell>
 
                               <TableCell>
-                                {item.amount / 1000000000000000000}
+                                {ethers.utils.formatEther(item.amount)}
                               </TableCell>
 
                               <TableCell>
-                                {item.amount / 1000000000000000000}/
+                                {ethers.utils.formatEther(item.amount)}/
                                 {item.votingpower.toFixed(2)}%
                               </TableCell>
 

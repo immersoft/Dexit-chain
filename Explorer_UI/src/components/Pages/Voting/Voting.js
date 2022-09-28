@@ -37,6 +37,8 @@ import { ToastContainer, toast } from "react-toastify";
 import Backdrop from '@mui/material/Backdrop';
 import './Voting.css'
 import VotingContract from '../../../AllContract/Voting'
+import BSCVa from '../../../Contract'
+import { ethers } from "ethers";
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -89,6 +91,12 @@ const Voting = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+//register
+const [openRegister, setOpenRegister] = React.useState(false);
+  const handleOpenRegister = () => setOpenRegister(true);
+  const handleCloseRegister = () => setOpenRegister(false);
+
+
   useEffect(() => {
     minimumStakeValue();
     getAccounts();
@@ -100,10 +108,10 @@ const Voting = () => {
   }, []);
   const handleStakeSubmit = async () => {
     try {
-      let stakerAmountData = bigInt(stakerAmount * 10 ** 18);
+      let stakerAmountData = ethers.utils.parseEther(stakerAmount)
       // console.log(stakerAmountData.value, "stakerAmount");
       let result = await Proposal.stakeValidator({
-        value: stakerAmountData.value,
+        value: stakerAmountData.toString(),
       });
       // console.log(result, "results");
     } catch (error) {
@@ -125,8 +133,10 @@ const Voting = () => {
   };
 
   const validatorsList = async () => {
+    console.log("sshskhs",BSCVa)
     try {
-      let listData = await Proposal.getHighestValidators();
+
+      let listData = await BSCVa.getHighestValidators();
       // console.log(listData, "listData");
       setValidatorlist(listData);
     } catch (error) {
@@ -158,13 +168,13 @@ const Voting = () => {
       let details = "high";
       let chnageVariblr = "minimumStakeAmount";
       // let valuenum = bigInt(updateValue * 10 ** 18);
-      let ethe = bigInt(1 * 10 ** 18);
+      let ethe = ethers.utils.parseEther('1')
       console.log("create proposal", updateValue);
       let proposalCreate = await VotingContract.createProposal(
         details,
         variableName,
         updateValue,
-        { value: ethe.value }
+        { value: ethe.toString() }
       );
       // console.log(proposalCreate, "proposalCreate");
       let wait = await proposalCreate.wait();
@@ -189,7 +199,7 @@ const Voting = () => {
 
   const checkProposal = async () => {
     try {
-      let checkPropsal = await VotingContract.chcekProposal();
+      let checkPropsal = await VotingContract.checkProposal();
       console.log(checkPropsal, "checkPropsal");
       setproposalList(checkPropsal);
       console.log("getproposaldetailssss", checkPropsal[0]);
@@ -217,11 +227,31 @@ const Voting = () => {
 
   const getProposalDetails = async (id) => {
     try {
-      handleOpen()
+
+      console.log("id",id)
+      console.log("account",account)
+
+
+        let _startVotes=await VotingContract.startvotes(account, id);
+        console.log("check id vote time",_startVotes.voteTime.toString())
+        console.log("check id bytes",_startVotes.voter.toString())
+      console.log("Inside getProposalDetails")
+
+      let register=await _startVotes.voteTime.toString()
+      if(register ==0){
+        console.log("Vote time is zero")
+        handleOpenRegister()
+      }
+      else{
+        handleOpen()
+
+      }
+
       setsenIdToVoteComp(id);
       let proposalsss = await Proposal.proposals(id);
+      // console.log("detail details",proposalsss)
       setProposalData(proposalsss);
-      console.log(proposalData.votePowerOfAgree.toBigInt(), "proposalsss");
+      console.log(proposalsss, "proposalsss");
     } catch (error) {
       console.log(error);
     }
@@ -261,7 +291,7 @@ const Voting = () => {
     } = event;
     if (event.target.value) {
       let value = await Proposal.currentValue(event.target.value);
-      if (event.target.value === "MaxValidators") {
+      if (event.target.value === "maxValidators") {
         setcurrentValueOfselectedVar(value.toString());
       }
       if (event.target.value === "minimumStakeAmount") {
@@ -295,7 +325,113 @@ const Voting = () => {
 
   return (
     <>
-      
+{/* //register section  */}
+<div>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={openRegister}
+        onClose={handleCloseRegister}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={openRegister}>
+          <Box sx={style}>
+            <Grid >
+                <Typography variant="h5" pb={2} textAlign={"center"}>
+                  Proposal details Register
+                </Typography>
+                {proposalData ? (
+                  <>
+                    <Card
+                      sx={{
+                        paddingLeft: "1rem",
+                        paddingRight: "1rem",
+                        boxShadow: 0,
+                        backgroundColor: "#F8FAFD",
+                      }}
+                    >
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Proposer address</Grid>
+                        <Grid item>{proposalData.proposer}</Grid>
+                        <Divider />
+                      </Grid>
+
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Value </Grid>
+                        <Grid item>
+                          {/* {console.log(
+                            "cheehhskhskhs",
+                            proposalData.variable_value.toString()
+                          )} */}
+                          {proposalData.variable_name === "maxValidators"
+                            ? proposalData.variable_value.toString()
+                            : ethers.utils.formatEther(proposalData.variable_value)}
+                        </Grid>
+                        <Divider />
+                      </Grid>
+
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Name </Grid>
+                        <Grid item>{proposalData.variable_name}</Grid>
+                        <Divider />
+                      </Grid>
+
+                      <Grid
+                        container
+                        display={"flex"}
+                        justifyContent={"space-between"}
+                        pt={2}
+                        pb={2}
+                      >
+                        <Grid item>Status </Grid>
+                        <Grid item>
+                          {proposalData[11] === true ? "True" : "False"}
+                        </Grid>
+                        <Divider />
+                      </Grid>
+                    </Card>
+                  </>
+                ) : (
+                  <>
+                    <Typography sx={{ textAlign: "center", mt: 5 }}>
+                      No data found
+                    </Typography>{" "}
+                  </>
+                )}
+              </Grid>
+
+              <Grid container sx={{p:2}}>
+                <Grid item md={12} sm={12} xs={12}>
+                  <Vote data={senIdToVoteComp} data2={true}  />
+                </Grid>
+              </Grid>
+          </Box>
+        </Fade>
+      </Modal>
+    </div>
+{/* voting section  */}
     <div>
       <Modal
         aria-labelledby="transition-modal-title"
@@ -349,10 +485,9 @@ const Voting = () => {
                             "cheehhskhskhs",
                             proposalData.variable_value.toString()
                           )} */}
-                          {proposalData.variable_name === "MaxValidators"
+                          {proposalData.variable_name === "maxValidators"
                             ? proposalData.variable_value.toString()
-                            : proposalData.variable_value.toString() /
-                              1000000000000000000}
+                            : ethers.utils.formatEther(proposalData.variable_value)}
                         </Grid>
                         <Divider />
                       </Grid>
@@ -537,7 +672,7 @@ const Voting = () => {
                                 </TableCell>
 
                                 <TableCell>
-                                {val.value<51?val.value:val.value/1000000000000000000}
+                                {val.value<51?val.value:ethers.utils.formatEther(val.value)}
                                 </TableCell>
 
                                 <TableCell>

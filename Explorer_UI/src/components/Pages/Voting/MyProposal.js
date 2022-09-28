@@ -35,6 +35,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { ToastContainer, toast } from "react-toastify";
 import Backdrop from '@mui/material/Backdrop';
 import './Voting.css'
+import { ethers } from "ethers";
 
 
 const style = {
@@ -254,7 +255,7 @@ export default function MyProposal() {
                         Value{" "}
                       </Grid>
                       <Grid item>
-                      {myProposalDetails.name ==='MaxValidators'?myProposalDetails.value: myProposalDetails.value /1000000000000000000}
+                      {myProposalDetails.name ==='maxValidators'?myProposalDetails.value: ethers.utils.formatEther(myProposalDetails.value)}
 
                       </Grid>
                       <Divider />
@@ -415,7 +416,7 @@ export default function MyProposal() {
                         </TableCell>
 
                         <TableCell>
-                          {item.value<51?item.value:item.value/1000000000000000000}
+                          {item.value<51?item.value:ethers.utils.formatEther(item.value)}
                         </TableCell>
 
                         <TableCell>
@@ -494,7 +495,7 @@ export default function MyProposal() {
                         Value{" "}
                       </Grid>
                       <Grid item>
-                      {myProposalDetails.variable_name ==='MaxValidators'?myProposalDetails.variable_value.toString(): myProposalDetails.variable_value.toString() /
+                      {myProposalDetails.variable_name ==='maxValidators'?myProposalDetails.variable_value.toString(): myProposalDetails.variable_value.toString() /
                             1000000000000000000}
 
                       </Grid>

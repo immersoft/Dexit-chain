@@ -39,6 +39,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import fromExponential from 'from-exponential';
 import DelegatorUnstak from "./DelegatorUnstak";
 import ValidatorUnstake from "./ValidatorUnstake";
+import { ethers } from "ethers";
 
 
 const columns = [
@@ -145,11 +146,11 @@ const UnStakingHome = () => {
   }
 
   const handleDelegateWithdrawMaxAmount=()=>{
-    setWithdrawAmount(delegateBalance/1000000000000000000)
+    setWithdrawAmount(ethers.utils.formatEther(delegateBalance))
   }
 
   const handleWithdrawMaxAmount=()=>{
-    setWithdrawAmount(popupBalance/1000000000000000000)
+    setWithdrawAmount(ethers.utils.formatEther(popupBalance))
   }
 
   const handleWithdrawModalClose=()=>{
@@ -228,8 +229,8 @@ const UnStakingHome = () => {
                   validatorAddress: dataget[0],
                   amount: infoDetails[1].toString(),
                   totalAmount: infoDetails[1].toString(),
-                  income:infoDetails[4].toString()/1000000000000000000,
-                  totalIncome:infoDetails[5].toString()/1000000000000000000,
+                  income:ethers.utils.formatEther(infoDetails[4]),
+                  totalIncome:ethers.utils.formatEther(infoDetails[5]),
                   // status:dataget[1]
                 };
 
@@ -256,8 +257,8 @@ const UnStakingHome = () => {
                   address: dataget[0],
                   totalAmount: dataget[3].toString(),
                   amount: dataget[2].toString(),
-                  income:dataget[4].toString()/1000000000000000000,
-                  totalIncome:dataget[5].toString()/1000000000000000000,
+                  income:ethers.utils.formatEther(dataget[4]),
+                  totalIncome:ethers.utils.formatEther(dataget[5]),
                   status:dataget[1],
                 };
                 let check = customList.find(
@@ -290,8 +291,8 @@ const UnStakingHome = () => {
                 amount: dataget[2].toString(),
                 totalAmount: dataget[3].toString() ,
                 status:dataget[1],
-                income:dataget[4].toString()/1000000000000000000,
-                totalIncome:dataget[5].toString()/1000000000000000
+                income:ethers.utils.formatEther(dataget[4]),
+                totalIncome:ethers.utils.formatEther(dataget[5])
               };
               let check = customList.find(
                 (item) => item.address.toLowerCase() === account
@@ -373,8 +374,8 @@ const UnStakingHome = () => {
     try {
       handleWithdrawModalClose()
       setLoading(true);
-      let ethe=bigInt(withdrawAmount*10**18)
-      let result = await Connection.withdrawValidatorStaking(ethe.value);
+      let ethe=ethers.utils.parseEther(withdrawAmount)
+      let result = await Connection.withdrawValidatorStaking(ethe.toString());
       let abc = await result.wait();
       if (abc) {
         setLoading(false);
@@ -426,10 +427,10 @@ const UnStakingHome = () => {
     try {
       handleDelegateWithdrawModalClose()
       setLoading(true);
-      let amountWithdraw=bigInt(withdrawAmount * 10 ** 18);
-      console.log(amountWithdraw.value,"amountWithdraw")
+      let amountWithdraw=ethers.utils.parseEther(withdrawAmount)
+      console.log(amountWithdraw.toString(),"amountWithdraw")
       let delegateWithdrwal = await Connection.withdrawDelegatorStaking(
-        ValidatorAddForDel,amountWithdraw.value
+        ValidatorAddForDel,amountWithdraw.toString()
       );
       let abc = await delegateWithdrwal.wait();
       if (abc) {
@@ -501,8 +502,8 @@ const handleJailed=async()=>{
   try {
     handleModalClose()
     setLoading(true)
-    let ethe=bigInt(1*10 ** 18)
-    let unjailing=await Connection.unJailed({value:ethe.value})
+    let ethe=ethers.utils.parseEther('1')
+    let unjailing=await Connection.unJailed({value:ethe.toString()})
     console.log(unjailing,"unjailing")
     let abc = await unjailing.wait();
     if(abc){

@@ -17,6 +17,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Proposal from "../../../Contract";
 import fromExponential from 'from-exponential';
 import InfoIcon from '@mui/icons-material/Info';
+import { ethers } from "ethers";
 
 
 
@@ -99,7 +100,7 @@ const TransactionTable = () => {
      if(list){
       for(let i=0;i<list.length;i++){
         let dataget=await Connection.getValidatorInfo(list[i])
-        let totalVotingPower=((dataget[3].toString()/1000000000000000000)/(contract.toString()/1000000000000000000))*100
+        let totalVotingPower=(ethers.utils.formatEther(dataget[3])/(ethers.utils.formatEther(contract)))*100
         let customObject={
           address:list[i],
           amount:dataget[3].toString(),
@@ -160,7 +161,7 @@ const handleClaim=async()=>{
 }
 
 const maxValidator=async()=>{
-  let value = await Proposal.currentValue("MaxValidators");
+  let value = await Proposal.currentValue("maxValidators");
   console.log(value.toString(),"value")
   setMaximumValidator(value.toString())
 }
@@ -353,7 +354,7 @@ const shortenAccountId = (fullStr) => {
                                       </TableCell>
           
                                       <TableCell>
-                                        {item.status===2 ? <Button variant={(highestValidatorList.includes(item.address)) ? "contained":"outlined"} color={(highestValidatorList.includes(item.address))?"success":"warning"} size='small'>{(highestValidatorList.includes(item.address)) ? "Active":"Inactive"}</Button> : item.status===1 ? <Button variant="outlined" size='small'>Created</Button> :item.status ===3 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===4 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
+                                        {item.status===1 ? <Button variant={(highestValidatorList.includes(item.address)) ? "contained":"outlined"} color={(highestValidatorList.includes(item.address))?"success":"warning"} size='small'>{(highestValidatorList.includes(item.address)) ? "Active":"Inactive"}</Button> : item.status ===2 ? <Button variant="outlined" color="warning" size='small'>Un-Stake</Button> : item.status===3 ? <Button variant="outlined" color="warning" size='small'>Jailed</Button>:item.status===0 ? <Button variant="outlined" color="warning" size='small'>Not Exist</Button>:""}
                                         
                                       </TableCell>
           
@@ -366,11 +367,11 @@ const shortenAccountId = (fullStr) => {
                                       </TableCell>
                                     
                                       <TableCell>
-                                        {fromExponential(item.incomingCoins/1000000000000000000)}
+                                        {ethers.utils.formatEther(item.incomingCoins)}
                                       </TableCell>
           
                                       <TableCell>
-                                        {fromExponential(item.incomingTotalCoins/1000000000000000000)}
+                                      {ethers.utils.formatEther(item.incomingTotalCoins)}
                                       </TableCell>
           
                                       <TableCell>

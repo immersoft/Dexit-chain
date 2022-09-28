@@ -209,9 +209,8 @@ export default function Connect() {
                 symbol: "DXT",
                 decimals: 18,
               },
-              // rpcUrls: ["https://testnet.dexit.network"],
-              rpcUrls: ["https://datafeed.dexit.network"],
-            //   blockExplorerUrls: ["https://testnet.dexit.network"],
+              rpcUrls: ["https://testnet.dexit.network"],
+              blockExplorerUrls: ["https://backendtestnet.dxtscan.com"],
             },
           ];
         }

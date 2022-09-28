@@ -38,6 +38,7 @@ import { toast, ToastContainer } from "react-toastify";
 import InfoIcon from '@mui/icons-material/Info';
 import fromExponential from 'from-exponential';
 import DelegatorUnstak from "./DelegatorUnstak";
+import { ethers } from "ethers";
 
 
 const columns = [
@@ -144,11 +145,11 @@ const ValidatorUnstake = () => {
   }
 
   const handleDelegateWithdrawMaxAmount=()=>{
-    setWithdrawAmount(delegateBalance/1000000000000000000)
+    setWithdrawAmount(ethers.utils.formatEther(delegateBalance))
   }
 
   const handleWithdrawMaxAmount=()=>{
-    setWithdrawAmount(popupBalance/1000000000000000000)
+    setWithdrawAmount(ethers.utils.formatEther(popupBalance))
   }
 
   const handleWithdrawModalClose=()=>{
@@ -291,8 +292,8 @@ const ValidatorUnstake = () => {
     try {
       handleWithdrawModalClose()
       setLoading(true);
-      let ethe=bigInt(withdrawAmount*10**18)
-      let result = await Connection.withdrawValidatorStaking(ethe.value);
+      let ethe=ethers.utils.parseEther(withdrawAmount)
+      let result = await Connection.withdrawValidatorStaking(ethe.toString());
       let abc = await result.wait();
       if (abc) {
         setLoading(false);
@@ -344,10 +345,10 @@ const ValidatorUnstake = () => {
     try {
       handleDelegateWithdrawModalClose()
       setLoading(true);
-      let amountWithdraw=bigInt(withdrawAmount * 10 ** 18);
-      console.log(amountWithdraw.value,"amountWithdraw")
+      let amountWithdraw=ethers.utils.parseEther(withdrawAmount)
+      console.log(amountWithdraw.toString(),"amountWithdraw")
       let delegateWithdrwal = await Connection.withdrawDelegatorStaking(
-        ValidatorAddForDel,amountWithdraw.value
+        ValidatorAddForDel,amountWithdraw.toString()
       );
       let abc = await delegateWithdrwal.wait();
       if (abc) {
@@ -419,8 +420,9 @@ const handleJailed=async()=>{
   try {
     handleModalClose()
     setLoading(true)
-    let ethe=bigInt(1*10 ** 18)
-    let unjailing=await Connection.unJailed({value:ethe.value})
+    let ethe = ethers.utils.parseEther('1')
+    let unjailing=await Connection.unJailed({value:ethe.toString()})
+    
     console.log(unjailing,"unjailing")
     let abc = await unjailing.wait();
     if(abc){
@@ -727,15 +729,15 @@ const shortenAccountId = (fullStr) => {
                                               </TableCell> */}
 
                                               <TableCell>
-                                                {item ? item.status==2 ? <span style={{color:"orange",textTransform:"uppercase"}}>Staked</span>:item.status==3?<span style={{color:"orange",textTransform:"uppercase"}}>Un-Staked</span>:item.status==4 ? <Button variant="contained" color="error" onClick={()=>handleModalOpen()}>Jailed</Button>:item.status==1?<span style={{color:"orange",textTransform:"uppercase"}}>Created</span>:item.status==0? <span style={{color:"orange",textTransform:"uppercase"}}>Not Exist</span> :"-" : "-"}
+                                                {item ? item.status==1 ? <span style={{color:"orange",textTransform:"uppercase"}}>Staked</span>:item.status==2?<span style={{color:"orange",textTransform:"uppercase"}}>Un-Staked</span>:item.status==3 ? <Button variant="contained" color="error" onClick={()=>handleModalOpen()}>Jailed</Button>:item.status==0? <span style={{color:"orange",textTransform:"uppercase"}}>Not Exist</span> :"-" : "-"}
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? item.amount/1000000000000000000 : "-"}
+                                                {item ? ethers.utils.formatEther(item.amount) : "-"}
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? item.totalAmount/1000000000000000000 : "-"}
+                                                {item ? ethers.utils.formatEther(item.totalAmount) : "-"}
                                               </TableCell>
                                               
 
@@ -765,11 +767,11 @@ const shortenAccountId = (fullStr) => {
                                                   </TableCell>
                                               
                                               <TableCell>
-                                                {item ? fromExponential(item.income/1000000000000000000) : "-"}
+                                                {item ? ethers.utils.formatEther(item.income) : "-"}
                                               </TableCell>
 
                                               <TableCell>
-                                                {item ? fromExponential(item.totalIncome/1000000000000000000) : "-"}
+                                                {item ? ethers.utils.formatEther(item.totalIncome) : "-"}
                                               </TableCell>
                                             
                                                 <TableCell> 

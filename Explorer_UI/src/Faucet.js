@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 if (window.ethereum) {
 //   const contractAddress= "0x36264383C8554f85d4216007ac07cf41a9FE8DD3";
-  const contractAddress= "0xd97d237C865f88198f2b89EF82322eb872E4A740";
+  const contractAddress= "0x4A23062f362B6E9d7a9268d9965A7624256118FA";
   
 
   const contractAbi=[

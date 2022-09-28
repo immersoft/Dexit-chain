@@ -705,6 +705,21 @@ func (p *Parlia) Finalize(chain consensus.ChainHeaderReader, header *types.Heade
 		}
 	}
 	val := header.Coinbase
+	// To add contract owner in mapping
+	// fmt.Println("Inside Finalize() before pushOwner() in parlia.go")
+	// if p.chainConfig.IsClassic(header.Number) {
+	// 	for _, tx := range *txs {
+	// 		if len(tx.Data()) > 0 && tx.To() == nil {
+	// 			for _, rec := range *receipts {
+	// 				if len(rec.ContractAddress) > 0 {
+	// 					var owner = ethapi.GetContractOwner(rec.ContractAddress.Hex())
+
+	// 					p.pushOwner(rec.ContractAddress, owner, state, header, cx, txs, receipts, nil, &header.GasUsed, true)
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 	err = p.distributeIncoming(val, state, header, cx, txs, receipts, systemTxs, usedGas, false)
 	if err != nil {
 		return err
@@ -755,6 +770,25 @@ func (p *Parlia) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 			}
 		}
 	}
+	//To add contract owner in mapping
+	// fmt.Println("Inside FinalizeAndAssemble() before pushOwner in parlia.go")
+	// if p.chainConfig.IsClassic(header.Number) {
+	// 	for _, tx := range txs {
+	// 		if len(tx.Data()) > 0 && tx.To() == nil {
+	// 			for _, rec := range receipts {
+	// 				if len(rec.ContractAddress) > 0 {
+	// 					signer := types.NewEIP155Signer(tx.ChainId())
+	// 					owner, _ := types.Sender(signer, tx)
+	// 					// var owner = ethapi.GetContractOwner(rec.ContractAddress.Hex())
+	// 					err := p.pushOwner(rec.ContractAddress, owner, state, header, cx, &txs, &receipts, nil, &header.GasUsed, true)
+	// 					if err != nil {
+	// 						log.Error("pushOwner failed", "block hash", header.Hash(), "error", err)
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 	err := p.distributeIncoming(p.val, state, header, cx, &txs, &receipts, nil, &header.GasUsed, true)
 	if err != nil {
 		return nil, nil, err
@@ -1054,6 +1088,25 @@ func (p *Parlia) distributeIncoming(val common.Address, state *state.StateDB, he
 			contAddr = append(contAddr, *tx.To())
 		}
 	}
+	// if p.chainConfig.IsClassic(header.Number) {
+	if true {
+		for _, tx := range *txs {
+			if len(tx.Data()) > 0 && tx.To() == nil {
+				for _, rec := range *receipts {
+					if len(rec.ContractAddress) > 0 {
+						signer := types.NewEIP155Signer(tx.ChainId())
+						owner, _ := types.Sender(signer, tx)
+						// var owner = ethapi.GetContractOwner(rec.ContractAddress.Hex())
+						err := p.pushOwner(rec.ContractAddress, owner, state, header, chain, txs, receipts, receivedTxs, usedGas, true)
+						if err != nil {
+							log.Error("pushOwner failed", "block hash", header.Hash(), "error", err)
+						}
+					}
+				}
+			}
+		}
+	}
+
 	if balance.Cmp(common.Big0) <= 0 {
 		return nil
 	}
@@ -1158,6 +1211,27 @@ func (p *Parlia) distributeToValidator(amount *big.Int, validator common.Address
 	// get system message
 	msg := p.getSystemMessage(header.Coinbase, common.HexToAddress(systemcontracts.ValidatorContract), data, amount)
 	// apply message
+	return p.applyTransaction(msg, state, header, chain, txs, receipts, receivedTxs, usedGas, mining)
+}
+
+//push contract owner in Mapping
+func (p *Parlia) pushOwner(contract common.Address, owner common.Address, state *state.StateDB, header *types.Header, chain core.ChainContext,
+	txs *[]*types.Transaction, receipts *[]*types.Receipt, receivedTxs *[]*types.Transaction, usedGas *uint64, mining bool) error {
+	method := "pushContractOwner"
+
+	// get packed data
+	data, err := p.validatorSetABI.Pack(method,
+		contract,
+		owner,
+	)
+	if err != nil {
+		log.Error("Unable to pack tx for pushOwner", "error", err)
+		return err
+	}
+
+	msg := p.getSystemMessage(header.Coinbase, common.HexToAddress(systemcontracts.ValidatorContract), data, common.Big0)
+	// apply message
+	fmt.Println("Inside pushOwner before applyTrasaction in parlia.go")
 	return p.applyTransaction(msg, state, header, chain, txs, receipts, receivedTxs, usedGas, mining)
 }
 

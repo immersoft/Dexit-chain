@@ -242,6 +242,19 @@ if (window.ethereum) {
     },
     {
         "inputs": [],
+        "name": "PROPOSAL_LASTING_PERIOD",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "RELAYERHUB_CONTRACT_ADDR",
         "outputs": [
             {
@@ -403,19 +416,6 @@ if (window.ethereum) {
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "id",
-                "type": "bytes32"
-            }
-        ],
-        "name": "authchangevalues",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [],
         "name": "bscChainID",
         "outputs": [
@@ -430,7 +430,7 @@ if (window.ethereum) {
     },
     {
         "inputs": [],
-        "name": "chcekProposal",
+        "name": "checkProposal",
         "outputs": [
             {
                 "internalType": "bytes32[]",
@@ -468,44 +468,6 @@ if (window.ethereum) {
             }
         ],
         "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "currentValidators",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "vari_name",
-                "type": "string"
-            }
-        ],
-        "name": "currentValue",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -557,7 +519,51 @@ if (window.ethereum) {
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "ibsc",
+        "outputs": [
+            {
+                "internalType": "contract IBSCValidatorSet",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "maxValidators",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "minimumStakeAmount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            },
             {
                 "internalType": "address",
                 "name": "",
@@ -570,19 +576,6 @@ if (window.ethereum) {
                 "internalType": "bool",
                 "name": "",
                 "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "proposalLastingPeriod",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -662,6 +655,48 @@ if (window.ethereum) {
                 "internalType": "bool",
                 "name": "resultExist",
                 "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "id",
+                "type": "bytes32"
+            }
+        ],
+        "name": "startVoteProposal",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "name": "startvotes",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "voter",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "voteTime",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",

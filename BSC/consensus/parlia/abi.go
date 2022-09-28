@@ -1,7 +1,30 @@
 package parlia
 
 const validatorSetABI = `
-[
+[   {
+      "inputs": [
+      {
+        "internalType": "address",
+        "name": "contAddr",
+        "type": "address"
+      },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "pushContractOwner",
+      "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
     {
       "anonymous": false,
       "inputs": [

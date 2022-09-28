@@ -16,6 +16,7 @@ import Proposal from "../../../Proposal";
 import Contract from "../../../Contract";
 import bigInt from "big-integer";
 import { ToastContainer, toast } from "react-toastify";
+import { ethers } from "ethers";
 
 export default function CreateProposall() {
   const [updateValue, setupdateValue] = useState(0);
@@ -24,7 +25,7 @@ export default function CreateProposall() {
   const [proposalDetails, setProposalDetails] = useState("");
   const [currentValueOfselectedVar, setcurrentValueOfselectedVar] =
     useState("");
-  const variableNames = ["minimumStakeAmount", "MaxValidators"];
+  const variableNames = ["minimumStakeAmount", "maxValidators"];
 
   const handleChange = async (event) => {
     // console.log("eevevvve", event.target.value);
@@ -34,9 +35,9 @@ export default function CreateProposall() {
     } = event;
     if (event.target.value) {
       // let value = await Proposal.currentValue(event.target.value);
-      if (event.target.value === "MaxValidators") {
-        let MaxVal = await Contract.MaxValidators();
-        console.log("this is MaxValidators : ",MaxVal);
+      if (event.target.value === "maxValidators") {
+        let MaxVal = await Contract.maxValidators();
+        console.log("this is maxValidators : ",MaxVal);
         setcurrentValueOfselectedVar(MaxVal.toString());
       }
       if (event.target.value === "minimumStakeAmount") {
@@ -53,18 +54,20 @@ export default function CreateProposall() {
     );
   };
   const createProposal = async () => {
-    // console.log("check name", variableName);
+    console.log("check name", variableName);
+    console.log("aasdfghj",Proposal );
+    console.log("vakues",typeof updateValue );
+
     setShowLoader(true);
     try {
-      let ethe = bigInt(1 * 10 ** 18);
+      let ethe = ethers.utils.parseEther('1')
       console.log("create proposal", updateValue);
       let proposalCreate = await Proposal.createProposal(
         proposalDetails,
         variableName,
-        updateValue,
-        { value: ethe.value }
+        Number (updateValue),
+        { value: ethe.toString() }
       );
-      // console.log(proposalCreate, "proposalCreate");
       let wait = await proposalCreate.wait();
       if (wait) {
         setShowLoader(false);

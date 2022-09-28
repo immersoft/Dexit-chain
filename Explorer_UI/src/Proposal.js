@@ -243,7 +243,7 @@ if (window.ethereum) {
 	},
 	{
 		"inputs": [],
-		"name": "MaxValidators",
+		"name": "maxValidators",
 		"outputs": [
 			{
 				"internalType": "uint256",

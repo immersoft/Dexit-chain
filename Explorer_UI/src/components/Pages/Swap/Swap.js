@@ -9,6 +9,7 @@ import Web3Token from 'web3-token';
 import axios from "axios";
 import SwapHistory from './SwapHistory';
 import { ToastContainer, toast } from "react-toastify";
+import { ethers } from 'ethers';
 
 
 const Swap = () => {
@@ -76,21 +77,21 @@ console.log(account,"account")
     const deposite=async(price)=>{
         try {
             console.log(account)
-            let valueAmount=bigInt(enteredAmount*10**18)
+            let valueAmount=ethers.utils.parseEther(enteredAmount)
             let depositeAmount;
 
             switch(toValue) {
               case 'ETH':
                 // code block
-                depositeAmount = await Connection.webETH.deposit({value:valueAmount.value})
+                depositeAmount = await Connection.webETH.deposit({value:valueAmount.toString()})
                 break;
               case 'BNB':
                 // code block
-                depositeAmount = await Connection.webBSC.deposit({value:valueAmount.value})
+                depositeAmount = await Connection.webBSC.deposit({value:valueAmount.toString()})
                 break;
               case 'DXT':
                 // code block
-                depositeAmount = await Connection.webDXT.deposit({value:valueAmount.value})
+                depositeAmount = await Connection.webDXT.deposit({value:valueAmount.toString()})
                 break;
               default:
                 // code block
