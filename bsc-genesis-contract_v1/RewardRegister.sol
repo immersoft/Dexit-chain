@@ -11,12 +11,8 @@ contract RewardRegister is System, IRewardRegister{
     mapping(address => uint256) public rewardAmountOwner;
     mapping(address => uint256) public rewardClaimRecordsOwners;
     address[] eligibleOwners;
-<<<<<<< HEAD:bsc-genesis-contract_v1/RewardRegister.sol
     uint64 public constant REWARD_CLAIMING_PERIOD = 150; //24 hrs 28800
     mapping(address => address) public contractsRecord;
-=======
-    uint64 public constant RewardClaimingPeriod = 21600; //24 hrs 21600
->>>>>>> b37a1e72cadaff1ec59df1372571c18b65fbfdfc:bsc-genesis-contract_v1/contracts/RewardRegister.sol
 
      function init() external onlyNotInit {
         alreadyInit = true;
