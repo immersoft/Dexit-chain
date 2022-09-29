@@ -98,10 +98,10 @@ TablePaginationActions.propTypes = {
 
 export default function AllTransactions() {
   const navigate = useNavigate();
-  // const web3 = new Web3(new Web3.providers.HttpProvider('https://datafeed.dexit.network'));
+  // const web3 = new Web3(new Web3.providers.HttpProvider('https://testnet.dexit.network'));
 
   const web3 = new Web3();
-  web3.setProvider("https://datafeed.dexit.network");
+  web3.setProvider("https://testnet.dexit.network");
   // web3.setProvider("http://192.168.1.41:8545");  
 
   const [page, setPage] = React.useState(0);

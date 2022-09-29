@@ -61,7 +61,10 @@ const columns = [
 
 
 export default function MyProposal() {
+  console.log("my proposal first")
   useEffect(() => {
+  console.log("my proposal first  useeffect")
+    
     myProposalListFunc();
     return () => {};
   }, []);
@@ -80,17 +83,18 @@ export default function MyProposal() {
 
 
   const getProposalDetails = async (id) => {
-      // console.log("calll")
+      console.log("calll getproposal details")
     try {
       let proposalsss = await Proposal.proposals(id);
+      console.log("checckkkkkkk",proposalsss)
       console.log(proposalsss)
       let newObject={
-        id:id,
-        name:proposalsss.variable_name,
-        details:proposalsss.details,
+        id:id.toString(),
+        name:proposalsss.variable_name.toString(),
+        details:proposalsss.details.toString(),
         value:proposalsss.variable_value.toString(),
-        address:proposalsss.proposer,
-        status:proposalsss[11]
+        address:proposalsss.proposer.toString(),
+        status:proposalsss[11].toString()
 
       }
       // proposalId.push(newObject)
@@ -108,12 +112,13 @@ export default function MyProposal() {
 
   const myProposalListFunc = async () => {
     let result = await Proposal.userProposal();
-    // console.log("result", result);
+    console.log("result hereerr", result);
     myOwnProposalList(result)
     setmyProposal(result);
-    let proposalsss = await Proposal.proposals(result[0]);
+    
+    // let proposalsss = await Proposal.proposals(result[0]);
     // console.log("proposalalala", proposalsss);
-    setmyProposalDetails(proposalsss);
+    // setmyProposalDetails(proposalsss);
   };
 
 

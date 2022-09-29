@@ -51,7 +51,7 @@ const SearchHash = () => {
     const timeStamp=location.state.blockTime
     const navigate=useNavigate()
     const web3 = new Web3();
-    web3.setProvider("https://datafeed.dexit.network");
+    web3.setProvider("https://testnet.dexit.network");
   // web3.setProvider("http://192.168.1.41:8545");  
 
     const[getDetailsInfo,setDetailsInfo]=useState()
