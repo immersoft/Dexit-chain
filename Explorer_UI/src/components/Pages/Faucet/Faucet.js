@@ -74,9 +74,16 @@ import {
             setshowloadingBtn(false);
             }
         } catch (error) {
-            toast.error("Error in transfer");
-            console.log(error);
-            setshowloadingBtn(false);
+          setshowloadingBtn(false);  
+            // console.log("errr7890-",error)
+            let alert =JSON.stringify(error)
+            let _parse=JSON.parse(alert)
+            if(_parse.error.data.message){
+              toast.error(_parse.error.data.message);
+            }
+            else{
+              toast.error('Something went wrong !');
+          }
         }
     }
   
