@@ -99,6 +99,8 @@ export default function MyProposal() {
       }
       // proposalId.push(newObject)
       // setAllNewInfo(newObject)
+      console.log("proposalsss[11].toString()", proposalsss[11].toString())
+      console.log("newObject",newObject)
       setProposalData(proposalsss);
       setmyProposalDetails(newObject)
       handleOpen()
@@ -291,7 +293,7 @@ export default function MyProposal() {
                         Status{" "}
                       </Grid>
                       <Grid item>
-                        {myProposalDetails.status === true ? "True" : "False"}
+                        {myProposalDetails.status ? "True" : "False"}
                       </Grid>
                       <Divider />
                     </Grid>
