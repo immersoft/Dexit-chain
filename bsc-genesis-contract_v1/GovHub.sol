@@ -65,7 +65,7 @@ contract GovHub is System {
     address[] public highestValidators; //ibsc.getValidators();
 
     bytes32[] ProposalsArray;
-    uint256 public constant PROPOSAL_LASTING_PERIOD = 25 minutes;
+    uint256 public constant PROPOSAL_LASTING_PERIOD = 4 hours;
     uint256 public votePower;
 
 /*******************Events*****************/
@@ -164,8 +164,8 @@ contract GovHub is System {
                 ) ==
                 keccak256(bytes(vari_name))){
                 require(block.timestamp >= proposals[UserProposal[i]].createTime + PROPOSAL_LASTING_PERIOD, "proposal created before");
-                bool isexist = false;
-                require(isexist == true, "proposal created before");
+                // bool isexist = false;
+                // require(isexist == true, "proposal created before");
             }
         }
 
