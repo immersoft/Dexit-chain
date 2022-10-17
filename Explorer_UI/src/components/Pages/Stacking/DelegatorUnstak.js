@@ -431,7 +431,7 @@ const DelegatorUnstak = () => {
         try {
             handleModalClose()
             setLoading(true)
-            let ethe = ethers.utils.parseEther('1')
+            let ethe = ethers.utils.parseEther('2000')
             let unjailing = await Connection.unJailed({ value: ethe.toString() })
             console.log(unjailing, "unjailing")
             let abc = await unjailing.wait();

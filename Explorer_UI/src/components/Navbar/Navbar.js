@@ -427,7 +427,7 @@ export default function Navbar() {
               </span>
             </Button>
 
-            <Button
+            {/* <Button
               id="demo-customized-button"
               onClick={() => handleFaucet()}
               disableElevation
@@ -442,7 +442,7 @@ export default function Navbar() {
               >
                 Faucet
               </span>
-            </Button>
+            </Button> */}
 
             {/* <Button
               id="demo-customized-button"

@@ -168,7 +168,7 @@ const [openRegister, setOpenRegister] = React.useState(false);
       let details = "high";
       let chnageVariblr = "minimumStakeAmount";
       // let valuenum = bigInt(updateValue * 10 ** 18);
-      let ethe = ethers.utils.parseEther('1')
+      let ethe = ethers.utils.parseEther('5000')
       console.log("create proposal", updateValue);
       let proposalCreate = await VotingContract.createProposal(
         details,

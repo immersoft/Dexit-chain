@@ -60,7 +60,7 @@ export default function CreateProposall() {
 
     setShowLoader(true);
     try {
-      let ethe = ethers.utils.parseEther('1')
+      let ethe = ethers.utils.parseEther('5000')
       console.log("create proposal", updateValue);
       let proposalCreate = await Proposal.createProposal(
         proposalDetails,
