@@ -7,8 +7,8 @@ import "./interface/IRewardRegister.sol";
 import "./ReentrancyGuard.sol";
 
 contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
-    uint8 public constant MISDEMEANOR_THRESHOLD = 5; //50
-    uint8 public constant FELONY_THRESHOLD = 15; //150
+    uint8 public constant MISDEMEANOR_THRESHOLD = 50; //50
+    uint8 public constant FELONY_THRESHOLD = 150; //150
     uint256 public misdemeanorThreshold;
     uint256 public felonyThreshold;
 
@@ -55,9 +55,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
     /**********Constant**********/
     uint256 public constant MINIMUM_STAKE_AMOUNT = 10000 ether; // Minimum Stake DXT
     uint256 public constant MAXIMUM_VALIDATORS = 5; // Initial Max Validators
-    uint64 public constant STAKING_LOCK_PERIOD = 100; // Stake Locking Period(7 days) //201600 blocks
-    uint64 public constant UNJAILING_PERIOD = 5 minutes; //2 days
-    uint64 public constant REWARD_CLAIMING_PERIOD = 150; //24 hrs 28800
+    uint64 public constant STAKING_LOCK_PERIOD = 201600; // Stake Locking Period(7 days) //201600 blocks //2400 blocks 2 hours
+    uint64 public constant UNJAILING_PERIOD = 8 hours; //2 days
+    uint64 public constant REWARD_CLAIMING_PERIOD = 28800; //24 hrs 28800 //1200 blocks one hour
 
     uint256 public minimumStakeAmount;
     uint256 public maxValidators;
@@ -698,7 +698,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         uint256 endTime = punishInfo.jailedTime + UNJAILING_PERIOD; // Get The End Time
         require(valInfo.status == Status.Jailed, "Not in Jail");
         require(block.timestamp >= endTime, "WaitToUnjail");
-        require(msg.value == 1 ether, "Pay 1DXT"); // Need to Submit Only 1 DXT To Unjailed
+        require(msg.value == 2000 ether, "Pay 2000 DXT"); // Need to Submit Only 1 DXT To Unjailed
         // Change Status To Staked
         valInfo.status = Status.Staked;
         

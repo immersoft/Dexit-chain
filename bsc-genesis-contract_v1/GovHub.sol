@@ -65,7 +65,7 @@ contract GovHub is System {
     address[] public highestValidators; //ibsc.getValidators();
 
     bytes32[] ProposalsArray;
-    uint256 public constant PROPOSAL_LASTING_PERIOD = 4 hours;
+    uint256 public constant PROPOSAL_LASTING_PERIOD = 96 hours;
     uint256 public votePower;
 
 /*******************Events*****************/
@@ -153,7 +153,7 @@ contract GovHub is System {
             "maxValidators & minimumStakeAmount Proposal Only"
         );
         //value should be 1000DXT for creating a proposal
-        require(msg.value == 1 ether, "Must pay 1 DXT");
+        require(msg.value == 5000 ether, "Must pay 5000 DXT");
         bytes32[] memory UserProposal = userProposal();
 
          //Checks that validator can only create proposal after 3 days once they create proposal
