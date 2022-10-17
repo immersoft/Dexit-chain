@@ -101,7 +101,7 @@ export default function AllTransactions() {
   // const web3 = new Web3(new Web3.providers.HttpProvider('https://testnet.dexit.network'));
 
   const web3 = new Web3();
-  web3.setProvider("https://testnet.dexit.network");
+  web3.setProvider("https://rpc.dexit.network");
   // web3.setProvider("http://192.168.1.41:8545");  
 
   const [page, setPage] = React.useState(0);

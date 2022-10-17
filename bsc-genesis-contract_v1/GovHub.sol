@@ -268,7 +268,7 @@ contract GovHub is System {
         require(block.timestamp < proposals[id].createTime + PROPOSAL_LASTING_PERIOD, "Proposal Expired"); //Checks Proposal is expired or Not
         require(isEligible == true, "Not Eligible"); // Check Present in Eligible List
         require((startvotes[msg.sender][id].voteTime)!=0 , "Apply for vote first");
-        require((startvotes[msg.sender][id].voteTime + 2 minutes) <= block.timestamp, "Can't vote before time lock"); // Cannot vote before 48 hours
+        require((startvotes[msg.sender][id].voteTime + 48 hours) <= block.timestamp, "Can't vote before time lock"); // Cannot vote before 48 hours
         require(proposals[id].createTime != 0, "Proposal not exist"); // Check for Proposal Exist
         require(proposals[id].access == true, "Voting completed for this ID"); //Check if Proposal is Comleted or Not for this id
         require(votes[msg.sender][id].voteTime == 0, "You can't vote for a proposal twice"); // Check Can't Vote for Same Proposal Twice

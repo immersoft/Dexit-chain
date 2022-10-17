@@ -490,7 +490,7 @@ const DelegatorUnstak = () => {
                                 <TextField
                                     id="outlined-read-only-input"
                                     label="Amount"
-                                    defaultValue="1 DXT"
+                                    defaultValue="2000 DXT"
                                     InputProps={{
                                         readOnly: true,
                                     }}

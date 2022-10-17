@@ -1,5 +1,5 @@
 {
-  "name": "dexit-explorer",
+  "name": "frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -35,10 +35,11 @@
     "web3-token": "^0.2.7"
   },
   "scripts": {
-    "start": "react-app-rewired start",
+    "start": "react-app-rewired start --port 3001",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
+    
   },
   "eslintConfig": {
     "extends": [

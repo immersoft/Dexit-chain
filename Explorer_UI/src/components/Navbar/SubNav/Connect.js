@@ -196,21 +196,21 @@ export default function Connect() {
       netID = network.toString();
       var params;
       if (isTestnet === "false") {
-        if (netID === "899") {
+        if (netID === "877") {
           alert("Dexit Network has already been added to Metamask.");
           return;
         } else {
           params = [
             {
-              chainId: '0x383',
-              chainName: "Dexit Live",
+              chainId: '0x36D',
+              chainName: "Dexit Mainnet",
               nativeCurrency: {
                 name: "DeXit",
                 symbol: "DXT",
                 decimals: 18,
               },
-              rpcUrls: ["https://testnet.dexit.network"],
-              blockExplorerUrls: ["https://backendtestnet.dxtscan.com"],
+              rpcUrls: ["https://rpc.dexit.network"],
+              blockExplorerUrls: ["https://dao.dexit.network"],
             },
           ];
         }
