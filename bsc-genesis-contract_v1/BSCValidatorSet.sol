@@ -55,9 +55,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
     /**********Constant**********/
     uint256 public constant MINIMUM_STAKE_AMOUNT = 10000 ether; // Minimum Stake DXT
     uint256 public constant MAXIMUM_VALIDATORS = 5; // Initial Max Validators
-    uint64 public constant STAKING_LOCK_PERIOD = 201600; // Stake Locking Period(7 days) //201600 blocks //2400 blocks 2 hours
-    uint64 public constant UNJAILING_PERIOD = 8 hours; //2 days
-    uint64 public constant REWARD_CLAIMING_PERIOD = 28800; //24 hrs 28800 //1200 blocks one hour
+    uint64 public constant STAKING_LOCK_PERIOD = 2400; // Stake Locking Period(7 days) 201600 blocks //2400 blocks 2 hours
+    uint64 public constant UNJAILING_PERIOD = 15 minutes; //2 days
+    uint64 public constant REWARD_CLAIMING_PERIOD = 1200; //24 hrs 28800 //1200 blocks one hour
 
     uint256 public minimumStakeAmount;
     uint256 public maxValidators;

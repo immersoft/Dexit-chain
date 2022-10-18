@@ -157,9 +157,9 @@ let stakeAmount =ethers.utils.parseEther(stakerAmount)
           toast.success("Transaction successfull");
         }
       } catch (error) {
-        console.log(error);
+        console.log("error3456789", error);
         if (error.message) {
-          toast.error(error.message);
+          toast.error(error.data.message);
         }
         setLoading(false);
         setOpenStack(false);

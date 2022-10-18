@@ -293,7 +293,7 @@ export default function MyProposal() {
                         Status{" "}
                       </Grid>
                       <Grid item>
-                        {myProposalDetails.status ? "True" : "False"}
+                        {myProposalDetails.status ? myProposalDetails.status : ""}
                       </Grid>
                       <Divider />
                     </Grid>

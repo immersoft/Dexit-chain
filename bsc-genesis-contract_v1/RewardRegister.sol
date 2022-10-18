@@ -11,7 +11,7 @@ contract RewardRegister is System, IRewardRegister{
     mapping(address => uint256) public rewardAmountOwner;
     mapping(address => uint256) public rewardClaimRecordsOwners;
     address[] eligibleOwners;
-    uint64 public constant REWARD_CLAIMING_PERIOD = 150; //24 hrs 28800
+    uint64 public constant REWARD_CLAIMING_PERIOD = 1200; //24 hrs 28800
     mapping(address => address) public contractsRecord;
 
      function init() external onlyNotInit {
