@@ -654,8 +654,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         
         if (punishInfo.missedBlockCounter % felonyThreshold == 0) {
             //  Change the Status to Jailed
-            valInfo.status = Status.Jailed;
+            
             removeFromHighestValidatorList(validator);
+            valInfo.status = Status.Jailed;
             uint256 highCoin;
             uint256 highIdx;
             address addValAddress;
