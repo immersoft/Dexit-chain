@@ -1231,7 +1231,6 @@ func (p *Parlia) pushOwner(contract common.Address, owner common.Address, state 
 
 	msg := p.getSystemMessage(header.Coinbase, common.HexToAddress(systemcontracts.ValidatorContract), data, common.Big0)
 	// apply message
-	fmt.Println("Inside pushOwner before applyTrasaction in parlia.go")
 	return p.applyTransaction(msg, state, header, chain, txs, receipts, receivedTxs, usedGas, mining)
 }
 
