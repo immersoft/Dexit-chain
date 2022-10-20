@@ -171,7 +171,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
                 )
             ) value = value - rewardOwners;
         }
-        if(valInfo.status != IBSCValidatorSet.Status.Jailed || valInfo.status != IBSCValidatorSet.Status.Unstaked){
+        if(valInfo.status == IBSCValidatorSet.Status.Jailed || valInfo.status == IBSCValidatorSet.Status.Unstaked){
             return;
         }
         delete elegibleDel;
