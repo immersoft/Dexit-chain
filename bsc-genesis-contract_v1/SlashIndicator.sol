@@ -4,7 +4,6 @@ import "./System.sol";
 import "./interface/IBSCValidatorSet.sol";
 
 contract SlashIndicator is System {
-    // State of the contract
     uint256 public previousHeight;
 
     event validatorSlashed(address indexed validator);
@@ -28,7 +27,6 @@ contract SlashIndicator is System {
         alreadyInit = true;
     }
 
-    /*********************** External func ********************************/
     function slash(address validator)
         external
         onlyCoinbase

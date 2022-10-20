@@ -7,8 +7,8 @@ import "./interface/IRewardRegister.sol";
 import "./ReentrancyGuard.sol";
 
 contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
-    uint8 public constant MISDEMEANOR_THRESHOLD = 50; //50
-    uint8 public constant FELONY_THRESHOLD = 150; //150
+    uint8 public constant MISDEMEANOR_THRESHOLD = 50; 
+    uint8 public constant FELONY_THRESHOLD = 150; 
     uint256 public misdemeanorThreshold;
     uint256 public felonyThreshold;
 
@@ -19,26 +19,23 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
     uint256 public burnRatio;
     bool public burnRatioInitialized;
 
-    //Delegator Struct
     struct Delegator {
-        address delegatorAddress; //  delegator self address
-        uint256 amount; // self stake
+        address delegatorAddress; 
+        uint256 amount; // delegate amount
         uint256 unstakeBlock; // unstakeBlock = 0 means can stake if !=0 already unstake
         uint256 index; // index no represent in stakers array in Validator Struct
-        uint256 income; // delegator income
+        uint256 income; 
         uint256 totalIncome;
     }
 
-    // Validator Address  = > Get Validator Information
     mapping(address => Validator) validatorInfo;
-    // Delegator Address => Validator Address =>Staking Info
+    // Delegator => Validator Address => Staking Info
     mapping(address => mapping(address => Delegator)) stakingInfo;
-    //Claim time record for validator and delegator
     mapping(address => uint256) public rewardClaimRecordsValidator;
     mapping(address => uint256) public rewardClaimRecordsDelegator;
 
     address[] public currentValidators; // All Validators
-    address[] public highestValidators; // Only Active Validators
+    address[] public highestValidators; // Active Validators
     address[] public elegibleDel;
 
     uint256 public totalDXTStake; //  To DXT Stake Amount
@@ -53,11 +50,11 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
     address[] public punishValidator;
 
     /**********Constant**********/
-    uint256 public constant MINIMUM_STAKE_AMOUNT = 10000 ether; // Minimum Stake DXT
-    uint256 public constant MAXIMUM_VALIDATORS = 5; // Initial Max Validators
-    uint64 public constant STAKING_LOCK_PERIOD = 2400; // Stake Locking Period(7 days) 201600 blocks //2400 blocks 2 hours
-    uint64 public constant UNJAILING_PERIOD = 15 minutes; //2 days
-    uint64 public constant REWARD_CLAIMING_PERIOD = 1200; //24 hrs 28800 //1200 blocks one hour
+    uint256 public constant MINIMUM_STAKE_AMOUNT = 10000 ether; 
+    uint256 public constant MAXIMUM_VALIDATORS = 5; 
+    uint64 public constant STAKING_LOCK_PERIOD = 403200; // 7 days 201600 blocks //2400 blocks 2 hours //403200 blocks 14 days
+    uint64 public constant UNJAILING_PERIOD = 8 hours; 
+    uint64 public constant REWARD_CLAIMING_PERIOD = 28800; //24 hrs 28800 //1200 blocks one hour
 
     uint256 public minimumStakeAmount;
     uint256 public maxValidators;
@@ -131,7 +128,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
     }
 
     /*********************** External Functions **************************/
-    //function deposit(address valAddr) public payable {
     function deposit(address valAddr, address[] calldata _contractArray)
         external
         payable
@@ -175,9 +171,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
                 )
             ) value = value - rewardOwners;
         }
-
-        require(valInfo.status != IBSCValidatorSet.Status.Jailed); // Check for Not Exist Or Jailed
-        require(valInfo.status != IBSCValidatorSet.Status.Unstaked);
+        if(valInfo.status != IBSCValidatorSet.Status.Jailed || valInfo.status != IBSCValidatorSet.Status.Unstaked){
+            return;
+        }
         delete elegibleDel;
         for (uint256 j = 0; j < valInfo.delegators.length; j++) {
             address curr = valInfo.delegators[j];
@@ -192,9 +188,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
 
         uint256 percentageToTransfer = (valInfo.amount * 10000000000) / UpdatedCoins;
         uint256 rewardAmount = (value * percentageToTransfer) / 10000000000;
-        valInfo.income = valInfo.income + rewardAmount; // Updating income of validator
+        valInfo.income = valInfo.income + rewardAmount; 
         valInfo.totalIncome = valInfo.totalIncome + rewardAmount;
-        uint256 remainingDelegatorRewardAmount = value - rewardAmount; // Remaining delgators reward amount;
+        uint256 remainingDelegatorRewardAmount = value - rewardAmount; 
         uint256 totalCoinsByDelegators = UpdatedCoins - valInfo.amount;
         distributeRewardToDelegators(
             remainingDelegatorRewardAmount,
@@ -205,9 +201,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
 
     /***********************Staking***************************/
     function stakeValidator() external payable notZeroAddress returns (bool) {
-        address staker = msg.sender; // validator address
+        address staker = msg.sender; 
         uint256 stakeamount = msg.value;
-        //Struct Validator & Delegator
         Validator storage valInfo = validatorInfo[staker];
         Delegator storage stakeInfo = stakingInfo[staker][staker];
 
@@ -230,8 +225,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             require(stakeamount >= 100, "Stake atleast 100 DXT");
             valInfo.amount = valInfo.amount + stakeamount;
             valInfo.coins = valInfo.coins + stakeamount;
-            stakeInfo.unstakeBlock = 0; // Update The Block No
-            //Testing purpose
+            stakeInfo.unstakeBlock = 0; 
             require(valInfo.amount >= minimumStakeAmount, "Insufficient staking by Validator");
         }
 
@@ -239,7 +233,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             highestValidators.length < maxValidators &&
             !this.isTopValidator(staker)
         ) {
-            highestValidators.push(staker); // push into highestValidator if there is space
+            highestValidators.push(staker); 
         } else if (
             highestValidators.length >= maxValidators &&
             !this.isTopValidator(staker) &&
@@ -257,7 +251,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             }
         }
 
-        // Change the Status to Staked
         if (valInfo.status != IBSCValidatorSet.Status.Staked) {
             valInfo.status = IBSCValidatorSet.Status.Staked;
         }
@@ -266,7 +259,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             currentValidators.push(staker);
         }
 
-        //Get highestValidator from currentValidator and push it into highestValidator list (for staking more than 1 time)
+        //Get highestValidator from currentValidator and push it into highestValidator list (for staking more than once)
         uint256 highCoin;
         uint256 highIdx;
         address addValAddress;
@@ -286,17 +279,15 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         return true;
     }
 
-    //Function to Stake Delegators
     function stakeDelegator(address validator)
         external
         payable
         notZeroAddress
         returns (bool)
     {
-        address staker = msg.sender; //Delegator Address
-        uint256 stakeamount = msg.value; // Stake Amount
+        address staker = msg.sender; 
+        uint256 stakeamount = msg.value; 
 
-        // Struct Validator & Delegator
         Validator storage valInfo = validatorInfo[validator];
         Delegator storage stakeInfo = stakingInfo[staker][validator];
 
@@ -304,12 +295,11 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         require(stakeamount > 0, "Can't stake 0 DXT");
         require(this.isActiveValidator(validator), "Validator Not Exist");
         require(Status.Staked == valInfo.status, "Validator Not Staked");
-        //Testing purpose
         require(valInfo.amount >= minimumStakeAmount, "Insufficient staking by Validator");
 
         if (stakeInfo.amount == 0) {
-            stakeInfo.delegatorAddress = staker; // update in Delegator Staking Struct
-            stakeInfo.index = valInfo.delegators.length; // update the index of delegator struct for  delegators array in validator
+            stakeInfo.delegatorAddress = staker; 
+            stakeInfo.index = valInfo.delegators.length;
             valInfo.delegators.push(staker);
         }
 
@@ -318,14 +308,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         }
 
         valInfo.coins = valInfo.coins + stakeamount;
-        stakeInfo.amount = stakeInfo.amount + stakeamount; // update in Validator Coins(Total)
+        stakeInfo.amount = stakeInfo.amount + stakeamount; 
         
         if (
             highestValidators.length < maxValidators &&
             !this.isTopValidator(validator)
         ) {
-            //console.log("this is push 337 : ",maxValidators, minimumStakeAmount);
-            highestValidators.push(validator); // push into highestValidator if there is space
+            highestValidators.push(validator); 
         } else if (
             highestValidators.length >= maxValidators &&
             !this.isTopValidator(validator)
@@ -347,16 +336,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         return true;
     }
 
-    //Function to UnStakeValidator
     function unstakeValidator() external notZeroAddress returns (bool) {
-        address staker = msg.sender; //get the validator address
+        address staker = msg.sender;
 
-        //Struct Validator & Delegator
         Validator storage valInfo = validatorInfo[staker];
         Delegator storage stakeInfo = stakingInfo[staker][staker];
-        uint256 unstakeamount = valInfo.amount; // self amount validator
+        uint256 unstakeamount = valInfo.amount; 
 
-        // Check for the unstakeBlock status
         require(valInfo.status == Status.Staked, "Validator Should Staked");
         require(
             stakingInfo[staker][staker].unstakeBlock == 0,
@@ -368,8 +354,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             "Can't Unstake, Validators list underflow"
         );
 
-        stakeInfo.unstakeBlock = block.number; // Set Block No When Validator Unstake
-        removeFromHighestValidatorList(staker); // Remove From The Highest
+        stakeInfo.unstakeBlock = block.number; 
+        removeFromHighestValidatorList(staker);
         valInfo.status = Status.Unstaked;
         // Get Highest Validator From Current List
         uint256 highCoin;
@@ -388,52 +374,50 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         return true;
     }
 
-    // //Function to UnStakeDelegator
     function unstakeDelegators(address validator)
         external
         notZeroAddress
         returns (bool)
     {
-        address delegator = msg.sender; //get Delegator Address
+        address delegator = msg.sender; 
 
-        Delegator storage stakeInfo = stakingInfo[delegator][validator]; // Struct Delegator
-        uint256 unstakeamount = stakeInfo.amount; // get the staking info
+        Delegator storage stakeInfo = stakingInfo[delegator][validator]; 
+        uint256 unstakeamount = stakeInfo.amount; 
 
         require(stakeInfo.unstakeBlock == 0, "Already in unstaking status");
         require(unstakeamount > 0, "don't have any stake");
 
-        stakeInfo.unstakeBlock = block.number; // Update The Unstake Block for Deligator
+        stakeInfo.unstakeBlock = block.number; 
         emit UnstakeDelegator(validator, delegator);
         return true;
     }
 
-    //Function to WithdrawValidator staking after unstakeValidator
     function withdrawValidatorStaking(uint256 amount)
         external
         notZeroAddress
         nonReentrant
         returns (bool)
     {
-        address staker = msg.sender; // validator address
+        address staker = msg.sender; 
         Validator storage valInfo = validatorInfo[staker];
         Delegator storage stakeInfo = stakingInfo[staker][staker];
 
         require(
             amount <= valInfo.amount,
             "Can't Withdraw More Than Stake Amount"
-        ); // Can't Unstake More Than Stake Amount
+        ); 
         require(stakeInfo.unstakeBlock != 0, "Unstake First");
         require(
             stakeInfo.unstakeBlock + STAKING_LOCK_PERIOD <= block.number,
             "Staking haven't unlocked yet"
         );
 
-        uint256 updateBalance = valInfo.amount - amount; // balance - amount
+        uint256 updateBalance = valInfo.amount - amount; 
 
-        valInfo.amount = valInfo.amount - amount; // update the amount
-        valInfo.coins = valInfo.coins - amount; // Update Coins
+        valInfo.amount = valInfo.amount - amount; 
+        valInfo.coins = valInfo.coins - amount; 
         if (updateBalance >= minimumStakeAmount) {
-            valInfo.status = Status.Staked; //  Change Status to Staked
+            valInfo.status = Status.Staked; 
         }
 
         if (updateBalance < minimumStakeAmount) {
@@ -449,8 +433,8 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             removeFromCurrentValidatorList(staker);
         }
 
-        stakeInfo.unstakeBlock = 0; // Reset The unstakeBlock
-        payable(staker).transfer(amount); // Transfer the amount to validator
+        stakeInfo.unstakeBlock = 0; 
+        payable(staker).transfer(amount); 
         // Find Lowest in Highest Validator
         uint256 lowestCoin;
         uint256 lowIdx;
@@ -470,7 +454,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             highValidator != address(0) &&
             validatorInfo[highValidator].status != Status.Jailed
         ) {
-            //console.log("this is push 502 : ",maxValidators, minimumStakeAmount);
             highestValidators.push(highValidator);
         }
 
@@ -479,22 +462,21 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         return true;
     }
 
-    //Function to withdraw Delegator Staking
     function withdrawDelegatorStaking(address validator, uint256 amount)
         external
         notZeroAddress
         nonReentrant
         returns (bool)
     {
-        address staker = msg.sender; //Delegator Address
+        address staker = msg.sender; 
 
-        Delegator storage stakeInfo = stakingInfo[staker][validator]; // Delegator Staking Info
-        Validator storage valInfo = validatorInfo[validator]; // Validator
+        Delegator storage stakeInfo = stakingInfo[staker][validator]; 
+        Validator storage valInfo = validatorInfo[validator]; 
 
         require(
             amount <= stakeInfo.amount,
             "Can't Withdraw More Than Stake Amount"
-        ); // Can not withdraw more than stake
+        ); 
         require(stakeInfo.unstakeBlock != 0, "Unstake First");
         require(
             stakeInfo.unstakeBlock + STAKING_LOCK_PERIOD <= block.number,
@@ -502,16 +484,14 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         );
 
         stakeInfo.amount = stakeInfo.amount - amount;
-        valInfo.coins = valInfo.coins - amount; // Update The Coins in Validator Record
+        valInfo.coins = valInfo.coins - amount; 
         stakeInfo.unstakeBlock = 0;
 
         if (stakeInfo.amount == 0) {
-            // Update The Validator Info
             if (stakeInfo.index != valInfo.delegators.length - 1) {
                 valInfo.delegators[stakeInfo.index] = valInfo.delegators[
                     valInfo.delegators.length - 1
                 ];
-                //update index of staker
                 stakingInfo[valInfo.delegators[stakeInfo.index]][validator]
                     .index = stakeInfo.index;
             }
@@ -546,33 +526,32 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         return true;
     }
 
-    //Function to Validator Can Claim Reward
     function claimValidatorReward()
         external
         notZeroAddress
         nonReentrant
         returns (bool)
     {
-        address staker = msg.sender; // validator address
+        address staker = msg.sender; 
         Validator storage valInfo = validatorInfo[staker];
         uint256 oldClaimTime = rewardClaimRecordsValidator[staker];
 
         require(
             valInfo.status != Status.NotExist && valInfo.status != Status.Jailed
-        ); // Check for Not Exist Or Jailed
+        ); 
         require(valInfo.income > 0, "No incomes yet.");
 
         uint256 rewardAmount = valInfo.income;
         if (oldClaimTime == 0) {
             rewardClaimRecordsValidator[staker] = block.number;
-            payable(staker).transfer(rewardAmount); // Transfering The Reward Amount
-            valInfo.income = 0; // Reseting income of validator
+            payable(staker).transfer(rewardAmount); 
+            valInfo.income = 0; 
         } else {
             uint256 endTime = oldClaimTime + REWARD_CLAIMING_PERIOD;
             require(block.number >= endTime, "Claim after 24 hours");
             payable(staker).transfer(rewardAmount);
             rewardClaimRecordsValidator[staker] = block.number;
-            valInfo.income = 0; // Reseting income of validator
+            valInfo.income = 0; 
         }
         if(valInfo.amount == 0 && valInfo.coins == 0 && valInfo.income == 0){
                 valInfo.status == Status.NotExist;
@@ -583,22 +562,21 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         return true;
     }
 
-    //Function to Delegator Can Claim Reward
     function claimDelegatorReward(address validator)
         external
         notZeroAddress
         nonReentrant
         returns (bool)
     {
-        address delegator = msg.sender; // delegator self address
-        Delegator storage stakeInfo = stakingInfo[delegator][validator]; // Get Delegators Info
+        address delegator = msg.sender; 
+        Delegator storage stakeInfo = stakingInfo[delegator][validator]; 
         uint256 oldClaimTime = rewardClaimRecordsDelegator[delegator];
         require(stakeInfo.income > 0, "No incomes yet.");
         uint256 staking = stakeInfo.income;
 
         if (oldClaimTime == 0) {
             rewardClaimRecordsDelegator[delegator] = block.number;
-            payable(delegator).transfer(staking); // transfer the income to delegators
+            payable(delegator).transfer(staking); 
             stakeInfo.income = 0;
         } else {
             uint256 endTime = oldClaimTime + REWARD_CLAIMING_PERIOD;
@@ -625,7 +603,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         return true;
     }
 
-    /*********************Getting call from blockchain*********************/
+    /*********************Internal calls*********************/
     function pushContractOwner(address contAddr, address owner)
         external
         onlyCoinbase
@@ -640,7 +618,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
     /**********************Slashing**********************/
     function punish(address validator) external override onlySlash {
         Validator storage valInfo = validatorInfo[validator];
-        // Get Punish Record of the Validator
         PunishRecord storage punishInfo = punishRecord[validator];
         uint256 income = valInfo.income;
         if (!punishInfo.isPunished) {
@@ -649,11 +626,9 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             punishValidator.push(validator);
         }
 
-        // Increment the Block Counter
         punishInfo.missedBlockCounter = punishInfo.missedBlockCounter + 1;
         
         if (punishInfo.missedBlockCounter % felonyThreshold == 0) {
-            //  Change the Status to Jailed
             
             removeFromHighestValidatorList(validator);
             valInfo.status = Status.Jailed;
@@ -682,31 +657,26 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         ) {
             uint256 rest = highestValidators.length - 1;
             uint256 averageDistribute = income / rest;
-            // Logic to Distribute Income to Better Validators
             distributeRewardIncomeExcept(averageDistribute);
-            // Reset the Validator Missed Block Counter
             valInfo.income = 0;
         }
 
         emit PunishValidator(validator);
     }
 
-    //Function to Unjailed the validator
     function unJailed() external payable {
-        address requester = msg.sender; // validator address
+        address requester = msg.sender; 
         Validator storage valInfo = validatorInfo[requester];
-        PunishRecord storage punishInfo = punishRecord[requester]; // Get The Punish Record
-        uint256 endTime = punishInfo.jailedTime + UNJAILING_PERIOD; // Get The End Time
+        PunishRecord storage punishInfo = punishRecord[requester]; 
+        uint256 endTime = punishInfo.jailedTime + UNJAILING_PERIOD; 
         require(valInfo.status == Status.Jailed, "Not in Jail");
         require(block.timestamp >= endTime, "WaitToUnjail");
-        require(msg.value == 2000 ether, "Pay 2000 DXT"); // Need to Submit Only 1 DXT To Unjailed
-        // Change Status To Staked
+        require(msg.value == 2000 ether, "Pay 2000 DXT"); 
         valInfo.status = Status.Staked;
         
         if (
             highestValidators.length < maxValidators && requester != address(0)
         ) {
-            //console.log("this is push 766 : ",maxValidators, minimumStakeAmount);
             if(valInfo.amount >= minimumStakeAmount){
                 highestValidators.push(requester);
             }
@@ -728,11 +698,10 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             }
         }
 
-        // Reset Punish Record
         punishInfo.jailedTime = 0;
         punishInfo.index = 0;
         punishInfo.isPunished = false;
-        removeFromPunishValidator(requester); // Remove From Punish Record
+        removeFromPunishValidator(requester); 
     }
 
     /********************Internal Functions******************/
@@ -793,7 +762,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
                 validatorInfo[currentValidators[k]].coins > highCoins &&
                 !this.isTopValidator(currentValidators[k]) &&
                 validatorInfo[currentValidators[k]].status == Status.Staked &&
-                //Testing purpose   
                 validatorInfo[currentValidators[k]].amount >= minimumStakeAmount
             ) {
                 highCoins = validatorInfo[currentValidators[k]].coins;
@@ -925,7 +893,6 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         string calldata variable_name,
         uint256 variable_value
     ) external override onlyGov {
-        // require(resultExist == false,"proposal Expired");
         if (
             keccak256(bytes(variable_name)) ==
             keccak256(bytes("minimumStakeAmount"))
@@ -966,7 +933,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
             keccak256(bytes(variable_name)) == keccak256(bytes("maxValidators"))
         ) {
             preMaxValidators = maxValidators;
-            //removing the validators from highvalidator who donot qualify now
+            //update highestValidators
             if (variable_value < preMaxValidators) {
                 uint256 validatorToRemove = maxValidators - variable_value;
                 for (uint256 i = 0; i < validatorToRemove; i++) {
@@ -1014,7 +981,7 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
         for (uint256 k = 0; k < n && n > 1; k++) {
             if (val == highestValidators[k]) {
                 if (k != n - 1) {
-                    highestValidators[k] = highestValidators[n - 1]; //Swapping of addresses and plced unstake validator into last index so that we can pop.
+                    highestValidators[k] = highestValidators[n - 1]; 
                 }
                 highestValidators.pop();
                 emit RemoveFromHighestValidators(val);
@@ -1038,14 +1005,13 @@ contract BSCValidatorSet is IBSCValidatorSet, System, ReentrancyGuard {
                 totalCoins;
             uint256 rewardDelegatorAmount = (rewardAmount *
                 percentageToTransfer) / 10000000000;
-            stakeInfo.income = stakeInfo.income + rewardDelegatorAmount; // Reseting income of delegator
+            stakeInfo.income = stakeInfo.income + rewardDelegatorAmount; 
             stakeInfo.totalIncome =
                 stakeInfo.totalIncome +
                 rewardDelegatorAmount;
         }
     }
 
-    //Function to distribute reward income
     function distributeRewardIncomeExcept(uint256 averageDistribute) private {
         if (averageDistribute != 0) {
             for (uint256 i = 0; i < highestValidators.length; i++) {

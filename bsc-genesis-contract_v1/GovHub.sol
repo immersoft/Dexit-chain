@@ -8,30 +8,21 @@ contract GovHub is System {
     IBSCValidatorSet public ibsc;
    
     struct ProposalInfo {
-        // who propose this proposal
         address payable proposer;
         // propose who to be a validator
         address dst;
-        // optional detail info of proposal
         string details;
-        // time create proposal
         uint256 createTime;
-        // propose string
         string variable_name;
-        // propose value
         uint256 variable_value;
         //access of voting
         bool access;
         //Vote Power
         uint256 votePowerOfAgree;
         uint256 votePowerOfDisagree;
-        // number agree this proposal
         uint16 agree;
-        // number reject this proposal
         uint16 reject;
-        // is passed
         bool ispassed;
-        // means you can get proposal of current vote.
         bool resultExist;
     }
 
@@ -59,13 +50,13 @@ contract GovHub is System {
     mapping(bytes32 => mapping(address => bool)) public pass;
     mapping(address => mapping(bytes32 => StartVoteInfo)) public startvotes;
   
-    uint256 public maxValidators;//= ibsc.getMaxValidators();
-    uint256 public minimumStakeAmount;//= ibsc.getMinimumStakeAmount();
+    uint256 public maxValidators;
+    uint256 public minimumStakeAmount;
 
-    address[] public highestValidators; //ibsc.getValidators();
+    address[] public highestValidators; 
 
     bytes32[] ProposalsArray;
-    uint256 public constant PROPOSAL_LASTING_PERIOD = 4 hours;
+    uint256 public constant PROPOSAL_LASTING_PERIOD = 10 days;
     uint256 public votePower;
 
 /*******************Events*****************/
@@ -107,21 +98,7 @@ contract GovHub is System {
         return ProposalsArray;
     }
 
-    function authChangeValues(bytes32 id) private{
-    
-        // if (
-        //     keccak256(bytes(proposals[id].variable_name)) ==
-        //     keccak256(bytes("minimumStakeAmount"))
-        // ) {
-        //     ibsc.updateVotingValues(proposals[id].variable_name, proposals[id].variable_value);        
-        // }else{
-        //     if (
-        //         keccak256(bytes(proposals[id].variable_name)) ==
-        //         keccak256(bytes("maxValidators"))
-        //         )   {
-        //                 ibsc.updateVotingValues(proposals[id].variable_name, proposals[id].variable_value); 
-        //         }
-        // }
+    function authChangeValues(bytes32 id) private{    
         if (
             keccak256(bytes(proposals[id].variable_name)) ==
             keccak256(bytes("minimumStakeAmount")) ||
@@ -144,19 +121,16 @@ contract GovHub is System {
         highestValidators = ibsc.getValidators();
         address dst = msg.sender;
         (IBSCValidatorSet.Status status) = ibsc.getStatus(dst);
-        require(status == IBSCValidatorSet.Status.Staked, "Only Active Validator"); //Only Active Validator
-        //Validator can only Made these two proposals.onlyValidator(Compare 2 string)
+        require(status == IBSCValidatorSet.Status.Staked, "Only Active Validator"); 
         require(
             keccak256(bytes(vari_name)) == keccak256(bytes("maxValidators")) ||
                 keccak256(bytes(vari_name)) ==
                 keccak256(bytes("minimumStakeAmount")),
             "maxValidators & minimumStakeAmount Proposal Only"
         );
-        //value should be 1000DXT for creating a proposal
         require(msg.value == 5000 ether, "Must pay 5000 DXT");
         bytes32[] memory UserProposal = userProposal();
 
-         //Checks that validator can only create proposal after 3 days once they create proposal
         for (uint256 i = 0; i < UserProposal.length; i++) {
             if (
                 keccak256(
@@ -164,18 +138,14 @@ contract GovHub is System {
                 ) ==
                 keccak256(bytes(vari_name))){
                 require(block.timestamp >= proposals[UserProposal[i]].createTime + PROPOSAL_LASTING_PERIOD, "proposal created before");
-                // bool isexist = false;
-                // require(isexist == true, "proposal created before");
             }
         }
 
-        //Restrictions for create proposal for minimum stake amount
         if (keccak256(bytes(vari_name)) == keccak256(bytes("minimumStakeAmount"))) {
             require(value >= 1, "minimumStakeAmount can't be less than 1");
 
-            value = value * 1 ether; //Convert the value wei into eather
+            value = value * 1 ether; 
            
-            // Fetch highestAmount of activevalidator
              (uint256 highcoin) = ibsc.getCoins(highestValidators[0]);
              for (uint256 i = 1; i < highestValidators.length; i++) {
                 (uint256 coin) = ibsc.getCoins(highestValidators[i]);
@@ -200,7 +170,7 @@ contract GovHub is System {
         );
         bytes32 pID = id;
         bytes32 uID = id;
-        //Details can't be more than 100 words
+
         require(bytes(details).length <= 100, "Details too long");
 
         ActiveProposal storage activeInfo = activeProposalMap[id];
@@ -208,13 +178,12 @@ contract GovHub is System {
         for (uint256 i = 0; i < highestValidators.length; i++) {
             address currentaddr = highestValidators[i];
             (uint256 coins) = ibsc.getCoins(currentaddr);
-            activeInfo.isEligible[currentaddr] = true; //  Set IsEligible
-            activeInfo.individualCoins[currentaddr] = coins; // Update individualCoins Map
+            activeInfo.isEligible[currentaddr] = true; 
+            activeInfo.individualCoins[currentaddr] = coins; 
             updateCoins = updateCoins + coins;
         }
         activeInfo.totalVotePower = updateCoins;
        
-        // Set into the mapping
         ProposalInfo memory proposal;
         proposal.proposer = payable(dst);
         proposal.dst = dst;
@@ -234,29 +203,25 @@ contract GovHub is System {
         return true;
     }
 
-    //Will return current values of minimumStakeAmount & maxValidators
-    //List of proposal validators
     function userProposal() public view returns (bytes32[] memory) {
         return userProposals[msg.sender];
     }
 
-     //Start Voting to proposal
+    //Apply for voting
     function startVoteProposal(bytes32 id) external {
         ActiveProposal storage activeInfo = activeProposalMap[id];
         bool isEligible = activeInfo.isEligible[msg.sender];
-        require(block.timestamp < proposals[id].createTime + PROPOSAL_LASTING_PERIOD, "Proposal Expired"); //Checks Proposal is expired or Not
-        require(isEligible == true, "Not Eligible"); // Check Present in Eligible List
+        require(block.timestamp < proposals[id].createTime + PROPOSAL_LASTING_PERIOD, "Proposal Expired");
+        require(isEligible == true, "Not Eligible"); 
         require((startvotes[msg.sender][id].voteTime)==0 , "Already applied");
-        require(proposals[id].createTime != 0, "Proposal not exist"); // Check for Proposal Exist
-        require(proposals[id].access == true, "Voting completed for this ID"); //Check if Proposal is Comleted or Not for this id
-        require(votes[msg.sender][id].voteTime == 0, "You can't vote for a proposal twice"); // Check Can't Vote for Same Proposal Twice
+        require(proposals[id].createTime != 0, "Proposal not exist"); 
+        require(proposals[id].access == true, "Voting completed for this ID"); 
+        require(votes[msg.sender][id].voteTime == 0, "You can't vote for a proposal twice"); 
         
-        //Store data into the mapping votes
         startvotes[msg.sender][id].voteTime = block.timestamp;
         startvotes[msg.sender][id].voter = msg.sender;
     }
 
-    //All Current Highest  Validators will vote to that proposal
     function voteProposal(bytes32 id, string calldata vote)
         external
         returns (bool)
@@ -265,15 +230,15 @@ contract GovHub is System {
         ActiveProposal storage activeInfo = activeProposalMap[id];
         bool isEligible = activeInfo.isEligible[msg.sender];
 
-        require(block.timestamp < proposals[id].createTime + PROPOSAL_LASTING_PERIOD, "Proposal Expired"); //Checks Proposal is expired or Not
-        require(isEligible == true, "Not Eligible"); // Check Present in Eligible List
+        require(block.timestamp < proposals[id].createTime + PROPOSAL_LASTING_PERIOD, "Proposal Expired"); 
+        require(isEligible == true, "Not Eligible"); 
         require((startvotes[msg.sender][id].voteTime)!=0 , "Apply for vote first");
-        require((startvotes[msg.sender][id].voteTime + 15 minutes) <= block.timestamp, "Can't vote before time lock"); // Cannot vote before 48 hours
-        require(proposals[id].createTime != 0, "Proposal not exist"); // Check for Proposal Exist
-        require(proposals[id].access == true, "Voting completed for this ID"); //Check if Proposal is Comleted or Not for this id
-        require(votes[msg.sender][id].voteTime == 0, "You can't vote for a proposal twice"); // Check Can't Vote for Same Proposal Twice
+        require((startvotes[msg.sender][id].voteTime + 48 hours) <= block.timestamp, "Can't vote before time lock"); 
+        require(proposals[id].createTime != 0, "Proposal not exist"); 
+        require(proposals[id].access == true, "Voting completed for this ID"); 
+        require(votes[msg.sender][id].voteTime == 0, "You can't vote for a proposal twice"); 
         
-        //checks spellings of true or false
+        //check vote
         if (keccak256(bytes(vote)) == keccak256(bytes("true"))) {
             auth = true;
         } else if ((keccak256(bytes(vote)) == keccak256(bytes("false")))) {
@@ -281,8 +246,7 @@ contract GovHub is System {
         } else {
             revert("Invalid Vote");
         }
-        //If any validator passs the proposal then his coins will be added in votePower
-        uint256 icoin = activeInfo.individualCoins[msg.sender]; // Get Individual Coins
+        uint256 icoin = activeInfo.individualCoins[msg.sender]; 
         if (auth) {
             proposals[id].votePowerOfAgree =
                 proposals[id].votePowerOfAgree +
@@ -293,38 +257,34 @@ contract GovHub is System {
                 icoin;
         }
 
-        //Store data into the mapping votes
         votes[msg.sender][id].voteTime = block.timestamp;
         votes[msg.sender][id].voter = msg.sender;
         votes[msg.sender][id].auth = auth;
 
         emit LogVote(id, msg.sender, auth, block.timestamp);
 
-        //counte number of validator agreed and disagree to that proposal
+        //count vote
         if (auth) {
             proposals[id].agree += 1;
         } else {
             proposals[id].reject += 1;
         }
         if (pass[id][proposals[id].dst] || proposals[id].resultExist) {
-            return true; //Do nothing if dst already passed or rejected.
+            return true; 
         }
 
-        // Total Coins Proposal ID
         uint256 totalVotePower = activeInfo.totalVotePower;
 
-        //If voting is agreed by greater than 50% calculating votingPower then update the mapping
         if (proposals[id].votePowerOfAgree >= (totalVotePower / 2) + 1) {
             pass[id][proposals[id].dst] = true;
             proposals[id].resultExist = true;
-            proposals[id].proposer.transfer(5000 ether);
+            proposals[id].proposer.transfer(4000 ether);
             authChangeValues(id);
             proposals[id].ispassed = true;
             proposals[id].access = false;
             emit LogPassProposal(id, proposals[id].dst, block.timestamp);
             return true;
         }
-        //If voting is dis-agreed by 51% calculating votingPower then update the mapping
         if (proposals[id].votePowerOfDisagree >= (totalVotePower / 2) + 1) {
             proposals[id].resultExist = true;
             proposals[id].ispassed = false;
