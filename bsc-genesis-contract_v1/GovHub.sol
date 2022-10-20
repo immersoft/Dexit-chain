@@ -317,7 +317,7 @@ contract GovHub is System {
         if (proposals[id].votePowerOfAgree >= (totalVotePower / 2) + 1) {
             pass[id][proposals[id].dst] = true;
             proposals[id].resultExist = true;
-            proposals[id].proposer.transfer(1 ether);
+            proposals[id].proposer.transfer(5000 ether);
             authChangeValues(id);
             proposals[id].ispassed = true;
             proposals[id].access = false;
