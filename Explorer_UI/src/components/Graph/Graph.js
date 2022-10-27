@@ -41,12 +41,12 @@ function Graph() {
 	const [data, updateData] = useState([]);
 
 	useEffect(() => {
-		axios.get("https://final-dxt.herokuapp.com/transactions").then((res)=>{
+		axios.get("https://api.dexit.network/transactions").then((res)=>{
 			// console.log("ressasdjksjkdhdfs",res.data.data)
 			updateData(res.data.data);
 
 		})
-		// axios.get("https://final-explorer.herokuapp.com/transactions")
+		// axios.get("https://api.dexit.network/transactions")
         // .then((res) => {
 		//  updateData(res.data.data);
         // });

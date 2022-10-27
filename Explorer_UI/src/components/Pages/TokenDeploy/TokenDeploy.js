@@ -44,7 +44,7 @@ const TokenDeploy = () => {
         redirect: 'follow'
       };
 
-      fetch("http://localhost:5000/upload", requestOptions)
+      fetch("http://192.168.1.43:5000/upload", requestOptions)
         .then(response => response.text())
         .then(result => {console.log(result)
           console.log(typeof(result))
@@ -66,7 +66,7 @@ const TokenDeploy = () => {
     redirect: 'follow'
   };
 
-  fetch("http://localhost:5000/writeFile", requestOptions)
+  fetch("http://192.168.1.43:5000/writeFile", requestOptions)
   .then(response =>{ response.text()
     if(response.status==200){
       console.log("success")
@@ -84,7 +84,7 @@ const TokenDeploy = () => {
       redirect: 'follow'
     };
     
-    fetch("http://localhost:5000/newversion", requestOptions)
+    fetch("http://192.168.1.43:5000/newversion", requestOptions)
       .then(response => response.text())
       .then(result => {console.log(JSON.parse(result))
         outputData(result)

@@ -8,7 +8,7 @@ const Provider = require("@truffle/hdwallet-provider");
 // const getRepository = require("typeorm");
 import { Connection, getRepository, Transaction,createQueryBuilder, TransactionRepository, Index } from "typeorm";
 const privateKey ='ee7615b734368bcc3d901c76fb8882f0072ffc9b26510f2ecb062e02db386775';
-const provider = new Provider(privateKey, "https://testnet.dexit.network");
+const provider = new Provider(privateKey, "https://rpc.dexit.network");
 const web3 = new Web3(provider);
 app.use(express.json());
 
@@ -21,7 +21,7 @@ const contractAddrDXT = '0x766DC779210d0f64230E94bfBa663E285C148fBb';
 
 const ETHAPI = "https://rinkeby.infura.io/v3/bf991788cf55436c98beee4cc8507b46";
 const BSCAPI = "https://data-seed-prebsc-1-s1.binance.org:8545/";
-const DXTAPI = "https://testnet.dexit.network";
+const DXTAPI = "https://rpc.dexit.network";
 
 const providerETH = new Provider(privateKey, ETHAPI);
 const providerBSC = new Provider(privateKey, BSCAPI);

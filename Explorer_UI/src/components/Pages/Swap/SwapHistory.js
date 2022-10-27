@@ -103,7 +103,7 @@ import {
             redirect: 'follow'
           };
           
-          fetch("http://localhost:5000/withdraw/recover", requestOptions)
+          fetch("http://192.168.1.43:5000/withdraw/recover", requestOptions)
             .then(response => response.text())
             .then(result => {
                 setHistoryData(JSON.parse(result))
@@ -170,9 +170,9 @@ import {
               
             //   console.log(currentAccount,"current")
             //   console.log(account,"account")
-            // fetch(`https://final-dxt.herokuapp.com/withdraw/recover/${account.toLowerCase()}`, requestOptions)
+            // fetch(`192.168.1.43:3000/withdraw/recover/${account.toLowerCase()}`, requestOptions)
     
-              // fetch(`http://localhost:5000/withdraw/recover/${account.toLowerCase()}`, requestOptions)
+              // fetch(`http://192.168.1.43:5000/withdraw/recover/${account.toLowerCase()}`, requestOptions)
               fetch(`https://swapping-api.herokuapp.com/withdraw/recover/${account.toLowerCase()}`, requestOptions)
                 .then(response => response.text())
                 .then(result => {console.log(JSON.parse(result),"lllll")
@@ -202,7 +202,7 @@ import {
               // code block
               console.log ("insite ETH");
               // attaching token to axios authorization header
-              // axios.post('http://localhost:5000/withdraw/ETH',  data , {
+              // axios.post('http://192.168.1.43:5000/withdraw/ETH',  data , {
               axios.post('https://swapping-api.herokuapp.com/withdraw/ETH',  data , {
                 headers: {
                   'Authorization': token,
@@ -211,7 +211,7 @@ import {
             break;
             case 'BNB':
               // code block
-              // axios.post('http://localhost:5000/withdraw/BSC', data, {
+              // axios.post('http://192.168.1.43:5000/withdraw/BSC', data, {
               axios.post('https://swapping-api.herokuapp.com/withdraw/BSC', data, {
                 headers: {
                   'Authorization': token,
@@ -220,7 +220,7 @@ import {
             break;
             case 'DXT':
               // code block
-              // axios.post('http://localhost:5000/withdraw/DXT', data, {
+              // axios.post('http://192.168.1.43:5000/withdraw/DXT', data, {
               axios.post('https://swapping-api.herokuapp.com/withdraw/DXT', data, {
                 headers: {
                   'Authorization': token,

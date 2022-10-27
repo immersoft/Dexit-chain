@@ -17,18 +17,19 @@ require("dotenv").config();
 
 export const connection = createConnection({
   type: "postgres",
-  host: "castor.db.elephantsql.com",
+  host: "database-1.c4f7lgocb2v5.ap-northeast-1.rds.amazonaws.com",
   port: 5432, // default port of postgres
-  username: "mrabouuj",
+  username: "postgres",
   password: "QvhCQM5jwdFFh7kHdzPW2nN2uI7fxNYS",
-  database: "mrabouuj",
+  database: "dexitdb",
   entities: [TransactionEntity,TransactionTableCounter,TransactionTimesEntity,BlockTransactionEntity,SwapTable],
   synchronize: true,
   logging: false,
 })
   .then(async(connection) => {
+    
   
-    const repository = connection.getRepository(TransactionTableCounter);
+    const repository =await connection.getRepository(TransactionTableCounter);
 
    
     console.log("Connection has been established successfully.");

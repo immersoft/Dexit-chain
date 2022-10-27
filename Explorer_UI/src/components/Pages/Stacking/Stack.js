@@ -207,7 +207,7 @@ let stakeAmount =ethers.utils.parseEther(stakerAmount)
       redirect: "follow",
     };
 
-    fetch("https://final-explorer.herokuapp.com/validatorInfo", requestOptions)
+    fetch("https://api.dexit.network/validatorInfo", requestOptions)
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log("error", error));

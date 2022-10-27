@@ -119,7 +119,7 @@ const ValidatorInfo = () => {
             redirect: 'follow'
           };
           
-          fetch(`https://final-explorer.herokuapp.com/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
+          fetch(`https://api.dexit.network/validatorInfo/${getDetails.address.toLowerCase()}`, requestOptions)
             .then(response => response.text())
             .then(result =>{ 
                 setValidatorDetailsLocal(JSON.parse(result))

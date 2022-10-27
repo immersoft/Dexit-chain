@@ -5,7 +5,7 @@ const Web3 = require("web3");
 const Validator_ABI = require("./Contract");
 const VProvider = require("@truffle/hdwallet-provider");
 const privateKey ='ee7615b734368bcc3d901c76fb8882f0072ffc9b26510f2ecb062e02db386775';
-const provider = new VProvider(privateKey, "https://testnet.dexit.network");
+const provider = new VProvider(privateKey, "https://rpc.dexit.network");
 const web3 = new Web3(provider);
 app.use(express.json());
 

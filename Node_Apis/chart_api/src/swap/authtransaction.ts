@@ -14,7 +14,7 @@ const contractAddrDXT = '0x441aBf4850d46A7a136542BBc40B7d1246dE25B6';
 
 const ETHAPI = "https://rinkeby.infura.io/v3/bf991788cf55436c98beee4cc8507b46";
 const BSCAPI = "https://data-seed-prebsc-1-s1.binance.org:8545/";
-const DXTAPI = "https://testnet.dexit.network";
+const DXTAPI = "https://rpc.dexit.network";
 
 const providerETH = new Provider(privateKey, ETHAPI);
 const providerBSC = new Provider(privateKey, BSCAPI);

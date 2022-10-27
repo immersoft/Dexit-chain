@@ -21,7 +21,7 @@ app.use(express.json());
 const web3 = new Web3();
 
 
-web3.setProvider("https://testnet.dexit.network");
+web3.setProvider("https://rpc.dexit.network");
 // web3.setProvider("http://datafeed.dexit.network");
 
 
@@ -73,15 +73,15 @@ console.log(init,'init');
 console.log(count,'count');
 //insert query 
 
-
-await getConnection()
-    .createQueryBuilder()
-    .insert()
-    .into(TransactionTableCounter)
-    .values([
-        { totalcount: count}
-     ])
-    .execute();
+console.log('getconnection', getConnection())
+// await getConnection()
+//     .createQueryBuilder()
+//     .insert()
+//     .into(TransactionTableCounter)
+//     .values([
+//         { totalcount: count}
+//      ])
+//     .execute();
 
 console.log('dfjsgsdhv');
 count=0;

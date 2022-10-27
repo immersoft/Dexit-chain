@@ -42,7 +42,7 @@ const DetailsBox = () => {
       redirect: "follow",
     };
 
-    fetch("https://final-dxt.herokuapp.com/blockstransactions", requestOptions)
+    fetch("https://api.dexit.network/blockstransactions", requestOptions)
       .then((response) => response.text())
       .then((result) => {
         // console.log(JSON.parse(result))
@@ -71,7 +71,7 @@ const DetailsBox = () => {
       redirect: "follow",
     };
 
-    fetch("https://final-dxt.herokuapp.com/transactioncountupdate/1", requestOptions)
+    fetch("https://api.dexit.network/transactioncountupdate/1", requestOptions)
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log("error", error));
@@ -149,7 +149,7 @@ const validatorsCount=()=>{
     redirect: 'follow'
   };
   
-  fetch("https://final-dxt.herokuapp.com/getHighestValidators", requestOptions)
+  fetch("https://api.dexit.network/getHighestValidators", requestOptions)
     .then(response => response.text())
     .then(result =>{ 
       // console.log(JSON.parse(result),"api result get")
@@ -165,7 +165,7 @@ const totalVotingPower=()=>{
     redirect: 'follow'
   };
   
-  fetch("https://final-dxt.herokuapp.com/getvotingpower", requestOptions)
+  fetch("https://api.dexit.network/getvotingpower", requestOptions)
     .then(response => response.text())
     .then(result => {
       // console.log(result,"result")

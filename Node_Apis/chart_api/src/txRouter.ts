@@ -22,7 +22,7 @@ let DirName2='./build/contract/';
 var formidable = require('formidable');
 var util = require("util"); 
 const path= require('path');
-
+console.log("in txrouter file")
 router.get("/validatorInfo/:address", async function (req: Request, res: Response) {
   const txRepo = getRepository(TransactionEntity);
   const transactions = await txRepo.findOne({Address:req.params.address})
